@@ -28,40 +28,39 @@ pub struct OdehResult {
 /// Evaluasi kriteria Odeh
 ///
 /// Port dari: OdehVisibilityAtSunset di KumpulanFungsiAtSunset.bas
-pub fn evaluate_odeh(
-    location: &GeoLocation,
-    date: &GregorianDate,
-) -> OdehResult {
+pub fn evaluate_odeh(location: &GeoLocation, date: &GregorianDate) -> OdehResult {
     // Hitung parameter hilal pada saat maghrib (TOPOCENTRIC)
     let moon_altitude = crate::astronomy::altitude_at_sunset(location, date, true);
     let _elongation = crate::astronomy::elongation_at_sunset(location, date, true);
     let sun_altitude = calculate_sun_altitude_at_sunset(location, date);
     let crescent_width = crate::astronomy::crescent_width_at_sunset(location, date, true);
-    
-    // Hitung Julian Day dan time at sunset
+
+    // Hitung Julian Day dan time at sunset (UTC)
     let jd = crate::calendar::gregorian_to_jd(date);
     let sunset_hour = crate::astronomy::calculate_sunset(location, date);
-    let sunset_jd = jd + (sunset_hour / 24.0);
-    
+    let sunset_hour_ut = sunset_hour - location.timezone;
+    let sunset_jd = jd + (sunset_hour_ut / 24.0);
+
     // Hitung horizontal parallax bulan
     let moon_parallax = crate::astronomy::horizontal_moon_parallax(sunset_jd);
-    
+
     // Hitung sun distance (dalam AU)
     let (_, sun_distance) = astro::sun::geocent_ecl_pos(sunset_jd);
-    
+
     // Hitung ARCV
-    let arcv = crate::astronomy::calculate_arcv(moon_altitude, sun_altitude, moon_parallax, sun_distance);
-    
+    let arcv =
+        crate::astronomy::calculate_arcv(moon_altitude, sun_altitude, moon_parallax, sun_distance);
+
     // Hitung threshold dari crescent width
     let w = crescent_width;
     let threshold = calculate_odeh_threshold(w);
-    
+
     // Hitung q value
     let q = arcv - threshold;
-    
+
     // Evaluasi visibilitas berdasarkan q value
     let (is_visible, visibility_type) = evaluate_q_value(q);
-    
+
     OdehResult {
         is_visible,
         moon_altitude,
@@ -98,34 +97,40 @@ fn evaluate_q_value(q: f64) -> (bool, String) {
 fn calculate_sun_altitude_at_sunset(location: &GeoLocation, date: &GregorianDate) -> f64 {
     let jd = crate::calendar::gregorian_to_jd(date);
     let sunset_hour = crate::astronomy::calculate_sunset(location, date);
-    let sunset_jd = jd + (sunset_hour / 24.0);
-    
+    let sunset_hour_ut = sunset_hour - location.timezone;
+    let sunset_jd = jd + (sunset_hour_ut / 24.0);
+
     // Sun altitude pada sunset adalah approximately -0.833 degrees (accounting for refraction)
     // Untuk perhitungan lebih akurat, hitung dari sun position
     let sun_pos = crate::astronomy::sun_position(sunset_jd);
-    
+
     // Konversi dari ekliptika ke equatorial
     let obliquity = astro::ecliptic::mn_oblq_laskar(astro::time::julian_cent(sunset_jd));
-    
-    let ra = ((sun_pos.longitude.to_radians().sin() * obliquity.cos() -
-              sun_pos.latitude.to_radians().tan() * obliquity.sin())
-             .atan2(sun_pos.longitude.to_radians().cos())).to_degrees();
-    
-    let dec = (sun_pos.latitude.to_radians().sin() * obliquity.cos() +
-              sun_pos.longitude.to_radians().cos() * 
-              sun_pos.latitude.to_radians().sin() * obliquity.sin()).asin().to_degrees();
-    
+
+    let ra = ((sun_pos.longitude.to_radians().sin() * obliquity.cos()
+        - sun_pos.latitude.to_radians().tan() * obliquity.sin())
+    .atan2(sun_pos.longitude.to_radians().cos()))
+    .to_degrees();
+
+    let dec = (sun_pos.latitude.to_radians().sin() * obliquity.cos()
+        + sun_pos.longitude.to_radians().cos()
+            * sun_pos.latitude.to_radians().sin()
+            * obliquity.sin())
+    .asin()
+    .to_degrees();
+
     // Hitung altitude
     let lat = location.latitude.to_radians();
     let dec_rad = dec.to_radians();
-    
+
     // Local Sidereal Time
     let lst = local_sidereal_time(location.longitude, sunset_jd);
     let ha = (lst - ra).to_radians();
-    
-    let altitude = (lat.sin() * dec_rad.sin() + 
-                   lat.cos() * dec_rad.cos() * ha.cos()).asin().to_degrees();
-    
+
+    let altitude = (lat.sin() * dec_rad.sin() + lat.cos() * dec_rad.cos() * ha.cos())
+        .asin()
+        .to_degrees();
+
     altitude
 }
 
@@ -135,9 +140,9 @@ fn local_sidereal_time(longitude: f64, jd: f64) -> f64 {
     let gmst_hours = 18.697374558 + 879000.0513367 * t + 0.093104 * t * t - 6.2e-6 * t * t * t;
     let gmst_hours = gmst_hours % 24.0;
     let gmst_deg = (gmst_hours * 15.0) % 360.0;
-    
+
     let lst = (gmst_deg + longitude) % 360.0;
-    
+
     if lst < 0.0 {
         lst + 360.0
     } else {
@@ -155,7 +160,7 @@ mod tests {
         let w1 = 1.0;
         let threshold1 = calculate_odeh_threshold(w1);
         assert!(threshold1 > 0.0); // Threshold seharusnya positif untuk w kecil
-        
+
         let w2 = 5.0;
         let threshold2 = calculate_odeh_threshold(w2);
         assert!(threshold2 < threshold1); // Threshold menurun seiring w meningkat
@@ -166,7 +171,7 @@ mod tests {
         let (visible, type_str) = evaluate_q_value(10.0);
         assert!(visible);
         assert_eq!(type_str, "easily_visible");
-        
+
         let (visible, _) = evaluate_q_value(-0.05);
         assert!(!visible);
     }

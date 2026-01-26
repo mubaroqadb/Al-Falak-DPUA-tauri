@@ -292,12 +292,12 @@ export class MapVisualization extends HTMLElement {
     }).addTo(this.map);
 
     this.currentLocationMarker.bindPopup(`
-      <div class="p-2 min-w-[120px]">
-        <div class="text-[9px] uppercase font-mono opacity-50 mb-1">Observation Site</div>
-        <div class="text-xs font-bold border-b border-base-200 pb-1 mb-1">Global Reference Point</div>
-        <div class="text-[10px] space-y-1">
-          <div class="flex justify-between"><span>LAT:</span> <span class="font-mono">${latitude.toFixed(4)}°</span></div>
-          <div class="flex justify-between"><span>LON:</span> <span class="font-mono">${longitude.toFixed(4)}°</span></div>
+      <div class="p-3 min-w-[140px] glass-panel rounded-lg border-0 shadow-xl">
+        <div class="text-[9px] uppercase font-mono opacity-60 mb-1 tracking-wider">Observation Site</div>
+        <div class="text-xs font-bold border-b border-base-content/10 pb-2 mb-2">Global Reference Point</div>
+        <div class="text-[10px] space-y-1.5 font-mono">
+          <div class="flex justify-between items-center"><span class="opacity-70">LAT:</span> <span class="font-bold text-primary">${latitude.toFixed(4)}°</span></div>
+          <div class="flex justify-between items-center"><span class="opacity-70">LON:</span> <span class="font-bold text-primary">${longitude.toFixed(4)}°</span></div>
         </div>
       </div>
     `, { className: 'modern-popup' });

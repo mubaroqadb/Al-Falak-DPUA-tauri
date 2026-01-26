@@ -38,15 +38,23 @@ body {
 
 @plugin "daisyui/theme" {
   name: "dark";
-  primary: #38bdf8; /* Sky 400 - brighter moonlight blue */
-  secondary: #818cf8; /* Indigo 400 - soft purple */
-  accent: #22d3ee; /* Cyan 400 - glowy cyan */
-  neutral: #0f172a; /* Slate 900 */
-  base-100: #020617; /* Slate 950 - deeper night sky */
-  base-200: #0f172a; /* Slate 900 */
-  base-300: #1e293b; /* Slate 800 */
-  base-content: #f1f5f9; /* Slate 100 */
-  
+  primary: #38bdf8;
+  /* Sky 400 - brighter moonlight blue */
+  secondary: #818cf8;
+  /* Indigo 400 - soft purple */
+  accent: #22d3ee;
+  /* Cyan 400 - glowy cyan */
+  neutral: #0f172a;
+  /* Slate 900 */
+  base-100: #020617;
+  /* Slate 950 - deeper night sky */
+  base-200: #0f172a;
+  /* Slate 900 */
+  base-300: #1e293b;
+  /* Slate 800 */
+  base-content: #f1f5f9;
+  /* Slate 100 */
+
   --rounded-box: 1rem;
   --rounded-btn: 0.5rem;
   --rounded-badge: 1.9rem;
@@ -73,12 +81,14 @@ html {
 }
 
 .theme-toggle-btn .sun-icon {
-  color: #fbbf24; /* Amber 400 */
+  color: #fbbf24;
+  /* Amber 400 */
   filter: drop-shadow(0 0 2px rgba(251, 191, 36, 0.5));
 }
 
 .theme-toggle-btn .moon-icon {
-  color: #38bdf8; /* Sky 400 */
+  color: #38bdf8;
+  /* Sky 400 */
   filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.5));
 }
 
@@ -133,9 +143,20 @@ html * {
 }
 
 @keyframes twinkle {
-  0% { transform: scale(0.5); opacity: 0; }
-  50% { transform: scale(1.2); opacity: var(--opacity, 0.8); }
-  100% { transform: scale(0.5); opacity: 0; }
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: var(--opacity, 0.8);
+  }
+
+  100% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
 }
 
 /* Glassmorphism Utilities */
@@ -153,10 +174,67 @@ html * {
 }
 
 /* Enhanced Typography */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: 'Montserrat', var(--font-sans);
   letter-spacing: -0.025em;
 }
+
+/* Animations & Transitions */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+/* Interactive Hover Effects */
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-hover-scale {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-hover-scale:active {
+  transform: scale(0.96);
+}
+
+.card {
+  transition: border-color 0.3s ease, transform 0.3s ease;
+}
+
 
 /* Custom Astronomical Visualization Styles */
 /* These are specific to map and chart rendering that DaisyUI doesn't cover */
@@ -382,6 +460,7 @@ select:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
 }
+
 /* Export Modal Styles */
 .export-modal {
   position: fixed;
@@ -398,8 +477,8 @@ select:focus {
 }
 
 .export-modal-content {
-  background: var(--fallback-b1,oklch(var(--b1)));
-  color: var(--fallback-bc,oklch(var(--bc)));
+  background: var(--fallback-b1, oklch(var(--b1)));
+  color: var(--fallback-bc, oklch(var(--bc)));
   border-radius: 12px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   max-width: 500px;
@@ -412,6 +491,7 @@ select:focus {
     transform: translateY(20px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -423,6 +503,7 @@ select:focus {
     opacity: 1;
     transform: translateY(0);
   }
+
   to {
     opacity: 0;
     transform: translateY(10px);
@@ -434,7 +515,7 @@ select:focus {
   justify-content: space-between;
   align-items: center;
   padding: 20px;
-  border-bottom: 1px solid var(--fallback-b3,oklch(var(--b3)));
+  border-bottom: 1px solid var(--fallback-b3, oklch(var(--b3)));
 }
 
 .export-modal-header h2 {
@@ -449,7 +530,7 @@ select:focus {
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: var(--fallback-bc,oklch(var(--bc)));
+  color: var(--fallback-bc, oklch(var(--bc)));
   padding: 0;
   width: 32px;
   height: 32px;
@@ -461,7 +542,7 @@ select:focus {
 }
 
 .export-modal-close:hover {
-  background: var(--fallback-b2,oklch(var(--b2)));
+  background: var(--fallback-b2, oklch(var(--b2)));
   color: inherit;
 }
 
@@ -476,15 +557,15 @@ select:focus {
   display: flex;
   align-items: center;
   padding: 12px;
-  border: 1px solid var(--fallback-b3,oklch(var(--b3)));
+  border: 1px solid var(--fallback-b3, oklch(var(--b3)));
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .export-option:hover {
-  background: var(--fallback-b2,oklch(var(--b2)));
-  border-color: var(--fallback-p,oklch(var(--p)));
+  background: var(--fallback-b2, oklch(var(--b2)));
+  border-color: var(--fallback-p, oklch(var(--p)));
 }
 
 .export-option input[type="radio"] {
@@ -505,7 +586,7 @@ select:focus {
   display: flex;
   gap: 12px;
   padding: 20px;
-  border-top: 1px solid var(--fallback-b3,oklch(var(--b3)));
+  border-top: 1px solid var(--fallback-b3, oklch(var(--b3)));
   justify-content: flex-end;
 }
 

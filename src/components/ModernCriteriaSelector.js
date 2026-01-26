@@ -22,20 +22,22 @@ export class ModernCriteriaSelector extends HTMLElement {
     ];
 
     this.innerHTML = `
-      <div class="space-y-2">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         ${criteria.map(c => `
-          <div class="card ${this.selectedCriteria === c.id ? 'bg-primary text-primary-content' : 'bg-base-200 hover:bg-base-300'} cursor-pointer transition-all duration-200 criteria-card" 
+          <div class="card ${this.selectedCriteria === c.id ? 'bg-primary text-primary-content shadow-lg ring-2 ring-primary/50' : 'bg-base-100/50 hover:bg-base-100/80 hover:scale-[1.02] hover:shadow-md'} border border-base-content/5 cursor-pointer transition-all duration-300 criteria-card group backdrop-blur-sm" 
                data-criteria="${c.id}">
-            <div class="card-body p-3 flex-row items-center gap-3">
-              <div class="text-2xl">${c.icon}</div>
-              <div class="flex-1">
-                <div class="font-bold text-sm">${c.name}</div>
-                <div class="text-xs opacity-70">${c.desc}</div>
+            <div class="card-body p-4 flex flex-row items-center gap-4">
+              <div class="text-3xl filter drop-shadow-sm group-hover:scale-110 transition-transform duration-300">${c.icon}</div>
+              <div class="flex-1 min-w-0">
+                <div class="font-bold text-sm truncate">${c.name}</div>
+                <div class="text-xs opacity-70 truncate">${c.desc}</div>
               </div>
               <div class="flex items-center">
-                <input type="radio" name="criteria-radio" class="radio radio-primary radio-sm" ${this.selectedCriteria === c.id ? 'checked' : ''} />
+                <input type="radio" name="criteria-radio" class="radio radio-primary radio-sm group-hover:scale-110 transition-transform" ${this.selectedCriteria === c.id ? 'checked' : ''} />
               </div>
             </div>
+            <!-- Selection indicator effect -->
+            ${this.selectedCriteria === c.id ? '<div class="absolute inset-0 bg-primary/10 rounded-2xl animate-pulse"></div>' : ''}
           </div>
         `).join('')}
       </div>

@@ -1,24 +1,24 @@
 //! Module untuk berbagai kriteria visibilitas hilal
-//! 
+//!
 //! Modul ini menyediakan implementasi berbagai kriteria visibilitas hilal
 //! yang digunakan oleh berbagai organisasi Islam di seluruh dunia
 
-pub mod mabims;
-pub mod odeh;
-pub mod wujudul_hilal;
-pub mod turkey;
+pub mod additional;
 pub mod ijtima_qobla_ghurub;
 pub mod lfnu;
-pub mod additional;
+pub mod mabims;
+pub mod odeh;
+pub mod turkey;
+pub mod wujudul_hilal;
 
 // Re-export tipe data dan fungsi
-pub use mabims::{MabimsResult, evaluate_criteria as evaluate_mabims};
-pub use odeh::{OdehResult, evaluate_odeh};
-pub use wujudul_hilal::{WujudulHilalResult, evaluate_wujudul_hilal};
-pub use turkey::{TurkeyResult, evaluate_turkey};
-pub use ijtima_qobla_ghurub::{IjtimaQoblaGhuribResult, evaluate_ijtima_qobla_ghurub};
-pub use lfnu::{LfnuResult, evaluate_lfnu};
-pub use additional::{KigResult, Kriteria29Result, evaluate_kig, evaluate_kriteria_29};
+pub use additional::{evaluate_kig, evaluate_kriteria_29, KigResult, Kriteria29Result};
+pub use ijtima_qobla_ghurub::{evaluate_ijtima_qobla_ghurub, IjtimaQoblaGhuribResult};
+pub use lfnu::{evaluate_lfnu, LfnuResult};
+pub use mabims::{evaluate_criteria as evaluate_mabims, MabimsResult};
+pub use odeh::{evaluate_odeh, OdehResult};
+pub use turkey::{evaluate_turkey, TurkeyResult};
+pub use wujudul_hilal::{evaluate_wujudul_hilal, WujudulHilalResult};
 
 use crate::{GeoLocation, GregorianDate};
 
@@ -40,12 +40,12 @@ pub struct VisibilityResult {
 }
 
 /// Master function untuk mengevaluasi semua kriteria sekaligus
-/// 
+///
 /// # Arguments
 /// * `location` - Lokasi pengamatan
 /// * `date` - Tanggal Gregorian
 /// * `conjunction_jd` - Julian Day dari ijtimak (konjungsi bulan-matahari)
-/// 
+///
 /// # Returns
 /// HashMap dengan hasil evaluasi untuk setiap kriteria
 pub fn evaluate_all_criteria(
@@ -54,16 +54,23 @@ pub fn evaluate_all_criteria(
     conjunction_jd: f64,
 ) -> std::collections::HashMap<String, VisibilityResult> {
     let mut results = std::collections::HashMap::new();
-    
+
     let jd = crate::calendar::gregorian_to_jd(date);
     let sunset_hour = crate::astronomy::calculate_sunset(location, date);
-    let sunset_jd = jd + (sunset_hour / 24.0);
-    
-    println!("📅 Observation date: {}-{}-{}", date.year, date.month, date.day);
+    let sunset_hour_ut = sunset_hour - location.timezone;
+    let sunset_jd = jd + (sunset_hour_ut / 24.0);
+
+    println!(
+        "📅 Observation date: {}-{}-{}",
+        date.year, date.month, date.day
+    );
     println!("🌙 Conjunction JD: {}", conjunction_jd);
     println!("🌅 Sunset JD: {}", sunset_jd);
-    println!("⏱️  Moon age: {} hours", (sunset_jd - conjunction_jd) * 24.0);
-    
+    println!(
+        "⏱️  Moon age: {} hours",
+        (sunset_jd - conjunction_jd) * 24.0
+    );
+
     // Evaluasi MABIMS
     let mabims_result = evaluate_mabims(location, conjunction_jd, sunset_jd);
     results.insert(
@@ -84,7 +91,7 @@ pub fn evaluate_all_criteria(
             ),
         },
     );
-    
+
     // Evaluasi Wujudul Hilal
     let wujudul_result = evaluate_wujudul_hilal(location, date, conjunction_jd);
     results.insert(
@@ -99,12 +106,11 @@ pub fn evaluate_all_criteria(
             },
             additional_info: format!(
                 "Ijtimak before maghrib: {}, Moon altitude: {:.2}°",
-                wujudul_result.ijtimak_before_maghrib,
-                wujudul_result.moon_altitude
+                wujudul_result.ijtimak_before_maghrib, wujudul_result.moon_altitude
             ),
         },
     );
-    
+
     // Evaluasi Turkey (menggunakan topocentric)
     let turkey_result = evaluate_turkey(location, date, true);
     results.insert(
@@ -119,12 +125,11 @@ pub fn evaluate_all_criteria(
             },
             additional_info: format!(
                 "Altitude: {:.2}°, Elongation: {:.2}°",
-                turkey_result.moon_altitude,
-                turkey_result.elongation
+                turkey_result.moon_altitude, turkey_result.elongation
             ),
         },
     );
-    
+
     // Evaluasi Odeh
     let odeh_result = evaluate_odeh(location, date);
     results.insert(
@@ -135,13 +140,11 @@ pub fn evaluate_all_criteria(
             visibility_type: odeh_result.visibility_type.clone(),
             additional_info: format!(
                 "ARCV: {:.2}°, Width: {:.2}', q-value: {:.3}",
-                odeh_result.arcv,
-                odeh_result.crescent_width,
-                odeh_result.q_value
+                odeh_result.arcv, odeh_result.crescent_width, odeh_result.q_value
             ),
         },
     );
-    
+
     // Evaluasi Ijtima Qobla Ghurub
     let ijtima_result = evaluate_ijtima_qobla_ghurub(location, date, conjunction_jd);
     results.insert(
@@ -160,7 +163,7 @@ pub fn evaluate_all_criteria(
             ),
         },
     );
-    
+
     // Evaluasi LFNU
     let lfnu_result = evaluate_lfnu(location, date);
     results.insert(
@@ -175,11 +178,10 @@ pub fn evaluate_all_criteria(
             },
             additional_info: format!(
                 "Altitude: {:.2}°, Elongation: {:.2}°",
-                lfnu_result.moon_altitude,
-                lfnu_result.elongation
+                lfnu_result.moon_altitude, lfnu_result.elongation
             ),
         },
     );
-    
+
     results
 }

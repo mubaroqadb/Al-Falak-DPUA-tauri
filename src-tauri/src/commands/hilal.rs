@@ -317,11 +317,9 @@ fn calculate_detailed_ephemeris(
     }
 
     // Calculate altitude (geocentric and topocentric)
-    let observation_date = GregorianDate {
-        year: 2026, // TODO: Extract from sunset_jd
-        month: 2,
-        day: 17.0,
-    };
+    // Calculate altitude (geocentric and topocentric)
+    // Extract date from sunset_jd
+    let observation_date = crate::calendar::jd_to_gregorian(sunset_jd);
     let moon_alt_geo = astronomy::hilal::altitude_at_sunset(location, &observation_date, false);
     let sun_alt_geo = -0.8333; // Standard sunset definition
 

@@ -13,7 +13,9 @@ import './components/ValidationPanel.js';
 import './components/DetailedEphemerisDisplay.js';
 import './components/PrayerTimesDisplay.js';
 import './components/CalculateButton.js';
+import './components/CalculateButton.js';
 import './components/ModernCriteriaSelector.js';
+import './components/MoonPhaseVisualizer.js';
 import './components/LocationSelector.js';
 import './components/LanguageSwitcher.js';
 import './components/ThemeToggle.js';
@@ -490,6 +492,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (window.app) {
           await window.app.updateVisibilityZones();
           await window.app.updateCalculations();
+          
+          // Trigger rolling numbers animation
+          const stats = [
+            { id: 'stat-altitude', suffix: '°' },
+            { id: 'stat-elongation', suffix: '°' },
+            { id: 'stat-age', suffix: 'h' }
+          ];
+
+          stats.forEach(stat => {
+            const el = document.getElementById(stat.id);
+            if (el) {
+              const finalValue = parseFloat(el.innerText);
+              if (!isNaN(finalValue)) {
+                animateValue(el, 0, finalValue, 1500, stat.suffix);
+              }
+            }
+          });
         }
       } finally {
         // Hide loading
@@ -497,6 +516,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         heroLoading.classList.add('hidden');
       }
     });
+  }
+
+  // Rolling Number Animation Utility
+  function animateValue(obj, start, end, duration, suffix = '') {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      // Ease-out cubic function for smooth roll
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      
+      const current = progress * (end - start) + start;
+      obj.innerHTML = current.toFixed(2) + suffix;
+      
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      } else {
+        obj.innerHTML = end.toFixed(2) + suffix;
+      }
+    };
+    window.requestAnimationFrame(step);
   }
 
   console.log('✅ Application initialized successfully');

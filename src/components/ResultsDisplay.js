@@ -94,52 +94,63 @@ export class ResultsDisplay extends HTMLElement {
         </div>
 
         <!-- Astronomical Data -->
-        <div class="result-section">
-          <h4>🌙 Astronomical Data</h4>
-          <div class="result-item">
-            <span class="label">Conjunction (Ijtimak):</span>
-            <span class="value font-mono">${result.conjunction_date || 'N/A'}</span>
-          </div>
-          <div class="result-item">
-            <span class="label">Moon Age:</span>
-            <span class="value font-mono">${result.moon_age_hours ? result.moon_age_hours.toFixed(2) + ' hours' : 'N/A'}</span>
-          </div>
-          <div class="result-item">
-            <span class="label">Moon Altitude (Tinggi):</span>
-            <span class="value font-mono">${result.moon_altitude ? result.moon_altitude.toFixed(4) + '°' : 'N/A'}</span>
-          </div>
-          <div class="result-item">
-            <span class="label">Moon Azimuth:</span>
-            <span class="value font-mono">${result.moon_azimuth ? result.moon_azimuth.toFixed(4) + '°' : 'N/A'}</span>
-          </div>
-          <div class="result-item">
-            <span class="label">Elongation:</span>
-            <span class="value font-mono">${result.elongation ? result.elongation.toFixed(4) + '°' : 'N/A'}</span>
-          </div>
-          <div class="result-item">
-            <span class="label">ARCV (Arc of Vision):</span>
-            <span class="value font-mono">${result.arcv ? result.arcv.toFixed(4) + '°' : 'N/A'}</span>
-          </div>
-          <div class="result-item">
-            <span class="label">Crescent Width:</span>
-            <span class="value font-mono">${result.crescent_width ? result.crescent_width.toFixed(2) + "'" : 'N/A'}</span>
-          </div>
-          <div class="result-item">
-            <span class="label">Moon Distance:</span>
-            <span class="value font-mono">${result.moon_distance_km ? result.moon_distance_km.toFixed(0) + ' km' : 'N/A'}</span>
-          </div>
-          <div class="result-item">
-            <span class="label">Moon Semi-Diameter:</span>
-            <span class="value font-mono">${result.moon_semidiameter ? result.moon_semidiameter.toFixed(4) + '°' : 'N/A'}</span>
-          </div>
-          <div class="result-item">
-            <span class="label">Parallax:</span>
-            <span class="value font-mono">${result.parallax ? result.parallax.toFixed(4) + '°' : 'N/A'}</span>
-          </div>
-          <div class="result-item">
-            <span class="label">Refraction:</span>
-            <span class="value font-mono">${result.refraction ? result.refraction.toFixed(4) + '°' : 'N/A'}</span>
-          </div>
+        <!-- Astronomical Data Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Visualizer Column -->
+            <div class="flex flex-col gap-4">
+                <moon-phase-visualizer 
+                    illumination="${result.illumination || 0.005}" 
+                    age="${result.moon_age_hours || 0}">
+                </moon-phase-visualizer>
+                
+                <div class="glass-panel p-4 rounded-xl">
+                    <h4 class="text-sm font-bold uppercase opacity-70 mb-3">🌙 Moon Position</h4>
+                    <div class="space-y-2 text-sm">
+                         <div class="flex justify-between"><span>Altitude:</span> <span class="font-mono font-bold">${result.moon_altitude ? result.moon_altitude.toFixed(4) + '°' : 'N/A'}</span></div>
+                         <div class="flex justify-between"><span>Azimuth:</span> <span class="font-mono">${result.moon_azimuth ? result.moon_azimuth.toFixed(4) + '°' : 'N/A'}</span></div>
+                         <div class="flex justify-between"><span>Elongation:</span> <span class="font-mono">${result.elongation ? result.elongation.toFixed(4) + '°' : 'N/A'}</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Data Column -->
+            <div class="glass-panel p-4 rounded-xl">
+              <h4 class="text-sm font-bold uppercase opacity-70 mb-3">📋 Detailed Ephemeris</h4>
+              <div class="space-y-2 text-sm overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
+                  <div class="result-item">
+                    <span class="label">Conjunction (Ijtimak):</span>
+                    <span class="value font-mono text-right">${result.conjunction_date || 'N/A'}</span>
+                  </div>
+                  <div class="result-item">
+                    <span class="label">Moon Age:</span>
+                    <span class="value font-mono text-right">${result.moon_age_hours ? result.moon_age_hours.toFixed(2) + ' h' : 'N/A'}</span>
+                  </div>
+                  <div class="result-item">
+                    <span class="label">ARCV (Arc of Vision):</span>
+                    <span class="value font-mono text-right">${result.arcv ? result.arcv.toFixed(4) + '°' : 'N/A'}</span>
+                  </div>
+                  <div class="result-item">
+                    <span class="label">Crescent Width:</span>
+                    <span class="value font-mono text-right">${result.crescent_width ? result.crescent_width.toFixed(4) + "'" : 'N/A'}</span>
+                  </div>
+                  <div class="result-item">
+                    <span class="label">Moon Distance:</span>
+                    <span class="value font-mono text-right">${result.moon_distance_km ? result.moon_distance_km.toFixed(0) + ' km' : 'N/A'}</span>
+                  </div>
+                  <div class="result-item">
+                    <span class="label">Moon Semi-Diameter:</span>
+                    <span class="value font-mono text-right">${result.moon_semidiameter ? result.moon_semidiameter.toFixed(4) + '°' : 'N/A'}</span>
+                  </div>
+                  <div class="result-item">
+                    <span class="label">Parallax:</span>
+                    <span class="value font-mono text-right">${result.parallax ? result.parallax.toFixed(4) + '°' : 'N/A'}</span>
+                  </div>
+                  <div class="result-item">
+                    <span class="label">Refraction:</span>
+                    <span class="value font-mono text-right">${result.refraction ? result.refraction.toFixed(4) + '°' : 'N/A'}</span>
+                  </div>
+              </div>
+            </div>
         </div>
 
         <!-- Solar Data -->
