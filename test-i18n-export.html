@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I18N & Export Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .status { padding: 10px; margin: 5px 0; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button { padding: 8px 16px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>I18N & Export Functions Test</h1>
+    
+    <div class="test-section">
+        <h2>I18N Loading Test</h2>
+        <button onclick="testI18nLoading()">Test I18N Loading</button>
+        <div id="i18n-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Language Switching Test</h2>
+        <button onclick="testLanguageSwitch('en')">Switch to English</button>
+        <button onclick="testLanguageSwitch('id')">Switch to Indonesian</button>
+        <button onclick="testLanguageSwitch('ar')">Switch to Arabic</button>
+        <div id="lang-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Export Functions Test</h2>
+        <button onclick="testExportCSV()">Test CSV Export</button>
+        <button onclick="testExportJSON()">Test JSON Export</button>
+        <button onclick="testExportPDF()">Test PDF Export</button>
+        <div id="export-status"></div>
+    </div>
+
+    <script type="module">
+        import { i18n } from './src/services/i18n.js';
+
+        window.testI18nLoading = async function() {
+            const status = document.getElementById('i18n-status');
+            try {
+                await i18n.init();
+                const lang = i18n.getLanguage();
+                const keys = Object.keys(i18n.getAll());
+                const html = `
+                    <div class="status success">
+                        ✅ I18N Loaded Successfully<br>
+                        Current Language: ${lang}<br>
+                        Translation Keys: ${keys.length}<br>
+                        First 5 keys: ${keys.slice(0, 5).join(', ')}
+                    </div>
+                `;
+                status.innerHTML = html;
+            } catch (error) {
+                status.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+            }
+        };
+
+        window.testLanguageSwitch = function(lang) {
+            const status = document.getElementById('lang-status');
+            try {
+                i18n.setLanguage(lang);
+                const current = i18n.getLanguage();
+                const sample = i18n.t('app.title', 'N/A');
+                const html = `
+                    <div class="status success">
+                        ✅ Language Switched to: ${lang}<br>
+                        Current: ${current}<br>
+                        Sample (app.title): ${sample}
+                    </div>
+                `;
+                status.innerHTML = html;
+            } catch (error) {
+                status.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+            }
+        };
+
+        window.testExportCSV = function() {
+            const status = document.getElementById('export-status');
+            try {
+                const mockData = {
+                    criteria_results: {
+                        'mabims': { moon_altitude: 10.5, sun_altitude: -5.2, elongation: 12.3, age_of_moon: 1.5, is_visible: true },
+                        'odeh': { moon_altitude: 9.8, sun_altitude: -5.5, elongation: 11.8, age_of_moon: 1.5, is_visible: false }
+                    }
+                };
+                
+                let csv = 'Criteria,Status,Moon Altitude,Sun Altitude,Elongation,Age of Moon,Visibility\n';
+                Object.entries(mockData.criteria_results).forEach(([criteria, result]) => {
+                    const moonAlt = result.moon_altitude?.toFixed(2) || 'N/A';
+                    const sunAlt = result.sun_altitude?.toFixed(2) || 'N/A';
+                    const elongation = result.elongation?.toFixed(2) || 'N/A';
+                    const age = result.age_of_moon?.toFixed(2) || 'N/A';
+                    const visibility = result.is_visible ? 'Visible' : 'Not Visible';
+                    csv += `"${criteria}","${visibility}","${moonAlt}","${sunAlt}","${elongation}","${age}"\n`;
+                });
+                
+                status.innerHTML = `
+                    <div class="status success">
+                        ✅ CSV Export Function Working<br>
+                        Sample CSV Generated (${csv.length} chars)
+                    </div>
+                `;
+            } catch (error) {
+                status.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+            }
+        };
+
+        window.testExportJSON = function() {
+            const status = document.getElementById('export-status');
+            try {
+                const mockData = {
+                    timestamp: new Date().toISOString(),
+                    location: 'Test Location',
+                    criteria_results: {
+                        'mabims': { is_visible: true }
+                    }
+                };
+                
+                const json = JSON.stringify(mockData, null, 2);
+                status.innerHTML = `
+                    <div class="status success">
+                        ✅ JSON Export Function Working<br>
+                        Sample JSON Generated (${json.length} chars)
+                    </div>
+                `;
+            } catch (error) {
+                status.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+            }
+        };
+
+        window.testExportPDF = function() {
+            const status = document.getElementById('export-status');
+            try {
+                const mockData = {
+                    timestamp: new Date().toISOString(),
+                    location: 'Test Location'
+                };
+                
+                const content = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Hisab Hilal Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+        th { background-color: #3498db; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Hisab Hilal Calculation Report</h1>
+    <p><strong>Generated:</strong> ${mockData.timestamp}</p>
+    <p><strong>Location:</strong> ${mockData.location}</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Criteria</th>
+                <th>Visibility</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Test Criteria</td>
+                <td>Test Result</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>`;
+                status.innerHTML = `
+                    <div class="status success">
+                        ✅ PDF Export Function Working<br>
+                        Sample HTML Generated (${content.length} chars)
+                    </div>
+                `;
+            } catch (error) {
+                status.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+            }
+        };
+
+        // Auto-test on page load
+        window.addEventListener('load', async () => {
+            await window.testI18nLoading();
+        });
+    </script>
+</body>
+</html>

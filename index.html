@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="id" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Al Falak DPUA - Hisab Hilal Calculator</title>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="/src/main.js" defer></script>
+  </head>
+
+  <body>
+    <!-- Skip to Main Content Link (Accessibility) -->
+    <a href="#main-content" class="skip-to-main">Skip to main content</a>
+    
+    <!-- Tauri Status Banner -->
+    <tauri-status-banner></tauri-status-banner>
+    
+    <div class="min-h-screen bg-base-200">
+      <!-- Modern Navbar -->
+      <header class="bg-linear-to-r from-primary to-secondary text-primary-content shadow-lg sticky top-0 z-[100]">
+        <div class="navbar container mx-auto px-4 min-h-[4rem]">
+          <div class="navbar-start">
+            <a class="btn btn-ghost normal-case text-xl gap-3 px-0 hover:bg-transparent">
+              <img src="/src/assets/logo.png" alt="Al Falak DPUA Logo" class="h-10 w-10 object-contain rounded-lg shadow-sm" />
+              <span class="tracking-tight">Al Falak DPUA</span>
+            </a>
+          </div>
+          
+          <div class="navbar-center hidden lg:flex">
+            <div class="badge badge-lg badge-accent font-bold shadow-sm" data-i18n="app.tagline">Hisab Hilal Calculator</div>
+          </div>
+          
+          <div class="navbar-end gap-3">
+            <!-- Mobile Badge (visible only on small screens) -->
+            <div class="badge badge-accent font-bold lg:hidden text-xs mr-2" data-i18n="app.tagline">Hisab Hilal</div>
+            <language-switcher></language-switcher>
+          </div>
+        </div>
+      </header>
+
+      <!-- Hero Section - Calculation Form -->
+      <div class="hero bg-base-100 py-12" id="main-content">
+        <div class="hero-content w-full max-w-6xl">
+          <div class="w-full">
+            <h1 class="text-4xl font-bold text-center mb-2" data-i18n="labels.calculate">Calculate Hilal Visibility</h1>
+            <p class="text-center text-base-content/70 mb-8" data-i18n="app.subtitle">Astronomical calculation for crescent moon visibility</p>
+            
+            <!-- Calculation Form Card -->
+            <div class="card bg-base-100 shadow-2xl border border-base-300">
+              <div class="card-body">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <!-- Date Input -->
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-semibold" data-i18n="labels.date">📅 Calculation Date</span>
+                    </label>
+                    <input type="date" id="calc-date" class="input input-bordered input-primary" />
+                  </div>
+
+                  <!-- New Integrated Location Selector -->
+                  <div class="col-span-1 lg:col-span-2">
+                    <label class="label">
+                      <span class="label-text font-semibold" data-i18n="labels.location">📍 Select Location</span>
+                    </label>
+                    <location-selector id="main-location-selector"></location-selector>
+                  </div>
+
+                </div>
+
+
+                <!-- Criteria Selection -->
+                <div class="mt-6">
+                  <label class="label">
+                    <span class="label-text font-semibold" data-i18n="labels.criteria">🔭 Visibility Criteria</span>
+                  </label>
+                  <modern-criteria-selector></modern-criteria-selector>
+                </div>
+
+                <!-- Calculate Button -->
+                <div class="card-actions justify-center mt-8">
+                  <button class="btn btn-primary btn-lg gap-2 px-12" id="hero-calculate-btn" aria-label="Calculate hilal visibility">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                    </svg>
+                    <span data-i18n="buttons.calculate">CALCULATE</span>
+                    <span class="loading loading-spinner loading-md hidden" id="hero-loading" aria-hidden="true"></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Section -->
+      <div class="container mx-auto px-4 py-8">
+        <div class="stats stats-vertical lg:stats-horizontal shadow-xl w-full bg-base-100">
+          <div class="stat">
+            <div class="stat-figure text-primary opacity-80">
+              <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            </div>
+            <div class="stat-title text-[10px] uppercase font-bold tracking-widest opacity-60" data-i18n="results.moonAltitude">Moon Altitude</div>
+            <div class="stat-value text-primary text-3xl" id="stat-altitude">--°</div>
+            <div class="stat-desc font-medium" data-i18n="results.heightAtSunset">Height at sunset</div>
+          </div>
+          
+          <div class="stat">
+            <div class="stat-figure text-secondary opacity-80">
+              <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 11-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
+              </svg>
+            </div>
+            <div class="stat-title text-[10px] uppercase font-bold tracking-widest opacity-60" data-i18n="results.elongation">Elongation</div>
+            <div class="stat-value text-secondary text-3xl" id="stat-elongation">--°</div>
+            <div class="stat-desc font-medium" data-i18n="results.separationAngle">Separation angle</div>
+          </div>
+          
+          <div class="stat">
+            <div class="stat-figure text-accent opacity-80">
+              <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="stat-title text-[10px] uppercase font-bold tracking-widest opacity-60" data-i18n="results.moonAge">Moon Age</div>
+            <div class="stat-value text-accent text-3xl" id="stat-age">--h</div>
+            <div class="stat-desc font-medium" data-i18n="results.timeSinceNewMoon">Time since new moon</div>
+          </div>
+          
+          <div class="stat">
+            <div class="stat-figure text-success opacity-80">
+              <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </div>
+            <div class="stat-title text-[10px] uppercase font-bold tracking-widest opacity-60" data-i18n="results.visibility">Visibility</div>
+            <div class="stat-value text-success text-3xl" id="stat-visibility">--</div>
+            <div class="stat-desc font-medium" id="stat-visibility-desc" data-i18n="results.quickPrediction">Quick prediction</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs Section -->
+      <div class="container mx-auto px-4 pb-12">
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body p-0">
+            <!-- Interactive Tabs Navigation (Segmented Controls) -->
+            <div role="tablist" class="tabs tabs-boxed bg-base-100 p-1.5 shadow-sm gap-1 mx-4 mt-6 rounded-2xl border border-base-300">
+              <a role="tab" class="tab tab-active h-12 rounded-xl font-extrabold uppercase text-xs tracking-widest transition-all duration-300 !bg-primary !text-primary-content shadow-sm" data-tab="ephemeris">
+                <svg class="w-5 h-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span data-i18n="tabLabels.ephemeris">Ephemeris</span>
+              </a>
+              <a role="tab" class="tab h-12 rounded-xl font-bold uppercase text-xs tracking-widest transition-all duration-200 hover:bg-base-200" data-tab="criteria">
+                <svg class="w-5 h-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <span data-i18n="tabLabels.criteria">Criteria</span>
+              </a>
+              <a role="tab" class="tab h-12 rounded-xl font-bold uppercase text-xs tracking-widest transition-all duration-200 hover:bg-base-200" data-tab="map">
+                <svg class="w-5 h-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                </svg>
+                <span data-i18n="tabLabels.map">Map</span>
+              </a>
+              <a role="tab" class="tab h-12 rounded-xl font-bold uppercase text-xs tracking-widest transition-all duration-200 hover:bg-base-200" data-tab="prayerTimes">
+                <svg class="w-5 h-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span data-i18n="tabLabels.prayerTimes">Prayer Times</span>
+              </a>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="p-6">
+              <!-- Ephemeris Tab -->
+              <div class="tab-content active" id="tab-ephemeris">
+                <detailed-ephemeris-display></detailed-ephemeris-display>
+              </div>
+
+              <!-- Prayer Times Tab -->
+              <div class="tab-content hidden" id="tab-prayerTimes">
+                <prayer-times-display></prayer-times-display>
+              </div>
+
+              <!-- Criteria Tab -->
+              <div class="tab-content hidden" id="tab-criteria">
+                <criteria-results-display></criteria-results-display>
+              </div>
+
+              <!-- Map Tab -->
+              <div class="tab-content hidden" id="tab-map">
+                <div class="h-96 relative mb-6">
+                  <map-visualization></map-visualization>
+                </div>
+                
+                <!-- Expanded Map Legend Below Map -->
+                <div class="card bg-base-200 shadow-inner border border-base-300">
+                  <div class="card-body p-4">
+                    <h4 class="font-bold text-sm mb-3 flex items-center gap-2">
+                       🔭 Visibility Legend
+                    </h4>
+                    <div id="map-legend-list" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                      <!-- Dynamic legend items from MapVisualization.js -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="footer footer-center p-10 bg-base-200 text-base-content">
+        <div>
+          <p class="font-bold" data-i18n="app.title">Al Falak DPUA - Hisab Hilal Calculator</p>
+          <p data-i18n="app.tagline">Modern astronomical calculation tool for crescent moon visibility</p>
+          <p>© 2026 - Built with DaisyUI & Tauri</p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Floating Calculate Button (Alternative) -->
+    <calculate-button></calculate-button>
+
+    <style>
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+    </style>
+  </body>
+</html>

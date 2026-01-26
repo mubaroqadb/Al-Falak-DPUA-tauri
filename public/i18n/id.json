@@ -1,0 +1,116 @@
+{
+  "app": {
+    "title": "Al Falak DPUA - Kalkulator Hisab Hilal",
+    "subtitle": "Perhitungan astronomis untuk visibilitas bulan sabit",
+    "tagline": "Alat perhitungan astronomis modern untuk prediksi ketampakan hilal"
+  },
+  "navigation": {
+    "home": "Beranda",
+    "hilal": "Visibilitas Hilal",
+    "prayerTimes": "Jadwal Shalat",
+    "calendar": "Konversi Kalender",
+    "qibla": "Arah Qibla",
+    "eclipse": "Gerhana",
+    "about": "Tentang"
+  },
+  "labels": {
+    "date": "📅 Tanggal Perhitungan",
+    "location": "📍 Pilih Lokasi",
+    "latitude": "Lintang",
+    "longitude": "Bujur",
+    "elevation": "Ketinggian (m)",
+    "timezone": "Zona Waktu",
+    "criteria": "🔭 Kriteria Visibilitas",
+    "calculate": "HITUNG",
+    "results": "Hasil",
+    "ephemeris": "Efeméris",
+    "map": "Peta"
+  },
+  "criteria": {
+    "mabims": "MABIMS 2010+",
+    "wujudul_hilal": "Wujudul Hilal",
+    "lfnu": "LFNU",
+    "ijtima_qobla_ghurub": "Ijtima Qobla Ghurub",
+    "odeh": "Odeh",
+    "turkey": "Turki",
+    "additional": "Tambahan"
+  },
+  "results": {
+    "moonAltitude": "Ketinggian Bulan",
+    "heightAtSunset": "Tinggi saat Terbenam",
+    "elongation": "Elongasi",
+    "separationAngle": "Sudut Separasi",
+    "moonAge": "Umur Bulan",
+    "timeSinceNewMoon": "Waktu sejak Bulan Baru",
+    "visibility": "Visibilitas",
+    "quickPrediction": "Prediksi Cepat",
+    "visible": "Terlihat",
+    "notVisible": "Tidak Terlihat",
+    "marginal": "Marginal"
+  },
+  "prayerTimes": {
+    "title": "Jadwal Shalat",
+    "imsak": "Imsak",
+    "shubuh": "Subuh",
+    "terbit": "Terbit",
+    "dhuha": "Dhuha",
+    "dzuhur": "Dzuhur",
+    "ashr": "Ashar",
+    "maghrib": "Maghrib",
+    "isya": "Isya",
+    "tengahMalam": "Tengah Malam",
+    "p3Malam": "1/3 Akhir Malam"
+  },
+  "tabLabels": {
+    "ephemeris": "Efeméris",
+    "criteria": "Kriteria",
+    "map": "Peta",
+    "prayerTimes": "Jadwal Shalat"
+  },
+  "buttons": {
+    "calculate": "Hitung",
+    "export": "Ekspor",
+    "reset": "Atur Ulang",
+    "close": "Tutup",
+    "download": "Unduh",
+    "share": "Bagikan"
+  },
+  "messages": {
+    "calculating": "Menghitung...",
+    "success": "Perhitungan selesai dengan sukses",
+    "error": "Terjadi kesalahan",
+    "loading": "Memuat...",
+    "noData": "Lakukan perhitungan untuk melihat hasil"
+  },
+  "export": {
+    "csv": "Ekspor sebagai CSV",
+    "pdf": "Ekspor sebagai PDF",
+    "downloadPDF": "Unduh PDF",
+    "downloadCSV": "Unduh CSV",
+    "success": "File berhasil diunduh",
+    "error": "Gagal mengekspor file"
+  },
+  "validation": {
+    "locationRequired": "Lokasi diperlukan",
+    "dateRequired": "Tanggal diperlukan",
+    "invalidDate": "Format tanggal tidak valid",
+    "invalidLocation": "Koordinat lokasi tidak valid",
+    "locationNotFound": "Lokasi tidak ditemukan"
+  },
+  "placeholders": {
+    "selectCity": "Pilih kota...",
+    "searchLocation": "Cari lokasi...",
+    "enterLatitude": "Masukkan lintang",
+    "enterLongitude": "Masukkan bujur"
+  },
+  "theme": {
+    "light": "Terang",
+    "dark": "Gelap",
+    "auto": "Otomatis"
+  },
+  "language": {
+    "english": "English",
+    "indonesian": "Bahasa Indonesia",
+    "arabic": "العربية"
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "app": {
+    "title": "Al Falak DPUA - Hisab Hilal Calculator",
+    "subtitle": "Astronomical calculation for crescent moon visibility",
+    "tagline": "Modern astronomical calculation tool for crescent moon visibility"
+  },
+  "navigation": {
+    "home": "Home",
+    "hilal": "Hilal Visibility",
+    "prayerTimes": "Prayer Times",
+    "calendar": "Calendar Conversion",
+    "qibla": "Qibla Direction",
+    "eclipse": "Eclipses",
+    "about": "About"
+  },
+  "labels": {
+    "date": "📅 Calculation Date",
+    "location": "📍 Select Location",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "elevation": "Elevation (m)",
+    "timezone": "Timezone",
+    "criteria": "🔭 Visibility Criteria",
+    "calculate": "CALCULATE",
+    "results": "Results",
+    "ephemeris": "Ephemeris",
+    "map": "Map"
+  },
+  "criteria": {
+    "mabims": "MABIMS 2010+",
+    "wujudul_hilal": "Wujudul Hilal",
+    "lfnu": "LFNU",
+    "ijtima_qobla_ghurub": "Ijtima Qobla Ghurub",
+    "odeh": "Odeh",
+    "turkey": "Turkish",
+    "additional": "Additional"
+  },
+  "results": {
+    "moonAltitude": "Moon Altitude",
+    "heightAtSunset": "Height at sunset",
+    "elongation": "Elongation",
+    "separationAngle": "Separation angle",
+    "moonAge": "Moon Age",
+    "timeSinceNewMoon": "Time since new moon",
+    "visibility": "Visibility",
+    "quickPrediction": "Quick prediction",
+    "visible": "Visible",
+    "notVisible": "Not Visible",
+    "marginal": "Marginal"
+  },
+  "prayerTimes": {
+    "title": "Prayer Schedule",
+    "imsak": "Imsak",
+    "shubuh": "Shubuh (Fajr)",
+    "terbit": "Terbit (Sunrise)",
+    "dhuha": "Dhuha",
+    "dzuhur": "Dzuhur",
+    "ashr": "Ashr",
+    "maghrib": "Maghrib",
+    "isya": "Isya (Isha)",
+    "tengahMalam": "Midnight",
+    "p3Malam": "Last 1/3 Night"
+  },
+  "tabLabels": {
+    "ephemeris": "Ephemeris",
+    "criteria": "Criteria",
+    "map": "Map",
+    "prayerTimes": "Prayer Times"
+  },
+  "buttons": {
+    "calculate": "Calculate",
+    "export": "Export",
+    "reset": "Reset",
+    "close": "Close",
+    "download": "Download",
+    "share": "Share"
+  },
+  "messages": {
+    "calculating": "Calculating...",
+    "success": "Calculation completed successfully",
+    "error": "An error occurred",
+    "loading": "Loading...",
+    "noData": "Perform a calculation to see results"
+  },
+  "export": {
+    "csv": "Export as CSV",
+    "pdf": "Export as PDF",
+    "downloadPDF": "Download PDF",
+    "downloadCSV": "Download CSV",
+    "success": "File downloaded successfully",
+    "error": "Failed to export file"
+  },
+  "validation": {
+    "locationRequired": "Location is required",
+    "dateRequired": "Date is required",
+    "invalidDate": "Invalid date format",
+    "invalidLocation": "Invalid location coordinates",
+    "locationNotFound": "Location not found"
+  },
+  "placeholders": {
+    "selectCity": "Select a city...",
+    "searchLocation": "Search location...",
+    "enterLatitude": "Enter latitude",
+    "enterLongitude": "Enter longitude"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "auto": "Auto"
+  },
+  "language": {
+    "english": "English",
+    "indonesian": "Bahasa Indonesia",
+    "arabic": "العربية"
+  }
+}
