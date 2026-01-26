@@ -251,10 +251,8 @@ export class CriteriaResultsDisplay extends HTMLElement {
     }
 
     try {
-      const fs = await import('@tauri-apps/api/fs');
-      const dialog = await import('@tauri-apps/api/dialog');
-      const { writeTextFile } = fs;
-      const { save } = dialog;
+      const { writeTextFile } = await import('@tauri-apps/plugin-fs');
+      const { save } = await import('@tauri-apps/plugin-dialog');
       
       const rows = [
         ['Criteria', 'Visible', 'Type', 'Details'],
@@ -301,10 +299,8 @@ export class CriteriaResultsDisplay extends HTMLElement {
     }
 
     try {
-      const fs = await import('@tauri-apps/api/fs');
-      const dialog = await import('@tauri-apps/api/dialog');
-      const { writeTextFile } = fs;
-      const { save } = dialog;
+      const { writeTextFile } = await import('@tauri-apps/plugin-fs');
+      const { save } = await import('@tauri-apps/plugin-dialog');
       
       const lines = [
         'HISAB HILAL - Visibility Criteria Results',

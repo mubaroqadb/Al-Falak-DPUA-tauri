@@ -142,52 +142,98 @@ class ExportManager {
     }
 
     this.closeModal(document.querySelector('.export-modal'));
-    this.showToast(`Data exported as ${format.toUpperCase()}`, 'success');
   }
 
-  exportCSV(filename) {
+  async exportCSV(filename) {
     const csv = this.convertToCSV(this.currentData);
-    this.downloadFile(csv, `${filename}.csv`, 'text/csv');
+    
+    if (window.__TAURI__) {
+      try {
+        const { save } = await import('@tauri-apps/plugin-dialog');
+        const { writeTextFile } = await import('@tauri-apps/plugin-fs');
+        
+        const filePath = await save({
+          filters: [{ name: 'CSV', extensions: ['csv'] }],
+          defaultPath: `${filename}.csv`
+        });
+
+        if (filePath) {
+          await writeTextFile(filePath, csv);
+          this.showToast('CSV exported via Tauri.', 'success');
+        }
+      } catch (error) {
+        console.error('Tauri CSV export failed:', error);
+        this.downloadFile(csv, `${filename}.csv`, 'text/csv');
+      }
+    } else {
+      this.downloadFile(csv, `${filename}.csv`, 'text/csv');
+      this.showToast('CSV downloaded via browser.', 'success');
+    }
   }
 
-  exportTXT(filename) {
+  async exportTXT(filename) {
     const txt = this.convertToTXT(this.currentData);
-    this.downloadFile(txt, `${filename}.txt`, 'text/plain');
+    
+    if (window.__TAURI__) {
+      try {
+        const { save } = await import('@tauri-apps/plugin-dialog');
+        const { writeTextFile } = await import('@tauri-apps/plugin-fs');
+        
+        const filePath = await save({
+          filters: [{ name: 'Text Files', extensions: ['txt'] }],
+          defaultPath: `${filename}.txt`
+        });
+
+        if (filePath) {
+          await writeTextFile(filePath, txt);
+          this.showToast('TXT exported via Tauri.', 'success');
+        }
+      } catch (error) {
+        console.error('Tauri TXT export failed:', error);
+        this.downloadFile(txt, `${filename}.txt`, 'text/plain');
+      }
+    } else {
+      this.downloadFile(txt, `${filename}.txt`, 'text/plain');
+      this.showToast('TXT downloaded via browser.', 'success');
+    }
   }
 
   exportPDF(filename) {
     // Create a simple HTML-based PDF
     const content = this.generatePDFContent(this.currentData);
     const printWindow = window.open('', '_blank');
-    printWindow.document.write(content);
-    printWindow.document.close();
+    if (printWindow) {
+      printWindow.document.write(content);
+      printWindow.document.close();
+      this.showToast('Print dialog opened.', 'info');
+    } else {
+      this.showToast('Popup blocked. Please allow popups to print.', 'error');
+    }
   }
 
   convertToCSV(data) {
     if (!data) return '';
 
-    let csv = 'Criteria,Status,Moon Altitude,Sun Altitude,Elongation,Age of Moon,Visibility\n';
+    let csv = '"HISAB HILAL CALCULATION REPORT"\n';
+    csv += `"Date","${data.observation_date?.day}/${data.observation_date?.month}/${data.observation_date?.year}"\n`;
+    csv += `"Location","${data.location?.latitude?.toFixed(6)}","${data.location?.longitude?.toFixed(6)}"\n`;
+    csv += `"Timezone","GMT${data.location?.timezone >= 0 ? '+' : ''}${data.location?.timezone}"\n\n`;
 
-    // Criteria Results
+    csv += '"VISIBILITY CRITERIA RESULTS"\n';
+    csv += '"Criteria","Status","Method Type","Technical Details"\n';
+
     if (data.criteria_results) {
-      Object.entries(data.criteria_results).forEach(([criteria, result]) => {
-        const moonAlt = this.formatValue(result.moon_altitude);
-        const sunAlt = this.formatValue(result.sun_altitude);
-        const elongation = this.formatValue(result.elongation);
-        const age = this.formatValue(result.age_of_moon);
-        const visibility = result.is_visible ? 'Visible' : 'Not Visible';
-        
-        csv += `"${criteria}","${visibility}","${moonAlt}","${sunAlt}","${elongation}","${age}"\n`;
+      Object.entries(data.criteria_results).forEach(([key, result]) => {
+        const visibility = result.is_visible ? 'VISIBLE' : 'NOT VISIBLE';
+        csv += `"${result.criteria_name}","${visibility}","${result.visibility_type}","${(result.additional_info || '').replace(/"/g, '""')}"\n`;
       });
     }
 
-    csv += '\nDetailed Ephemeris\n';
-    csv += 'Parameter,Value\n';
+    csv += '\n"DETAILED EPHEMERIS DATA"\n';
+    csv += '"Parameter","Value"\n';
 
-    // Ephemeris Data
     if (data.ephemeris) {
       Object.entries(data.ephemeris).forEach(([key, value]) => {
-        // Skip large objects or arrays if any, keep simple values
         if (typeof value !== 'object' && value !== null) {
            csv += `"${this.formatLabel(key)}","${value}"\n`;
         }
@@ -200,26 +246,31 @@ class ExportManager {
   convertToTXT(data) {
     if (!data) return '';
 
-    let txt = 'HISAB HILAL CALCULATION REPORT\n';
-    txt += '==============================\n\n';
+    let txt = '==================================================\n';
+    txt += '         AL FALAK DPUA - HISAB HILAL REPORT        \n';
+    txt += '==================================================\n\n';
     
-    txt += `Date: ${data.observation_date?.year}-${data.observation_date?.month}-${data.observation_date?.day}\n`;
-    txt += `Location: ${data.location?.latitude?.toFixed(4)}°, ${data.location?.longitude?.toFixed(4)}°\n`;
-    txt += `Timezone: UTC${data.location?.timezone >= 0 ? '+' : ''}${data.location?.timezone}\n\n`;
+    txt += `Observation Date : ${data.observation_date?.day}/${data.observation_date?.month}/${data.observation_date?.year}\n`;
+    txt += `Location         : ${data.location?.latitude?.toFixed(6)}, ${data.location?.longitude?.toFixed(6)}\n`;
+    txt += `Elevation        : ${data.location?.elevation}m\n`;
+    txt += `Timezone         : GMT${data.location?.timezone >= 0 ? '+' : ''}${data.location?.timezone}\n`;
+    txt += `Generated at     : ${new Date().toLocaleString()}\n\n`;
 
-    txt += 'CRITERIA RESULTS\n';
-    txt += '----------------\n';
+    txt += '--- VISIBILITY CRITERIA RESULTS ---\n';
+    txt += ''.padEnd(50, '-') + '\n';
     if (data.criteria_results) {
-      Object.entries(data.criteria_results).forEach(([criteria, result]) => {
-        const visibility = result.is_visible ? 'Visible' : 'Not Visible';
-        txt += `[${visibility}] ${criteria}\n`;
-        txt += `  Info: ${result.additional_info}\n`;
+      Object.entries(data.criteria_results).forEach(([key, result]) => {
+        const visibility = result.is_visible ? '[YES]' : '[NO ]';
+        txt += `${visibility} ${result.criteria_name.padEnd(25)} | ${result.visibility_type}\n`;
+        if (result.additional_info) {
+          txt += `      Info: ${result.additional_info}\n`;
+        }
       });
     }
     txt += '\n';
 
-    txt += 'DETAILED EPHEMERIS\n';
-    txt += '------------------\n';
+    txt += '--- DETAILED EPHEMERIS DATA ---\n';
+    txt += ''.padEnd(50, '-') + '\n';
     if (data.ephemeris) {
       Object.entries(data.ephemeris).forEach(([key, value]) => {
         if (typeof value !== 'object' && value !== null) {
@@ -227,6 +278,10 @@ class ExportManager {
         }
       });
     }
+
+    txt += '\n==================================================\n';
+    txt += '      © 2026 Al Falak DPUA - Hisab Hilal          \n';
+    txt += '==================================================\n';
 
     return txt;
   }

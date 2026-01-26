@@ -33,4 +33,9 @@ export default defineConfig(async () => ({
     // Target modern browsers for CSS to support @property (used by DaisyUI)
     cssTarget: ['chrome100', 'safari15', 'firefox128'],
   },
+
+  // Optimize dependencies for Tauri
+  optimizeDeps: {
+    exclude: ['@tauri-apps/api']
+  },
 }));
