@@ -16,12 +16,13 @@ import './components/CalculateButton.js';
 import './components/ModernCriteriaSelector.js';
 import './components/LocationSelector.js';
 import './components/LanguageSwitcher.js';
+import './components/ThemeToggle.js';
 
 
 // Theme Management
 class ThemeManager {
   constructor() {
-    this.currentTheme = localStorage.getItem('theme') || 'light';
+    this.currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     this.init();
   }
 
@@ -31,11 +32,6 @@ class ThemeManager {
   }
 
   setupEventListeners() {
-    const themeToggle = document.getElementById('theme-toggle');
-    if (themeToggle) {
-      themeToggle.addEventListener('click', () => this.toggleTheme());
-    }
-
     // Listen for system theme changes
     if (window.matchMedia) {
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
@@ -44,12 +40,12 @@ class ThemeManager {
         }
       });
     }
-  }
-
-  toggleTheme() {
-    this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
-    localStorage.setItem('theme', this.currentTheme);
-    this.applyTheme(this.currentTheme);
+    
+    // Listen for theme-changed event from ThemeToggle component
+    window.addEventListener('theme-changed', (e) => {
+      this.currentTheme = e.detail.theme;
+      this.applyTheme(this.currentTheme);
+    });
   }
 
   applyTheme(theme) {

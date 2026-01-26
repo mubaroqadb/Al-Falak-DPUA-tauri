@@ -11,6 +11,16 @@
   --radius-2xl: 1.5rem;
 
   --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Global Font Application */
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* DaisyUI 5 Theme Configuration */
@@ -24,6 +34,79 @@
   base-100: #ffffff;
   base-200: #f8fafc;
   base-300: #f1f5f9;
+}
+
+@plugin "daisyui/theme" {
+  name: "dark";
+  primary: #38bdf8; /* Sky 400 - brighter moonlight blue */
+  secondary: #818cf8; /* Indigo 400 - soft purple */
+  accent: #22d3ee; /* Cyan 400 - glowy cyan */
+  neutral: #0f172a; /* Slate 900 */
+  base-100: #020617; /* Slate 950 - deeper night sky */
+  base-200: #0f172a; /* Slate 900 */
+  base-300: #1e293b; /* Slate 800 */
+  base-content: #f1f5f9; /* Slate 100 */
+  
+  --rounded-box: 1rem;
+  --rounded-btn: 0.5rem;
+  --rounded-badge: 1.9rem;
+  --animation-btn: 0.25s;
+  --animation-input: 0.2s;
+  --btn-focus-scale: 0.95;
+  --border-btn: 1px;
+  --tab-border: 1px;
+  --tab-radius: 0.5rem;
+}
+
+/* Smooth transitions for theme switching */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Theme Toggle Animation */
+.theme-toggle-btn svg {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+
+.theme-toggle-btn:hover svg {
+  transform: rotate(15deg);
+}
+
+.theme-toggle-btn .sun-icon {
+  color: #fbbf24; /* Amber 400 */
+  filter: drop-shadow(0 0 2px rgba(251, 191, 36, 0.5));
+}
+
+.theme-toggle-btn .moon-icon {
+  color: #38bdf8; /* Sky 400 */
+  filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.5));
+}
+
+/* Dark Mode Specific Overrides */
+[data-theme="dark"] .card {
+  border-color: #1e293b;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .leaflet-container {
+  background: #0f172a;
+}
+
+[data-theme="dark"] .leaflet-tile-pane {
+  filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+}
+
+[data-theme="dark"] .navbar {
+  background-image: linear-gradient(to right, #0f172a, #1e293b);
+  border-bottom: 1px solid #1e293b;
+}
+
+[data-theme="dark"] .stat-value {
+  text-shadow: 0 0 10px currentColor;
+}
+
+html * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Custom Astronomical Visualization Styles */
@@ -142,6 +225,7 @@ body {
   width: 100%;
   overflow-x: hidden;
   user-select: none;
+  -webkit-user-select: none;
   /* Recommended for desktop apps */
 }
 
@@ -265,7 +349,8 @@ select:focus {
 }
 
 .export-modal-content {
-  background: white;
+  background: var(--fallback-b1,oklch(var(--b1)));
+  color: var(--fallback-bc,oklch(var(--bc)));
   border-radius: 12px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   max-width: 500px;
@@ -300,14 +385,14 @@ select:focus {
   justify-content: space-between;
   align-items: center;
   padding: 20px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--fallback-b3,oklch(var(--b3)));
 }
 
 .export-modal-header h2 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: #1f2937;
+  color: inherit;
 }
 
 .export-modal-close {
@@ -315,7 +400,7 @@ select:focus {
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--fallback-bc,oklch(var(--bc)));
   padding: 0;
   width: 32px;
   height: 32px;
@@ -327,8 +412,8 @@ select:focus {
 }
 
 .export-modal-close:hover {
-  background: #f3f4f6;
-  color: #1f2937;
+  background: var(--fallback-b2,oklch(var(--b2)));
+  color: inherit;
 }
 
 .export-options {
@@ -342,15 +427,15 @@ select:focus {
   display: flex;
   align-items: center;
   padding: 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--fallback-b3,oklch(var(--b3)));
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .export-option:hover {
-  background: #f9fafb;
-  border-color: #3b82f6;
+  background: var(--fallback-b2,oklch(var(--b2)));
+  border-color: var(--fallback-p,oklch(var(--p)));
 }
 
 .export-option input[type="radio"] {
@@ -363,7 +448,7 @@ select:focus {
 .export-option-label {
   flex: 1;
   font-weight: 500;
-  color: #1f2937;
+  color: inherit;
   cursor: pointer;
 }
 
@@ -371,7 +456,7 @@ select:focus {
   display: flex;
   gap: 12px;
   padding: 20px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--fallback-b3,oklch(var(--b3)));
   justify-content: flex-end;
 }
 

@@ -81,15 +81,15 @@ export class ResultsDisplay extends HTMLElement {
           <h4>📅 Basic Information</h4>
           <div class="result-item">
             <span class="label">Date:</span>
-            <span class="value">${this.formatDate(result.date)}</span>
+            <span class="value font-mono">${this.formatDate(result.date)}</span>
           </div>
           <div class="result-item">
             <span class="label">Location:</span>
-            <span class="value">${result.location?.latitude?.toFixed(4)}°, ${result.location?.longitude?.toFixed(4)}°</span>
+            <span class="value font-mono">${result.location?.latitude?.toFixed(4)}°, ${result.location?.longitude?.toFixed(4)}°</span>
           </div>
           <div class="result-item">
             <span class="label">Criteria:</span>
-            <span class="value">${result.criteria || 'Not specified'}</span>
+            <span class="value font-mono">${result.criteria || 'Not specified'}</span>
           </div>
         </div>
 
@@ -98,47 +98,47 @@ export class ResultsDisplay extends HTMLElement {
           <h4>🌙 Astronomical Data</h4>
           <div class="result-item">
             <span class="label">Conjunction (Ijtimak):</span>
-            <span class="value">${result.conjunction_date || 'N/A'}</span>
+            <span class="value font-mono">${result.conjunction_date || 'N/A'}</span>
           </div>
           <div class="result-item">
             <span class="label">Moon Age:</span>
-            <span class="value">${result.moon_age_hours ? result.moon_age_hours.toFixed(2) + ' hours' : 'N/A'}</span>
+            <span class="value font-mono">${result.moon_age_hours ? result.moon_age_hours.toFixed(2) + ' hours' : 'N/A'}</span>
           </div>
           <div class="result-item">
             <span class="label">Moon Altitude (Tinggi):</span>
-            <span class="value">${result.moon_altitude ? result.moon_altitude.toFixed(4) + '°' : 'N/A'}</span>
+            <span class="value font-mono">${result.moon_altitude ? result.moon_altitude.toFixed(4) + '°' : 'N/A'}</span>
           </div>
           <div class="result-item">
             <span class="label">Moon Azimuth:</span>
-            <span class="value">${result.moon_azimuth ? result.moon_azimuth.toFixed(4) + '°' : 'N/A'}</span>
+            <span class="value font-mono">${result.moon_azimuth ? result.moon_azimuth.toFixed(4) + '°' : 'N/A'}</span>
           </div>
           <div class="result-item">
             <span class="label">Elongation:</span>
-            <span class="value">${result.elongation ? result.elongation.toFixed(4) + '°' : 'N/A'}</span>
+            <span class="value font-mono">${result.elongation ? result.elongation.toFixed(4) + '°' : 'N/A'}</span>
           </div>
           <div class="result-item">
             <span class="label">ARCV (Arc of Vision):</span>
-            <span class="value">${result.arcv ? result.arcv.toFixed(4) + '°' : 'N/A'}</span>
+            <span class="value font-mono">${result.arcv ? result.arcv.toFixed(4) + '°' : 'N/A'}</span>
           </div>
           <div class="result-item">
             <span class="label">Crescent Width:</span>
-            <span class="value">${result.crescent_width ? result.crescent_width.toFixed(2) + "'" : 'N/A'}</span>
+            <span class="value font-mono">${result.crescent_width ? result.crescent_width.toFixed(2) + "'" : 'N/A'}</span>
           </div>
           <div class="result-item">
             <span class="label">Moon Distance:</span>
-            <span class="value">${result.moon_distance_km ? result.moon_distance_km.toFixed(0) + ' km' : 'N/A'}</span>
+            <span class="value font-mono">${result.moon_distance_km ? result.moon_distance_km.toFixed(0) + ' km' : 'N/A'}</span>
           </div>
           <div class="result-item">
             <span class="label">Moon Semi-Diameter:</span>
-            <span class="value">${result.moon_semidiameter ? result.moon_semidiameter.toFixed(4) + '°' : 'N/A'}</span>
+            <span class="value font-mono">${result.moon_semidiameter ? result.moon_semidiameter.toFixed(4) + '°' : 'N/A'}</span>
           </div>
           <div class="result-item">
             <span class="label">Parallax:</span>
-            <span class="value">${result.parallax ? result.parallax.toFixed(4) + '°' : 'N/A'}</span>
+            <span class="value font-mono">${result.parallax ? result.parallax.toFixed(4) + '°' : 'N/A'}</span>
           </div>
           <div class="result-item">
             <span class="label">Refraction:</span>
-            <span class="value">${result.refraction ? result.refraction.toFixed(4) + '°' : 'N/A'}</span>
+            <span class="value font-mono">${result.refraction ? result.refraction.toFixed(4) + '°' : 'N/A'}</span>
           </div>
         </div>
 
@@ -147,15 +147,15 @@ export class ResultsDisplay extends HTMLElement {
           <h4>☀️ Solar Data</h4>
           <div class="result-item">
             <span class="label">Sunset Time:</span>
-            <span class="value">${result.sunset_time ? this.formatTime(result.sunset_time) : 'N/A'}</span>
+            <span class="value font-mono">${result.sunset_time ? this.formatTime(result.sunset_time) : 'N/A'}</span>
           </div>
           <div class="result-item">
             <span class="label">Sun Altitude:</span>
-            <span class="value">${result.sun_altitude ? result.sun_altitude.toFixed(2) + '°' : 'N/A'}</span>
+            <span class="value font-mono">${result.sun_altitude ? result.sun_altitude.toFixed(2) + '°' : 'N/A'}</span>
           </div>
           <div class="result-item">
             <span class="label">Equation of Time:</span>
-            <span class="value">${result.equation_of_time ? result.equation_of_time.toFixed(2) + ' min' : 'N/A'}</span>
+            <span class="value font-mono">${result.equation_of_time ? result.equation_of_time.toFixed(2) + ' min' : 'N/A'}</span>
           </div>
         </div>
 
@@ -219,7 +219,7 @@ export class ResultsDisplay extends HTMLElement {
         .map(([key, value]) => `
           <div class="result-item">
             <span class="label">${this.formatLabel(key)}:</span>
-            <span class="value">${this.formatValue(value)}</span>
+            <span class="value font-mono">${this.formatValue(value)}</span>
           </div>
         `)
         .join('');
@@ -296,6 +296,7 @@ export class ResultsDisplay extends HTMLElement {
             .result-section { margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; }
             .result-item { display: flex; justify-content: space-between; margin: 5px 0; }
             .label { font-weight: bold; }
+            .value { font-family: "JetBrains Mono", monospace; }
             .visibility-result { padding: 15px; border-radius: 5px; }
             .visible { background: #d4edda; border: 1px solid #c3e6cb; }
             .not-visible { background: #f8d7da; border: 1px solid #f5c6cb; }

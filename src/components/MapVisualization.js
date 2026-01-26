@@ -235,8 +235,8 @@ export class MapVisualization extends HTMLElement {
         rect.bindTooltip(`
           <div class="text-[10px]">
             <span class="font-bold">${style.label}</span><br>
-            q: ${zone.q_value.toFixed(2)}<br>
-            Lat: ${zone.latitude.toFixed(1)}
+            q: <span class="font-mono">${zone.q_value.toFixed(2)}</span><br>
+            Lat: <span class="font-mono">${zone.latitude.toFixed(1)}</span>
           </div>
         `, { sticky: true, opacity: 0.9, direction: 'top' });
         
@@ -347,8 +347,8 @@ export class MapVisualization extends HTMLElement {
     marker.bindPopup(`
       <div class="text-xs">
         <b>Location Selected</b><br>
-        Lat: ${lat.toFixed(6)}<br>
-        Lon: ${lng.toFixed(6)}<br>
+        Lat: <span class="font-mono">${lat.toFixed(6)}</span><br>
+        Lon: <span class="font-mono">${lng.toFixed(6)}</span><br>
         <button class="btn btn-xs btn-primary mt-2" id="btn-select-this-final">Use This Location</button>
       </div>
     `).openPopup();

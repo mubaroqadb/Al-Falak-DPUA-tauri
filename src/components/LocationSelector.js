@@ -98,11 +98,11 @@ export class LocationSelector extends HTMLElement {
           </div>
           <div class="flex flex-col">
             <span class="opacity-50 font-mono uppercase tracking-wider font-bold">Latitude</span>
-            <span class="font-bold text-primary">${this.selectedCity.lat.toFixed(4)}°</span>
+            <span class="font-bold font-mono text-primary">${this.selectedCity.lat.toFixed(4)}°</span>
           </div>
           <div class="flex flex-col">
             <span class="opacity-50 font-mono uppercase tracking-wider font-bold">Longitude</span>
-            <span class="font-bold text-secondary">${this.selectedCity.lon.toFixed(4)}°</span>
+            <span class="font-bold font-mono text-secondary">${this.selectedCity.lon.toFixed(4)}°</span>
           </div>
           <div class="flex flex-col">
             <span class="opacity-50 font-mono uppercase tracking-wider font-bold">Timezone</span>
