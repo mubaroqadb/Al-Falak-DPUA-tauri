@@ -297,58 +297,19 @@ export class ResultsDisplay extends HTMLElement {
   }
 
   exportResults() {
-    if (!this.currentResult) {
-      alert('No results to export');
-      return;
-    }
-
-    const dataStr = JSON.stringify(this.currentResult, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-
-    const exportFileDefaultName = `hilal-results-${new Date().toISOString().split('T')[0]}.json`;
-
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-
-    console.log('📤 Results exported to:', exportFileDefaultName);
+    console.log('🔘 Export button clicked in ResultsDisplay');
+    this.dispatchEvent(new CustomEvent('export-click', {
+      bubbles: true,
+      composed: true
+    }));
   }
 
   printResults() {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    const resultsHtml = this.renderResults(this.currentResult);
-
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Hisab Hilal Results</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            .result-section { margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; }
-            .result-item { display: flex; justify-content: space-between; margin: 5px 0; }
-            .label { font-weight: bold; }
-            .value { font-family: "JetBrains Mono", monospace; }
-            .visibility-result { padding: 15px; border-radius: 5px; }
-            .visible { background: #d4edda; border: 1px solid #c3e6cb; }
-            .not-visible { background: #f8d7da; border: 1px solid #f5c6cb; }
-            .pass { color: #28a745; }
-            .fail { color: #dc3545; }
-          </style>
-        </head>
-        <body>
-          <h1>Hisab Hilal Calculation Results</h1>
-          <p>Generated on: ${new Date().toLocaleString()}</p>
-          ${resultsHtml}
-        </body>
-      </html>
-    `);
-
-    printWindow.document.close();
-    printWindow.print();
+    console.log('🖨️ Print button clicked in ResultsDisplay');
+    this.dispatchEvent(new CustomEvent('print-click', {
+      bubbles: true,
+      composed: true
+    }));
   }
 }
 

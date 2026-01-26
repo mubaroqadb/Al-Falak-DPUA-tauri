@@ -89,8 +89,8 @@ class ExportManager {
             <span class="export-option-label">CSV (Spreadsheet)</span>
           </label>
           <label class="export-option">
-            <input type="radio" name="export-format" value="json">
-            <span class="export-option-label">JSON (Data)</span>
+            <input type="radio" name="export-format" value="txt">
+            <span class="export-option-label">Text File (TXT)</span>
           </label>
           <label class="export-option">
             <input type="radio" name="export-format" value="pdf">
@@ -133,8 +133,8 @@ class ExportManager {
       case 'csv':
         this.exportCSV(filename);
         break;
-      case 'json':
-        this.exportJSON(filename);
+      case 'txt':
+        this.exportTXT(filename);
         break;
       case 'pdf':
         this.exportPDF(filename);
@@ -150,9 +150,9 @@ class ExportManager {
     this.downloadFile(csv, `${filename}.csv`, 'text/csv');
   }
 
-  exportJSON(filename) {
-    const json = JSON.stringify(this.currentData, null, 2);
-    this.downloadFile(json, `${filename}.json`, 'application/json');
+  exportTXT(filename) {
+    const txt = this.convertToTXT(this.currentData);
+    this.downloadFile(txt, `${filename}.txt`, 'text/plain');
   }
 
   exportPDF(filename) {
@@ -168,19 +168,67 @@ class ExportManager {
 
     let csv = 'Criteria,Status,Moon Altitude,Sun Altitude,Elongation,Age of Moon,Visibility\n';
 
+    // Criteria Results
     if (data.criteria_results) {
       Object.entries(data.criteria_results).forEach(([criteria, result]) => {
-        const moonAlt = result.moon_altitude?.toFixed(2) || 'N/A';
-        const sunAlt = result.sun_altitude?.toFixed(2) || 'N/A';
-        const elongation = result.elongation?.toFixed(2) || 'N/A';
-        const age = result.age_of_moon?.toFixed(2) || 'N/A';
+        const moonAlt = this.formatValue(result.moon_altitude);
+        const sunAlt = this.formatValue(result.sun_altitude);
+        const elongation = this.formatValue(result.elongation);
+        const age = this.formatValue(result.age_of_moon);
         const visibility = result.is_visible ? 'Visible' : 'Not Visible';
         
         csv += `"${criteria}","${visibility}","${moonAlt}","${sunAlt}","${elongation}","${age}"\n`;
       });
     }
 
+    csv += '\nDetailed Ephemeris\n';
+    csv += 'Parameter,Value\n';
+
+    // Ephemeris Data
+    if (data.ephemeris) {
+      Object.entries(data.ephemeris).forEach(([key, value]) => {
+        // Skip large objects or arrays if any, keep simple values
+        if (typeof value !== 'object' && value !== null) {
+           csv += `"${this.formatLabel(key)}","${value}"\n`;
+        }
+      });
+    }
+
     return csv;
+  }
+
+  convertToTXT(data) {
+    if (!data) return '';
+
+    let txt = 'HISAB HILAL CALCULATION REPORT\n';
+    txt += '==============================\n\n';
+    
+    txt += `Date: ${data.observation_date?.year}-${data.observation_date?.month}-${data.observation_date?.day}\n`;
+    txt += `Location: ${data.location?.latitude?.toFixed(4)}°, ${data.location?.longitude?.toFixed(4)}°\n`;
+    txt += `Timezone: UTC${data.location?.timezone >= 0 ? '+' : ''}${data.location?.timezone}\n\n`;
+
+    txt += 'CRITERIA RESULTS\n';
+    txt += '----------------\n';
+    if (data.criteria_results) {
+      Object.entries(data.criteria_results).forEach(([criteria, result]) => {
+        const visibility = result.is_visible ? 'Visible' : 'Not Visible';
+        txt += `[${visibility}] ${criteria}\n`;
+        txt += `  Info: ${result.additional_info}\n`;
+      });
+    }
+    txt += '\n';
+
+    txt += 'DETAILED EPHEMERIS\n';
+    txt += '------------------\n';
+    if (data.ephemeris) {
+      Object.entries(data.ephemeris).forEach(([key, value]) => {
+        if (typeof value !== 'object' && value !== null) {
+           txt += `${this.formatLabel(key).padEnd(30)}: ${value}\n`;
+        }
+      });
+    }
+
+    return txt;
   }
 
   generatePDFContent(data) {
@@ -191,21 +239,28 @@ class ExportManager {
   <meta charset="UTF-8">
   <title>Hisab Hilal Report</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
+    body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
     h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
-    h2 { color: #3498db; margin-top: 30px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
-    th { background: #f8f9fa; font-weight: bold; }
-    .visible { color: #27ae60; font-weight: bold; }
-    .not-visible { color: #e74c3c; font-weight: bold; }
-    .marginal { color: #f39c12; font-weight: bold; }
+    h2 { color: #3498db; margin-top: 30px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+    .meta { margin-bottom: 20px; background: #f8f9fa; padding: 15px; border-radius: 5px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+    th, td { border: 1px solid #dee2e6; padding: 8px 12px; text-align: left; }
+    th { background: #f1f5f9; font-weight: bold; color: #475569; }
+    tr:nth-child(even) { background-color: #f8fafc; }
+    .visible { color: #16a34a; font-weight: bold; }
+    .not-visible { color: #dc2626; font-weight: bold; }
+    .ephemeris-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-family: monospace; }
+    .ephemeris-item { display: flex; justify-content: space-between; border-bottom: 1px dashed #ccc; padding: 2px 0; }
   </style>
 </head>
 <body>
   <h1>Hisab Hilal Calculation Report</h1>
-  <p><strong>Date:</strong> ${data.ephemeris?.date || 'N/A'}</p>
-  <p><strong>Location:</strong> ${data.location?.latitude?.toFixed(4)}°, ${data.location?.longitude?.toFixed(4)}°</p>
+  
+  <div class="meta">
+    <p><strong>Observation Date:</strong> ${data.observation_date?.day} / ${data.observation_date?.month} / ${data.observation_date?.year}</p>
+    <p><strong>Location:</strong> ${data.location?.latitude?.toFixed(4)}°, ${data.location?.longitude?.toFixed(4)}° (Elev: ${data.location?.elevation}m)</p>
+    <p><strong>Generated on:</strong> ${new Date().toLocaleString()}</p>
+  </div>
   
   <h2>Visibility Criteria Results</h2>
   <table>
@@ -213,14 +268,24 @@ class ExportManager {
       <tr>
         <th>Criteria</th>
         <th>Status</th>
-        <th>Moon Altitude</th>
-        <th>Sun Altitude</th>
-        <th>Elongation</th>
-        <th>Age of Moon</th>
+        <th>Details</th>
       </tr>
     </thead>
     <tbody>
-      ${this.generatePDFTableRows(data)}
+      ${this.generatePDFCriteriaRows(data)}
+    </tbody>
+  </table>
+
+  <h2>Detailed Ephemeris</h2>
+  <table>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        ${this.generatePDFEphemerisRows(data)}
     </tbody>
   </table>
   
@@ -232,24 +297,45 @@ class ExportManager {
     `;
   }
 
-  generatePDFTableRows(data) {
+  generatePDFCriteriaRows(data) {
     if (!data.criteria_results) return '';
 
     return Object.entries(data.criteria_results).map(([criteria, result]) => {
-      const statusClass = result.is_visible ? 'visible' : (result.is_marginal ? 'marginal' : 'not-visible');
-      const statusText = result.is_visible ? 'Visible' : (result.is_marginal ? 'Marginal' : 'Not Visible');
+      const statusClass = result.is_visible ? 'visible' : 'not-visible';
+      const statusText = result.is_visible ? 'VISIBLE' : 'NOT VISIBLE';
       
       return `
         <tr>
           <td>${criteria}</td>
           <td class="${statusClass}">${statusText}</td>
-          <td>${result.moon_altitude?.toFixed(2) || 'N/A'}°</td>
-          <td>${result.sun_altitude?.toFixed(2) || 'N/A'}°</td>
-          <td>${result.elongation?.toFixed(2) || 'N/A'}°</td>
-          <td>${result.age_of_moon?.toFixed(2) || 'N/A'} hours</td>
+          <td>${result.additional_info || 'N/A'}</td>
         </tr>
       `;
     }).join('');
+  }
+
+  generatePDFEphemerisRows(data) {
+      if (!data.ephemeris) return '';
+      
+      return Object.entries(data.ephemeris)
+        .filter(([_, value]) => typeof value !== 'object' && value !== null)
+        .map(([key, value]) => `
+            <tr>
+                <td>${this.formatLabel(key)}</td>
+                <td style="font-family: monospace;">${value}</td>
+            </tr>
+        `).join('');
+  }
+
+  formatLabel(key) {
+    return key
+        .replace(/_/g, ' ')
+        .replace(/([A-Z])/g, ' $1') // Add space before camelCase text if any
+        .replace(/\b\w/g, l => l.toUpperCase()); // Capitalize first letter
+  }
+
+  formatValue(val) {
+      return (val !== undefined && val !== null && typeof val === 'number') ? val.toFixed(4) : (val || 'N/A');
   }
 
   downloadFile(content, filename, mimeType) {
@@ -416,6 +502,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.addEventListener('calculation-complete', (event) => {
     exportManager.setData(event.detail);
     console.log('📊 Export data updated');
+  });
+
+  // Listen for export requests from components
+  document.addEventListener('export-click', () => {
+    console.log('📨 Export event received');
+    exportManager.showExportModal();
+  });
+
+  document.addEventListener('print-click', () => {
+    console.log('📨 Print event received');
+    const filename = `hisab-hilal-${new Date().toISOString().split('T')[0]}`;
+    exportManager.exportPDF(filename);
   });
 
   // Map toggle functionality

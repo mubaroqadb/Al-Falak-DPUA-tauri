@@ -37,17 +37,17 @@ export class CriteriaResultsDisplay extends HTMLElement {
         </div>
 
         <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-base-300">
+          <button id="export-txt" class="btn btn-outline btn-sm btn-secondary gap-2">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+            TXT
+          </button>
           <button id="export-criteria" class="btn btn-outline btn-sm btn-info gap-2">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
             CSV
           </button>
-          <button id="export-json" class="btn btn-outline btn-sm btn-secondary gap-2">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM4 18V6h16v12H4zm2-2h2v2H6v-2zm0-4h2v2H6v-2zm0-4h2v2H6V8zm4 8h8v2h-8v-2zm0-4h8v2h-8v-2zm0-4h8v2h-8V8z"/></svg>
-            JSON
-          </button>
           <button id="print-criteria" class="btn btn-outline btn-sm btn-ghost gap-2">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
-            Print
+            Print/PDF
           </button>
         </div>
       </div>
@@ -58,15 +58,15 @@ export class CriteriaResultsDisplay extends HTMLElement {
 
   setupEventListeners() {
     const exportCsvBtn = this.querySelector('#export-criteria');
-    const exportJsonBtn = this.querySelector('#export-json');
+    const exportTxtBtn = this.querySelector('#export-txt');
     const printBtn = this.querySelector('#print-criteria');
 
     if (exportCsvBtn) {
       exportCsvBtn.addEventListener('click', () => this.exportCSV());
     }
 
-    if (exportJsonBtn) {
-      exportJsonBtn.addEventListener('click', () => this.exportJSON());
+    if (exportTxtBtn) {
+      exportTxtBtn.addEventListener('click', () => this.exportTXT());
     }
 
     if (printBtn) {
@@ -226,57 +226,124 @@ export class CriteriaResultsDisplay extends HTMLElement {
     });
   }
 
-  exportCSV() {
-    if (!this.criteriaResults) {
-      alert('No results to export');
-      return;
-    }
-
-    const rows = [
-      ['Criteria', 'Visible', 'Type', 'Details'],
-      ...Object.entries(this.criteriaResults).map(([name, data]) => [
-        data.criteria_name,
-        data.is_visible ? 'YES' : 'NO',
-        data.visibility_type,
-        data.additional_info || ''
-      ])
-    ];
-
-    const csv = rows.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `criteria-results-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-
-    console.log('📤 Results exported to CSV');
+  formatLocation() {
+    if (!this.locationData) return 'N/A';
+    return `Lat: ${this.locationData.latitude.toFixed(4)}°, Lon: ${this.locationData.longitude.toFixed(4)}°`;
   }
 
-  exportJSON() {
+  formatCoordinates() {
+    if (!this.locationData) return 'N/A';
+    const latDir = this.locationData.latitude >= 0 ? 'N' : 'S';
+    const lonDir = this.locationData.longitude >= 0 ? 'E' : 'W';
+    return `${Math.abs(this.locationData.latitude).toFixed(4)}° ${latDir}, ${Math.abs(this.locationData.longitude).toFixed(4)}° ${lonDir}`;
+  }
+
+  async exportCSV() {
     if (!this.criteriaResults) {
       alert('No results to export');
       return;
     }
 
-    const data = {
-      timestamp: new Date().toISOString(),
-      location: this.locationData,
-      observation_date: this.observationDate,
-      criteria_results: this.criteriaResults
-    };
+    // Check if we're in Tauri environment
+    if (!window.__TAURI__) {
+      alert('Export functionality is only available in the desktop application');
+      return;
+    }
 
-    const dataStr = JSON.stringify(data, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `criteria-results-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+    try {
+      const fs = await import('@tauri-apps/api/fs');
+      const dialog = await import('@tauri-apps/api/dialog');
+      const { writeTextFile } = fs;
+      const { save } = dialog;
+      
+      const rows = [
+        ['Criteria', 'Visible', 'Type', 'Details'],
+        ...Object.entries(this.criteriaResults).map(([name, data]) => [
+          data.criteria_name,
+          data.is_visible ? 'YES' : 'NO',
+          data.visibility_type,
+          data.additional_info || ''
+        ])
+      ];
 
-    console.log('📤 Results exported to JSON');
+      const csv = rows.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+      
+      // Use Tauri dialog to save file
+      const filePath = await save({
+        filters: [{
+          name: 'CSV',
+          extensions: ['csv']
+        }],
+        defaultPath: `criteria-results-${new Date().toISOString().split('T')[0]}.csv`
+      });
+
+      if (filePath) {
+        await writeTextFile(filePath, csv);
+        console.log('📤 Results exported to CSV:', filePath);
+        alert('Results exported successfully!');
+      }
+    } catch (error) {
+      console.error('❌ Export failed:', error);
+      alert('Export failed: ' + error.message);
+    }
+  }
+
+  async exportTXT() {
+    if (!this.criteriaResults) {
+      alert('No results to export');
+      return;
+    }
+
+    // Check if we're in Tauri environment
+    if (!window.__TAURI__) {
+      alert('Export functionality is only available in the desktop application');
+      return;
+    }
+
+    try {
+      const fs = await import('@tauri-apps/api/fs');
+      const dialog = await import('@tauri-apps/api/dialog');
+      const { writeTextFile } = fs;
+      const { save } = dialog;
+      
+      const lines = [
+        'HISAB HILAL - Visibility Criteria Results',
+        `Location: ${this.formatLocation()}`,
+        `Coordinates: ${this.formatCoordinates()}`,
+        `Observation Date: ${this.observationDate ? this.formatDate(this.observationDate.year, this.observationDate.month, this.observationDate.day) : 'N/A'}`,
+        '',
+        'VISIBILITY CRITERIA ANALYSIS',
+        'Criteria\tVisible\tType\tDetails',
+        ...Object.entries(this.criteriaResults).map(([name, data]) => 
+          `${data.criteria_name}\t${data.is_visible ? 'YES' : 'NO'}\t${data.visibility_type}\t${data.additional_info || ''}`
+        ),
+        '',
+        'SUMMARY',
+        `Total Criteria: ${Object.keys(this.criteriaResults).length}`,
+        `Visible: ${Object.values(this.criteriaResults).filter(c => c.is_visible).length}`,
+        `Not Visible: ${Object.values(this.criteriaResults).filter(c => !c.is_visible).length}`
+      ];
+
+      const txt = lines.join('\n');
+      
+      // Use Tauri dialog to save file
+      const filePath = await save({
+        filters: [{
+          name: 'Text Files',
+          extensions: ['txt']
+        }],
+        defaultPath: `criteria-results-${new Date().toISOString().split('T')[0]}.txt`
+      });
+
+      if (filePath) {
+        await writeTextFile(filePath, txt);
+        console.log('📤 Results exported to TXT:', filePath);
+        alert('Results exported successfully!');
+      }
+    } catch (error) {
+      console.error('❌ Export failed:', error);
+      alert('Export failed: ' + error.message);
+    }
   }
 
   printResults() {

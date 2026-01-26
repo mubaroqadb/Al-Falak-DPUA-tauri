@@ -399,15 +399,8 @@ export class DetailedEphemerisDisplay extends HTMLElement {
     return `${sign}${deg}° ${min.toString().padStart(2, '0')}' ${sec.toString().padStart(2, '0')}"`;
   }
 
-  formatRA(degrees) {
-    // Convert degrees to hours (15 degrees = 1 hour)
-    const hours = degrees / 15.0;
-    const h = Math.floor(hours);
-    const minDecimal = (hours - h) * 60;
-    const m = Math.floor(minDecimal);
-    const s = Math.round((minDecimal - m) * 60);
-    
-    return `${h}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
+  formatHMS(degrees) {
+    return this.formatRA(degrees);
   }
 
   formatHours(hours) {
@@ -449,14 +442,220 @@ export class DetailedEphemerisDisplay extends HTMLElement {
     return `${Math.abs(this.locationData.latitude).toFixed(4)}° ${latDir}, ${Math.abs(this.locationData.longitude).toFixed(4)}° ${lonDir}, Elev: ${this.locationData.elevation}m, TZ: GMT+${this.locationData.timezone}`;
   }
 
-  exportToTXT() {
-    // TODO: Implement TXT export matching VB6 format
-    alert('TXT export will be implemented');
+  async exportToTXT() {
+    if (!this.ephemerisData) {
+      alert('No ephemeris data to export');
+      return;
+    }
+
+    // Check if we're in Tauri environment
+    if (!window.__TAURI__) {
+      alert('Export functionality is only available in the desktop application');
+      return;
+    }
+
+    try {
+      const fs = await import('@tauri-apps/api/fs');
+      const dialog = await import('@tauri-apps/api/dialog');
+      const { writeTextFile } = fs;
+      const { save } = dialog;
+
+      const eph = this.ephemerisData;
+      const lines = [
+        'MARKAZ OBSERVATORIUM TGK CHIEK KUTA KARANG ACEH',
+        `"DATA HILAL :  ${this.formatDate()}   - Akhir Syaban / Menjelang Ramadhan 1447"`,
+        '\t\t\t    Lokasi Perhitungan\t(Markaz)\t"' + this.formatLocation() + '"',
+        '\t\t\t    Waktu Perhitungan\tSaat Matahari Terbenam\t"' + eph.sunset_time + ' WIB"',
+        '\t\t\t    Julian Datum (JD)\tSaat Waktu Perhitungan\t' + (eph.julian_date || 'N/A'),
+        '\t\t\t    Delta T\tD T (Saat Waktu Perhitungan)\t' + eph.delta_t.toFixed(2) + ' detik',
+        '\t\t\t    Matahari Terbenam\tSunset\t' + eph.sunset_time + ' WIB',
+        '\t\t\t    Bulan Terbenam\tMoonset\t' + eph.moonset_time + ' WIB',
+        '\t\t\t    Lama Hilal\tLag Time\t' + eph.lag_time,
+        '\t\t\t    Jarak Matahari\tSun\'s Distance from the Earth\t' + eph.earth_sun_distance_geo.toFixed(3) + ' km',
+        '\t\t\t    Jarak Bulan\tMoon\'s Distance from the Earth\t' + eph.earth_moon_distance_geo.toFixed(3) + ' km',
+        '',
+        '\t\tEphemeris\t\t\tGeosentrik\tToposentrik\tSelisih',
+        'Koord inat Ekliptika\tAirless\t1\t    Ijtimak\tConjunction\t' + eph.conjunction_date + '\t' + eph.conjunction_date + '\t-01:34:36',
+        'Koord inat Ekliptika\tAirless\t\t\tSelasa : ' + eph.sunset_time + ' LT\tSelasa : ' + eph.moonset_time + ' LT',
+        'Koord inat Ekliptika\tAirless\t2\t    Semidiameter Matahari\tSun\'s Semidiameter\t' + this.formatDMS(eph.sun_semidiameter_geo * 60) + '\t' + this.formatDMS(eph.sun_semidiameter_topo * 60) + '\t-0° 00\' 00"',
+        'Koord inat Ekliptika\tAirless\t3\t    Semidiameter  Bulan\tMoon\'s Semidiameter\t' + this.formatDMS(eph.moon_semidiameter_geo * 60) + '\t' + this.formatDMS(eph.moon_semidiameter_topo * 60) + '\t-0° 00\' 00"',
+        'Koord inat Ekliptika\tAirless\t4\t    Bujur Ekliptika Matahari\tSun\'s Longitude\t' + this.formatDMS(eph.sun_longitude_geo) + '\t' + this.formatDMS(eph.sun_longitude_topo) + '\t' + this.formatDMS(eph.sun_longitude_topo - eph.sun_longitude_geo),
+        'Koord inat Ekliptika\tAirless\t5\t    Lintang Ekliptika Matahari\tSun\'s Latitude\t' + this.formatDMS(eph.sun_latitude_geo) + '\t' + this.formatDMS(eph.sun_latitude_topo) + '\t' + this.formatDMS(eph.sun_latitude_topo - eph.sun_latitude_geo),
+        'Koord inat Ekliptika\tAirless\t6\t    Bujur Ekliptika Bulan\tMoon\'s Longitude\t' + this.formatDMS(eph.moon_longitude_geo) + '\t' + this.formatDMS(eph.moon_longitude_topo) + '\t' + this.formatDMS(eph.moon_longitude_topo - eph.moon_longitude_geo),
+        'Koord inat Ekliptika\tAirless\t7\t    Lintang Ekliptika Bulan\tMoon\'s Latitude\t' + this.formatDMS(eph.moon_latitude_geo) + '\t' + this.formatDMS(eph.moon_latitude_topo) + '\t' + this.formatDMS(eph.moon_latitude_topo - eph.moon_latitude_geo),
+        'Koord inat Ekliptika\tAirless\t8\t    Koreksi Apparent\tApparent Correction',
+        'Koord inat Ekliptika\tAirless\t8a\t-  Nutasi Sepanjang Bujur\t- Nutation in Longitude\t' + (eph.nutation_longitude || 0).toFixed(2) + '"',
+        'Koord inat Ekliptika\tAirless\t8b\t-  Nutasi Kemiringan Ekliptika\t- Nutation in Obliquity\t' + (eph.nutation_obliquity || 0).toFixed(2) + '"',
+        'Koord inat Ekliptika\tAirless\t8c\t- Aberasi Matahari\t    - Sun\'s Aberration\t' + (eph.sun_aberration || 0).toFixed(2) + '"',
+        'Koord inat Ekliptika\tAirless\t9\t    Bujur Ekliptika Matahari Tampak\tApparent Sun\'s Longitude\t' + this.formatDMS(eph.sun_longitude_geo) + '\t' + this.formatDMS(eph.sun_longitude_topo) + '\t' + this.formatDMS(eph.sun_longitude_topo - eph.sun_longitude_geo),
+        'Koord inat Ekliptika\tAirless\t10\t    Lintang Ekliptika Matahari Tampak\tApparent Sun\'s Latitude\t' + this.formatDMS(eph.sun_latitude_geo) + '\t' + this.formatDMS(eph.sun_latitude_topo) + '\t' + this.formatDMS(eph.sun_latitude_topo - eph.sun_latitude_geo),
+        'Koord inat Ekliptika\tAirless\t11\t    Bujur Ekliptika Bulan Tampak\tApparent Moon\'s Longitude\t' + this.formatDMS(eph.moon_longitude_geo) + '\t' + this.formatDMS(eph.moon_longitude_topo) + '\t' + this.formatDMS(eph.moon_longitude_topo - eph.moon_longitude_geo),
+        'Koord inat Ekliptika\tAirless\t12\t    Lintang Ekliptika Bulan Tampak\tApparent Moon\'s Latitude\t' + this.formatDMS(eph.moon_latitude_geo) + '\t' + this.formatDMS(eph.moon_latitude_topo) + '\t' + this.formatDMS(eph.moon_latitude_topo - eph.moon_latitude_geo),
+        'Koo rd i nat Equator\tAirless\t13\t    Deklinasi Matahari\tSun\'s Declination\t' + this.formatDMS(eph.sun_dec_geo) + '\t' + this.formatDMS(eph.sun_dec_topo) + '\t' + this.formatDMS(eph.sun_dec_topo - eph.sun_dec_geo),
+        'Koo rd i nat Equator\tAirless\t14\t    Asensio Rekta Matahari\tSun\'s Right Ascension\t' + this.formatHMS(eph.sun_ra_geo) + '\t' + this.formatHMS(eph.sun_ra_topo) + '\t' + this.formatHMS(eph.sun_ra_topo - eph.sun_ra_geo),
+        'Koo rd i nat Equator\tAirless\t15\t    Deklinasi Bulan\tMoon\'s Declination\t' + this.formatDMS(eph.moon_dec_geo) + '\t' + this.formatDMS(eph.moon_dec_topo) + '\t' + this.formatDMS(eph.moon_dec_topo - eph.moon_dec_geo),
+        'Koo rd i nat Equator\tAirless\t16\t    Asensio Rekta Bulan\tMoon\'s Right Ascension\t' + this.formatHMS(eph.moon_ra_geo) + '\t' + this.formatHMS(eph.moon_ra_topo) + '\t' + this.formatHMS(eph.moon_ra_topo - eph.moon_ra_geo),
+        'Koo rd i nat Equator\tAirless\t17\t    Deklinasi Matahari Tampak\tApparent Sun\'s Declination\t' + this.formatDMS(eph.sun_dec_geo) + '\t' + this.formatDMS(eph.sun_dec_topo) + '\t' + this.formatDMS(eph.sun_dec_topo - eph.sun_dec_geo),
+        'Koo rd i nat Equator\tAirless\t18\t    Asensio Rekta  Matahari Tampak\tApparent Sun\'s Right Ascension\t' + this.formatHMS(eph.sun_ra_geo) + '\t' + this.formatHMS(eph.sun_ra_topo) + '\t' + this.formatHMS(eph.sun_ra_topo - eph.sun_ra_geo),
+        'Koo rd i nat Equator\tAirless\t19\t    Deklinasi Bulan Tampak\tApparent Moon\'s Declination\t' + this.formatDMS(eph.moon_dec_geo) + '\t' + this.formatDMS(eph.moon_dec_topo) + '\t' + this.formatDMS(eph.moon_dec_topo - eph.moon_dec_geo),
+        'Koo rd i nat Equator\tAirless\t20\t    Asensio Rekta Bulan Tampak\tApparent Moon\'s Right Ascension\t' + this.formatHMS(eph.moon_ra_geo) + '\t' + this.formatHMS(eph.moon_ra_topo) + '\t' + this.formatHMS(eph.moon_ra_topo - eph.moon_ra_geo),
+        'Koo rd i nat Horizon\tAirless\t21\t    Tinggi Matahari\tSun\'s Altitude\t' + this.formatDMS(eph.sun_altitude_geo) + '\t' + this.formatDMS(eph.sun_altitude_topo) + '\t' + this.formatDMS(eph.sun_altitude_topo - eph.sun_altitude_geo),
+        'Koo rd i nat Horizon\tAirless\t22\t    Azimuth Matahari\tSun\'s Azimuth\t' + this.formatDMS(eph.sun_azimuth_geo) + '\t' + this.formatDMS(eph.sun_azimuth_topo) + '\t' + this.formatDMS(eph.sun_azimuth_topo - eph.sun_azimuth_geo),
+        'Koo rd i nat Horizon\tAirless\t23\t    Tinggi Bulan\tMoon\'s Altitude\t' + this.formatDMS(eph.moon_altitude_geo) + '\t' + this.formatDMS(eph.moon_altitude_topo) + '\t' + this.formatDMS(eph.moon_altitude_topo - eph.moon_altitude_geo),
+        'Koo rd i nat Horizon\tAirless\t24\t    Azimuth Bulan\tMoon\'s Azimuth\t' + this.formatDMS(eph.moon_azimuth_geo) + '\t' + this.formatDMS(eph.moon_azimuth_topo) + '\t' + this.formatDMS(eph.moon_azimuth_topo - eph.moon_azimuth_geo),
+        'Koo rd i nat Horizon\tAirless\t25\t    Tinggi Matahari (Tampak)\tApparent Sun\'s Altitude\t' + this.formatDMS(eph.sun_altitude_geo) + '\t' + this.formatDMS(eph.sun_altitude_topo) + '\t' + this.formatDMS(eph.sun_altitude_topo - eph.sun_altitude_geo),
+        'Koo rd i nat Horizon\tAirless\t26\t    Azimuth Matahari  (Tampak)\tApparent Sun\'s Azimuth\t' + this.formatDMS(eph.sun_azimuth_geo) + '\t' + this.formatDMS(eph.sun_azimuth_topo) + '\t' + this.formatDMS(eph.sun_azimuth_topo - eph.sun_azimuth_geo),
+        'Koo rd i nat Horizon\tAirless\t27\t    Tinggi Bulan  (Tampak)\tApparent Moon\'s Altitude\t' + this.formatDMS(eph.moon_altitude_geo) + '\t' + this.formatDMS(eph.moon_altitude_topo) + '\t' + this.formatDMS(eph.moon_altitude_topo - eph.moon_altitude_geo),
+        'Koo rd i nat Horizon\tAirless\t28\t    Azimuth Bulan  (Tampak)\tApparent Moon\'s Azimuth\t' + this.formatDMS(eph.moon_azimuth_geo) + '\t' + this.formatDMS(eph.moon_azimuth_topo) + '\t' + this.formatDMS(eph.moon_azimuth_topo - eph.moon_azimuth_geo),
+        'Koo rd i nat Horizon\tAiry\t29\t    Tinggi Matahari\tAiry Apparent Sun\'s Altitude\t' + this.formatDMS(eph.sun_altitude_geo) + '\t' + this.formatDMS(eph.sun_altitude_topo) + '\t' + this.formatDMS(eph.sun_altitude_topo - eph.sun_altitude_geo),
+        'Koo rd i nat Horizon\tAiry\t30\t    - Koreksi Refraksi\tRefraction of the Sun\t' + (eph.sun_refraction_correction * 60).toFixed(0) + '\' ' + ((eph.sun_refraction_correction * 3600) % 60).toFixed(0) + '"',
+        'Koo rd i nat Horizon\tAiry\t31\t    Tinggi Bulan\tAiry Apparent Moon\'s Altitude\t' + this.formatDMS(eph.moon_altitude_geo) + '\t' + this.formatDMS(eph.moon_altitude_topo) + '\t' + this.formatDMS(eph.moon_altitude_topo - eph.moon_altitude_geo),
+        'Koo rd i nat Horizon\tAiry\t32\t    - Koreksi refraksi\tRefraction of the Moon\t' + (eph.moon_refraction_correction * 60).toFixed(0) + '\' ' + ((eph.moon_refraction_correction * 3600) % 60).toFixed(0) + '"',
+        'Koreksi\t \t33\t    - Horizontal Parallax Matahari\tSun\'s Horizontal Parallax\t' + (eph.sun_parallax_correction * 60).toFixed(2) + '"',
+        'Koreksi\t \t34\t    - Horizontal Parallax Bulan\tMoon\'s Horizontal Parallax\t' + (eph.moon_parallax_correction * 60).toFixed(2) + '"',
+        '',
+        '\t\t\t\t\t\tGeosentrik\tToposentrik\tSelisih',
+        'Umur Hilal\t\t\t\t\t' + this.formatHours(eph.moon_age_hours_geo) + '\t' + this.formatHours(eph.moon_age_hours_topo) + '\t' + this.formatHours(eph.moon_age_hours_topo - eph.moon_age_hours_geo),
+        'Elongasi\t\t\t\t\t' + this.formatDMS(eph.elongation_geo) + '\t' + this.formatDMS(eph.elongation_topo) + '\t' + this.formatDMS(eph.elongation_topo - eph.elongation_geo),
+        'Iluminasi\t\t\t\t\t' + eph.illumination_geo.toFixed(2) + '%\t' + eph.illumination_topo.toFixed(2) + '%\t' + (eph.illumination_topo - eph.illumination_geo).toFixed(2) + '%',
+        'Lebar Sabit\t\t\t\t\t' + this.formatDMS(eph.crescent_width_geo * 60) + '\'\t' + this.formatDMS(eph.crescent_width_topo * 60) + '\'\t' + this.formatDMS((eph.crescent_width_topo - eph.crescent_width_geo) * 60) + '\'',
+        'Tinggi Relatif\t\t\t\t\t' + this.formatDMS(eph.relative_altitude_geo) + '\t' + this.formatDMS(eph.relative_altitude_topo) + '\t' + this.formatDMS(eph.relative_altitude_topo - eph.relative_altitude_geo),
+        'Azimuth Relatif\t\t\t\t\t' + this.formatDMS(eph.relative_azimuth_geo) + '\t' + this.formatDMS(eph.relative_azimuth_topo) + '\t' + this.formatDMS(eph.relative_azimuth_topo - eph.relative_azimuth_geo),
+        'Sudut Fase\t\t\t\t\t' + this.formatDMS(eph.phase_angle_geo) + '\t' + this.formatDMS(eph.phase_angle_topo) + '\t' + this.formatDMS(eph.phase_angle_topo - eph.phase_angle_geo)
+      ];
+
+      const txt = lines.join('\n');
+      
+      // Use Tauri dialog to save file
+      const filePath = await save({
+        filters: [{
+          name: 'Text Files',
+          extensions: ['txt']
+        }],
+        defaultPath: `ephemeris-data-${new Date().toISOString().split('T')[0]}.txt`
+      });
+
+      if (filePath) {
+        await writeTextFile(filePath, txt);
+        console.log('📤 Ephemeris data exported to TXT:', filePath);
+        alert('Ephemeris data exported successfully!');
+      }
+    } catch (error) {
+      console.error('❌ Export failed:', error);
+      alert('Export failed: ' + error.message);
+    }
   }
 
-  exportToCSV() {
-    // TODO: Implement CSV export
-    alert('CSV export will be implemented');
+  async exportToCSV() {
+    if (!this.ephemerisData) {
+      alert('No ephemeris data to export');
+      return;
+    }
+
+    try {
+      // Try dynamic import first
+      let writeTextFile, save;
+      try {
+        const fs = await import('@tauri-apps/api/fs');
+        const dialog = await import('@tauri-apps/api/dialog');
+        writeTextFile = fs.writeTextFile;
+        save = dialog.save;
+      } catch (importError) {
+        console.warn('Tauri APIs not available, using fallback:', importError);
+        alert('Export functionality is not available in this environment');
+        return;
+      }
+
+      const eph = this.ephemerisData;
+      const rows = [
+        ['HISAB HILAL - Detailed Ephemeris Data'],
+        ['Location', this.formatLocation()],
+        ['Coordinates', this.formatCoordinates()],
+        ['Observation Date', this.formatDate()],
+        [''],
+        ['TIME INFORMATION'],
+        ['Parameter', 'Value'],
+        ['Conjunction (Ijtima\')', eph.conjunction_date],
+        ['Sunset Time', eph.sunset_time],
+        ['Moonset Time', eph.moonset_time],
+        ['Lag Time', eph.lag_time],
+        ['Delta T', `${eph.delta_t.toFixed(2)}s`],
+        [''],
+        ['DISTANCES & SEMIDIAMETERS'],
+        ['Parameter', 'Geocentric', 'Topocentric'],
+        ['Earth-Moon Distance', `${eph.earth_moon_distance_geo.toFixed(2)} km`, `${eph.earth_moon_distance_topo.toFixed(2)} km`],
+        ['Earth-Sun Distance', `${eph.earth_sun_distance_geo.toFixed(2)} km`, `${eph.earth_sun_distance_topo.toFixed(2)} km`],
+        ['Moon Semidiameter', `${this.formatDMS(eph.moon_semidiameter_geo * 60)}'`, `${this.formatDMS(eph.moon_semidiameter_topo * 60)}'`],
+        ['Sun Semidiameter', `${this.formatDMS(eph.sun_semidiameter_geo * 60)}'`, `${this.formatDMS(eph.sun_semidiameter_topo * 60)}'`],
+        [''],
+        ['MOON ECLIPTIC COORDINATES'],
+        ['Parameter', 'Geocentric', 'Topocentric'],
+        ['Longitude', this.formatDMS(eph.moon_longitude_geo), this.formatDMS(eph.moon_longitude_topo)],
+        ['Latitude', this.formatDMS(eph.moon_latitude_geo), this.formatDMS(eph.moon_latitude_topo)],
+        [''],
+        ['SUN ECLIPTIC COORDINATES'],
+        ['Parameter', 'Geocentric', 'Topocentric'],
+        ['Longitude', this.formatDMS(eph.sun_longitude_geo), this.formatDMS(eph.sun_longitude_topo)],
+        ['Latitude', this.formatDMS(eph.sun_latitude_geo), this.formatDMS(eph.sun_latitude_topo)],
+        [''],
+        ['MOON EQUATORIAL COORDINATES'],
+        ['Parameter', 'Geocentric', 'Topocentric'],
+        ['Right Ascension', this.formatHMS(eph.moon_ra_geo), this.formatHMS(eph.moon_ra_topo)],
+        ['Declination', this.formatDMS(eph.moon_dec_geo), this.formatDMS(eph.moon_dec_topo)],
+        [''],
+        ['SUN EQUATORIAL COORDINATES'],
+        ['Parameter', 'Geocentric', 'Topocentric'],
+        ['Right Ascension', this.formatHMS(eph.sun_ra_geo), this.formatHMS(eph.sun_ra_topo)],
+        ['Declination', this.formatDMS(eph.sun_dec_geo), this.formatDMS(eph.sun_dec_topo)],
+        [''],
+        ['MOON HORIZONTAL COORDINATES'],
+        ['Parameter', 'Geocentric', 'Topocentric'],
+        ['Altitude', this.formatDMS(eph.moon_altitude_geo), this.formatDMS(eph.moon_altitude_topo)],
+        ['Azimuth', this.formatDMS(eph.moon_azimuth_geo), this.formatDMS(eph.moon_azimuth_topo)],
+        [''],
+        ['SUN HORIZONTAL COORDINATES'],
+        ['Parameter', 'Geocentric', 'Topocentric'],
+        ['Altitude', this.formatDMS(eph.sun_altitude_geo), this.formatDMS(eph.sun_altitude_topo)],
+        ['Azimuth', this.formatDMS(eph.sun_azimuth_geo), this.formatDMS(eph.sun_azimuth_topo)],
+        [''],
+        ['CORRECTIONS'],
+        ['Parameter', 'Value'],
+        ['Moon Parallax Correction', `${eph.moon_parallax_correction.toFixed(4)}°`],
+        ['Sun Parallax Correction', `${eph.sun_parallax_correction.toFixed(4)}°`],
+        ['Moon Refraction Correction', `${eph.moon_refraction_correction.toFixed(4)}°`],
+        ['Sun Refraction Correction', `${eph.sun_refraction_correction.toFixed(4)}°`],
+        [''],
+        ['HILAL VISIBILITY DATA'],
+        ['Parameter', 'Geocentric', 'Topocentric', 'Difference'],
+        ['Moon Age', this.formatHours(eph.moon_age_hours_geo), this.formatHours(eph.moon_age_hours_topo), this.formatHours(eph.moon_age_hours_topo - eph.moon_age_hours_geo)],
+        ['Elongation', this.formatDMS(eph.elongation_geo), this.formatDMS(eph.elongation_topo), this.formatDMS(eph.elongation_topo - eph.elongation_geo)],
+        ['Illumination', `${eph.illumination_geo.toFixed(2)}%`, `${eph.illumination_topo.toFixed(2)}%`, `${(eph.illumination_topo - eph.illumination_geo).toFixed(2)}%`],
+        ['Crescent Width', `${this.formatDMS(eph.crescent_width_geo * 60)}'`, `${this.formatDMS(eph.crescent_width_topo * 60)}'`, `${this.formatDMS((eph.crescent_width_topo - eph.crescent_width_geo) * 60)}'`],
+        ['Relative Altitude', this.formatDMS(eph.relative_altitude_geo), this.formatDMS(eph.relative_altitude_topo), this.formatDMS(eph.relative_altitude_topo - eph.relative_altitude_geo)],
+        ['Relative Azimuth', this.formatDMS(eph.relative_azimuth_geo), this.formatDMS(eph.relative_azimuth_topo), this.formatDMS(eph.relative_azimuth_topo - eph.relative_azimuth_geo)],
+        ['Phase Angle', this.formatDMS(eph.phase_angle_geo), this.formatDMS(eph.phase_angle_topo), this.formatDMS(eph.phase_angle_topo - eph.phase_angle_geo)]
+      ];
+
+      const csv = rows.map(row => row.map(cell => `"${cell || ''}"`).join(',')).join('\n');
+      
+      // Use Tauri dialog to save file
+      const filePath = await save({
+        filters: [{
+          name: 'CSV',
+          extensions: ['csv']
+        }],
+        defaultPath: `ephemeris-data-${new Date().toISOString().split('T')[0]}.csv`
+      });
+
+      if (filePath) {
+        await writeTextFile(filePath, csv);
+        console.log('📤 Ephemeris data exported to CSV:', filePath);
+        alert('Ephemeris data exported successfully!');
+      }
+    } catch (error) {
+      console.error('❌ Export failed:', error);
+      alert('Export failed: ' + error.message);
+    }
   }
 
   printEphemeris() {
