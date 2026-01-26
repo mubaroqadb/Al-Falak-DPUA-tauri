@@ -20,9 +20,9 @@ Aplikasi ini menggunakan algoritma astronomi untuk menghitung posisi Matahari da
 - Dukungan multi-bahasa (Indonesia, English, Arabic)
 - Validasi terhadap hasil VB6
 
-# Analisis Mendalam: Perbedaan Algoritma & Formula (Tauri vs VB6)
+## Perbedaan Algoritma & Formula (Tauri vs VB6)
 
-Analisis ini membedah perbedaan fundamental antara aplikasi **Al Falak DPUA-tauri** terbaru dengan versi **VB6** (Legacy). Secara garis besar, Tauri dibangun sebagai "Super-Symmetric Port" yang meniru logika VB6, namun dengan peningkatan pada sisi ketelitian numerik dan arsitektur modern.
+Analisis ini membedah perbedaan fundamental antara aplikasi **Al Falak DPUA-tauri** terbaru dengan versi **VB6** (Legacy). Secara garis besar, Tauri dibangun sebagai "Super-Symmetric Port" yang meniru logika VB6, namun dengan **peningkatan pada sisi ketelitian numerik dan arsitektur modern**.
 
 ---
 
