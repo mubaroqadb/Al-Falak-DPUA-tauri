@@ -213,7 +213,30 @@ h6 {
   animation-delay: 300ms;
 }
 
-/* Interactive Hover Effects */
+/* Skeleton Loading Animation */
+.skeleton {
+  background: rgba(200, 200, 200, 0.2);
+  border-radius: 4px;
+  animation: skeleton-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes skeleton-pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+[data-theme="dark"] .skeleton {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Custom transitions and utility classes */
 .hover-lift {
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
 }

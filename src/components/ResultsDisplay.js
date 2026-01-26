@@ -73,6 +73,30 @@ export class ResultsDisplay extends HTMLElement {
     content.innerHTML = this.renderResults(result);
   }
 
+  showSkeleton() {
+    const content = this.querySelector('#results-content');
+    content.innerHTML = `
+      <div class="results-grid animate-pulse">
+        <div class="result-section">
+          <div class="h-6 w-48 skeleton mb-4"></div>
+          <div class="space-y-3">
+            <div class="flex justify-between"><div class="h-4 w-20 skeleton"></div><div class="h-4 w-32 skeleton"></div></div>
+            <div class="flex justify-between"><div class="h-4 w-20 skeleton"></div><div class="h-4 w-40 skeleton"></div></div>
+            <div class="flex justify-between"><div class="h-4 w-20 skeleton"></div><div class="h-4 w-24 skeleton"></div></div>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+           <div class="flex flex-col gap-4">
+              <div class="h-48 w-full skeleton rounded-xl"></div>
+              <div class="h-32 w-full skeleton rounded-xl"></div>
+           </div>
+           <div class="h-full w-full skeleton rounded-xl"></div>
+        </div>
+      </div>
+    `;
+  }
+
   renderResults(result) {
     return `
       <div class="results-grid">

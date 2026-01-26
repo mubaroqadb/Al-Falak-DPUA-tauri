@@ -438,17 +438,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tabs = document.querySelectorAll('.tab');
   const tabContents = document.querySelectorAll('.tab-content');
   
+  // Initialize ARIA states
+  tabs.forEach(tab => {
+    const tabId = tab.dataset.tab;
+    tab.setAttribute('aria-controls', `tab-${tabId}`);
+    tab.setAttribute('aria-selected', tab.classList.contains('tab-active') ? 'true' : 'false');
+  });
+
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       // 1. Reset all tabs to inactive state
       tabs.forEach(t => {
         t.classList.remove('tab-active', '!bg-primary', '!text-primary-content', 'shadow-sm', 'font-extrabold');
         t.classList.add('font-bold'); // Default weight
+        t.setAttribute('aria-selected', 'false');
       });
 
       // 2. Apply active state to clicked tab
       tab.classList.add('tab-active', '!bg-primary', '!text-primary-content', 'shadow-sm', 'font-extrabold');
       tab.classList.remove('font-bold');
+      tab.setAttribute('aria-selected', 'true');
       
       // 3. Toggle content visibility
       tabContents.forEach(content => {
@@ -488,6 +497,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       heroLoading.classList.remove('hidden');
       
       try {
+        // Show skeleton loader
+        const resultsDisplay = document.querySelector('results-display');
+        if (resultsDisplay && typeof resultsDisplay.showSkeleton === 'function') {
+          resultsDisplay.showSkeleton();
+        }
+
         // Trigger calculation (reuse existing app logic)
         if (window.app) {
           await window.app.updateVisibilityZones();

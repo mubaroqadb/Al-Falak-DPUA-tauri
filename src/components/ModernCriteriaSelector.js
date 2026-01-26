@@ -22,7 +22,7 @@ export class ModernCriteriaSelector extends HTMLElement {
     ];
 
     this.innerHTML = `
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" role="radiogroup" aria-label="Select Visibility Criteria">
         ${criteria.map(c => `
           <div class="card ${this.selectedCriteria === c.id ? 'bg-primary text-primary-content shadow-lg ring-2 ring-primary/50' : 'bg-base-100/50 hover:bg-base-100/80 hover:scale-[1.02] hover:shadow-md'} border border-base-content/5 cursor-pointer transition-all duration-300 criteria-card group backdrop-blur-sm" 
                data-criteria="${c.id}">

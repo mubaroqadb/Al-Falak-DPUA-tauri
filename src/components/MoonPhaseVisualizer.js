@@ -61,8 +61,15 @@ export class MoonPhaseVisualizer extends HTMLElement {
     const glowColor = this.illumination > 0.01 ? '#fbbf24' : '#52525b';
     const glowOpacity = Math.min(this.illumination * 2, 0.8);
     
+    // Accessibility label
+    const phasePercent = (this.illumination * 100).toFixed(1);
+    const ageLabel = this.age.toFixed(1);
+    const a11yLabel = `Moon phase visualization: illumination ${phasePercent}%, moon age ${ageLabel} hours`;
+
     this.innerHTML = `
-      <div class="flex flex-col items-center justify-center p-4 rounded-xl glass-panel relative overflow-hidden">
+      <div class="flex flex-col items-center justify-center p-4 rounded-xl glass-panel relative overflow-hidden" 
+           role="img" 
+           aria-label="${a11yLabel}">
         <div class="relative w-32 h-32">
           <!-- Atmosphere Glow -->
           <div class="absolute inset-0 rounded-full" 
