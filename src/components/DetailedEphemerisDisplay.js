@@ -9,6 +9,19 @@ export class DetailedEphemerisDisplay extends HTMLElement {
     this.observationDate = null;
   }
 
+  formatRA(degrees) {
+    const isNegative = degrees < 0;
+    const absDegrees = (Math.abs(degrees) + 360) % 360;
+    const hours = absDegrees / 15;
+    const h = Math.floor(hours);
+    const minDecimal = (hours - h) * 60;
+    const m = Math.floor(minDecimal);
+    const s = ((minDecimal - m) * 60).toFixed(2);
+    
+    const sign = isNegative ? '-' : '';
+    return `${sign}${h}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
+  }
+
   connectedCallback() {
     try {
       this.render();
@@ -553,7 +566,7 @@ export class DetailedEphemerisDisplay extends HTMLElement {
       }
     } catch (error) {
       console.error('❌ Export failed:', error);
-      alert('Export failed: ' + error.message);
+      alert('Export failed: ' + (error.message || error));
     }
   }
 
@@ -601,50 +614,50 @@ export class DetailedEphemerisDisplay extends HTMLElement {
         [''],
         ['MOON ECLIPTIC COORDINATES'],
         ['Parameter', 'Geocentric', 'Topocentric'],
-        ['Longitude', this.formatDMS(eph.moon_longitude_geo), this.formatDMS(eph.moon_longitude_topo)],
-        ['Latitude', this.formatDMS(eph.moon_latitude_geo), this.formatDMS(eph.moon_latitude_topo)],
+        ['Longitude', this.formatDMS(eph.moon_longitude_geo || 0), this.formatDMS(eph.moon_longitude_topo || 0)],
+        ['Latitude', this.formatDMS(eph.moon_latitude_geo || 0), this.formatDMS(eph.moon_latitude_topo || 0)],
         [''],
         ['SUN ECLIPTIC COORDINATES'],
         ['Parameter', 'Geocentric', 'Topocentric'],
-        ['Longitude', this.formatDMS(eph.sun_longitude_geo), this.formatDMS(eph.sun_longitude_topo)],
-        ['Latitude', this.formatDMS(eph.sun_latitude_geo), this.formatDMS(eph.sun_latitude_topo)],
+        ['Longitude', this.formatDMS(eph.sun_longitude_geo || 0), this.formatDMS(eph.sun_longitude_topo || 0)],
+        ['Latitude', this.formatDMS(eph.sun_latitude_geo || 0), this.formatDMS(eph.sun_latitude_topo || 0)],
         [''],
         ['MOON EQUATORIAL COORDINATES'],
         ['Parameter', 'Geocentric', 'Topocentric'],
-        ['Right Ascension', this.formatHMS(eph.moon_ra_geo), this.formatHMS(eph.moon_ra_topo)],
-        ['Declination', this.formatDMS(eph.moon_dec_geo), this.formatDMS(eph.moon_dec_topo)],
+        ['Right Ascension', this.formatHMS(eph.moon_ra_geo || 0), this.formatHMS(eph.moon_ra_topo || 0)],
+        ['Declination', this.formatDMS(eph.moon_dec_geo || 0), this.formatDMS(eph.moon_dec_topo || 0)],
         [''],
         ['SUN EQUATORIAL COORDINATES'],
         ['Parameter', 'Geocentric', 'Topocentric'],
-        ['Right Ascension', this.formatHMS(eph.sun_ra_geo), this.formatHMS(eph.sun_ra_topo)],
-        ['Declination', this.formatDMS(eph.sun_dec_geo), this.formatDMS(eph.sun_dec_topo)],
+        ['Right Ascension', this.formatHMS(eph.sun_ra_geo || 0), this.formatHMS(eph.sun_ra_topo || 0)],
+        ['Declination', this.formatDMS(eph.sun_dec_geo || 0), this.formatDMS(eph.sun_dec_topo || 0)],
         [''],
         ['MOON HORIZONTAL COORDINATES'],
         ['Parameter', 'Geocentric', 'Topocentric'],
-        ['Altitude', this.formatDMS(eph.moon_altitude_geo), this.formatDMS(eph.moon_altitude_topo)],
-        ['Azimuth', this.formatDMS(eph.moon_azimuth_geo), this.formatDMS(eph.moon_azimuth_topo)],
+        ['Altitude', this.formatDMS(eph.moon_altitude_geo || 0), this.formatDMS(eph.moon_altitude_topo || 0)],
+        ['Azimuth', this.formatDMS(eph.moon_azimuth_geo || 0), this.formatDMS(eph.moon_azimuth_topo || 0)],
         [''],
         ['SUN HORIZONTAL COORDINATES'],
         ['Parameter', 'Geocentric', 'Topocentric'],
-        ['Altitude', this.formatDMS(eph.sun_altitude_geo), this.formatDMS(eph.sun_altitude_topo)],
-        ['Azimuth', this.formatDMS(eph.sun_azimuth_geo), this.formatDMS(eph.sun_azimuth_topo)],
+        ['Altitude', this.formatDMS(eph.sun_altitude_geo || 0), this.formatDMS(eph.sun_altitude_topo || 0)],
+        ['Azimuth', this.formatDMS(eph.sun_azimuth_geo || 0), this.formatDMS(eph.sun_azimuth_topo || 0)],
         [''],
         ['CORRECTIONS'],
         ['Parameter', 'Value'],
-        ['Moon Parallax Correction', `${eph.moon_parallax_correction.toFixed(4)}°`],
-        ['Sun Parallax Correction', `${eph.sun_parallax_correction.toFixed(4)}°`],
-        ['Moon Refraction Correction', `${eph.moon_refraction_correction.toFixed(4)}°`],
-        ['Sun Refraction Correction', `${eph.sun_refraction_correction.toFixed(4)}°`],
+        ['Moon Parallax Correction', `${(eph.moon_horizontal_parallax || 0).toFixed(4)}°`],
+        ['Sun Parallax Correction', `${(eph.sun_horizontal_parallax || 0).toFixed(4)}°`],
+        ['Moon Refraction Correction', `${(eph.moon_refraction || 0).toFixed(4)}°`],
+        ['Sun Refraction Correction', `${(eph.sun_refraction || 0).toFixed(4)}°`],
         [''],
         ['HILAL VISIBILITY DATA'],
         ['Parameter', 'Geocentric', 'Topocentric', 'Difference'],
-        ['Moon Age', this.formatHours(eph.moon_age_hours_geo), this.formatHours(eph.moon_age_hours_topo), this.formatHours(eph.moon_age_hours_topo - eph.moon_age_hours_geo)],
-        ['Elongation', this.formatDMS(eph.elongation_geo), this.formatDMS(eph.elongation_topo), this.formatDMS(eph.elongation_topo - eph.elongation_geo)],
-        ['Illumination', `${eph.illumination_geo.toFixed(2)}%`, `${eph.illumination_topo.toFixed(2)}%`, `${(eph.illumination_topo - eph.illumination_geo).toFixed(2)}%`],
-        ['Crescent Width', `${this.formatDMS(eph.crescent_width_geo * 60)}'`, `${this.formatDMS(eph.crescent_width_topo * 60)}'`, `${this.formatDMS((eph.crescent_width_topo - eph.crescent_width_geo) * 60)}'`],
-        ['Relative Altitude', this.formatDMS(eph.relative_altitude_geo), this.formatDMS(eph.relative_altitude_topo), this.formatDMS(eph.relative_altitude_topo - eph.relative_altitude_geo)],
-        ['Relative Azimuth', this.formatDMS(eph.relative_azimuth_geo), this.formatDMS(eph.relative_azimuth_topo), this.formatDMS(eph.relative_azimuth_topo - eph.relative_azimuth_geo)],
-        ['Phase Angle', this.formatDMS(eph.phase_angle_geo), this.formatDMS(eph.phase_angle_topo), this.formatDMS(eph.phase_angle_topo - eph.phase_angle_geo)]
+        ['Moon Age', this.formatHours(eph.moon_age_hours_geo || 0), this.formatHours(eph.moon_age_hours_topo || 0), this.formatHours((eph.moon_age_hours_topo || 0) - (eph.moon_age_hours_geo || 0))],
+        ['Elongation', this.formatDMS(eph.elongation_geo || 0), this.formatDMS(eph.elongation_topo || 0), this.formatDMS((eph.elongation_topo || 0) - (eph.elongation_geo || 0))],
+        ['Illumination', `${(eph.illumination_geo || 0).toFixed(2)}%`, `${(eph.illumination_topo || 0).toFixed(2)}%`, `${((eph.illumination_topo || 0) - (eph.illumination_geo || 0)).toFixed(2)}%`],
+        ['Crescent Width', `${this.formatDMS((eph.crescent_width_geo || 0) * 60)}'`, `${this.formatDMS((eph.crescent_width_topo || 0) * 60)}'`, `${this.formatDMS(((eph.crescent_width_topo || 0) - (eph.crescent_width_geo || 0)) * 60)}'`],
+        ['Relative Altitude', this.formatDMS(eph.relative_altitude_geo || 0), this.formatDMS(eph.relative_altitude_topo || 0), this.formatDMS((eph.relative_altitude_topo || 0) - (eph.relative_altitude_geo || 0))],
+        ['Relative Azimuth', this.formatDMS(eph.relative_azimuth_geo || 0), this.formatDMS(eph.relative_azimuth_topo || 0), this.formatDMS((eph.relative_azimuth_topo || 0) - (eph.relative_azimuth_geo || 0))],
+        ['Phase Angle', this.formatDMS(eph.phase_angle_geo || 0), this.formatDMS(eph.phase_angle_topo || 0), this.formatDMS((eph.phase_angle_topo || 0) - (eph.phase_angle_geo || 0))]
       ];
 
       const csv = rows.map(row => row.map(cell => `"${cell || ''}"`).join(',')).join('\n');
@@ -665,7 +678,7 @@ export class DetailedEphemerisDisplay extends HTMLElement {
       }
     } catch (error) {
       console.error('❌ Export failed:', error);
-      alert('Export failed: ' + error.message);
+      alert('Export failed: ' + (error.message || error));
     }
   }
 

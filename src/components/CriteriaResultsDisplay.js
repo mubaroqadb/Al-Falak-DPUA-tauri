@@ -282,7 +282,7 @@ export class CriteriaResultsDisplay extends HTMLElement {
       }
     } catch (error) {
       console.error('❌ Export failed:', error);
-      alert('Export failed: ' + error.message);
+      alert('Export failed: ' + (error.message || error));
     }
   }
 
@@ -338,7 +338,7 @@ export class CriteriaResultsDisplay extends HTMLElement {
       }
     } catch (error) {
       console.error('❌ Export failed:', error);
-      alert('Export failed: ' + error.message);
+      alert('Export failed: ' + (error.message || error));
     }
   }
 
