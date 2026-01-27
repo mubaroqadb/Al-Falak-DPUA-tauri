@@ -38,3 +38,7 @@ Cargo.lock
 
 # OS generated files
 Thumbs.db
+
+# Allow specific build artifacts
+!src-tauri/target/release/bundle/dmg/Al Falak DPUA_2.0.0_aarch64.dmg
+!src-tauri/target/x86_64-pc-windows-gnu/release/bundle/nsis/Al Falak DPUA_2.0.0_x64-setup.exe
