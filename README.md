@@ -2,9 +2,6 @@
 
 Aplikasi Hisab Rukyat Hilal berbasis Tauri untuk perhitungan awal bulan Hijriah.
 
-![Screenshot](src/assets/Dokumentasi/Screenshot%202026-01-27%20at%2000.19.23.png)
-
-[Lihat Dokumentasi Lengkap](./src/assets/Dokumentasi/)
 
 ## Deskripsi
 
@@ -20,7 +17,7 @@ Berikut adalah beberapa tangkapan layar dari aplikasi:
 ![Multi Bahasa](src/assets/Dokumentasi/Screenshot%202026-01-27%20at%2011.49.09.png)
 *Interface bahasa arab.*
 
-![Hasil Perhitungan](src/assets/Dokumentasi/Screenshot%2026-01-27%at 12.45.32.png)
+![Hasil Perhitungan](src/assets/Dokumentasi/Screenshot%2026-01-27%at%12.45.32.png)
 *Hasil Perhitungan kriteria hilal.*
 
 ![Pengaturan Mode](src/assets/Dokumentasi/Screenshot%202026-01-27%20at%2011.50.37.png)
