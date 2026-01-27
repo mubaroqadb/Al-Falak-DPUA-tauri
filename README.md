@@ -17,14 +17,14 @@ Berikut adalah beberapa tangkapan layar dari aplikasi:
 ![Halaman Utama](src/assets/Dokumentasi/Screenshot%202026-01-27%20at%2011.48.38.png)
 *Halaman utama aplikasi dengan menu navigasi.*
 
-![Perhitungan Hisab](src/assets/Dokumentasi/Screenshot%202026-01-27%20at%2011.49.09.png)
-*Interface perhitungan hisab rukyat hilal.*
+![Multi Bahasa](src/assets/Dokumentasi/Screenshot%202026-01-27%20at%2011.49.09.png)
+*Interface bahasa arab.*
 
-![Peta Lokasi](src/assets/Dokumentasi/Screenshot%202026-01-27%20at%2011.50.08.png)
-*Visualisasi peta untuk lokasi rukyat.*
+![Hasil Perhitungan](src/assets/Dokumentasi/Screenshot%2026-01-27%at 12.45.32.png)
+*Hasil Perhitungan kriteria hilal.*
 
-![Hasil Perhitungan](src/assets/Dokumentasi/Screenshot%202026-01-27%20at%2011.50.37.png)
-*Hasil perhitungan kriteria rukyat hilal.*
+![Pengaturan Mode](src/assets/Dokumentasi/Screenshot%202026-01-27%20at%2011.50.37.png)
+*Mode gelap.*
 
 [Lihat Dokumentasi Lengkap](./src/assets/Dokumentasi/)
 
