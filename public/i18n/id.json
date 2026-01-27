@@ -112,5 +112,30 @@
     "english": "English",
     "indonesian": "Bahasa Indonesia",
     "arabic": "العربية"
+  },
+  "aboutDetails": {
+    "title": "Tentang Al Falak DPUA",
+    "description": "Al Falak DPUA adalah alat perhitungan astronomi presisi tinggi yang dikembangkan untuk membantu komunitas Muslim dalam prediksi ketampakan hilal dan jadwal waktu shalat.",
+    "version": "Versi 2.0.0",
+    "developedBy": "Dikembangkan oleh Tim Riset DPUA",
+    "coreFeatures": "Fitur Utama",
+    "feature1": "Penilaian visibilitas Hilal multi-kriteria (MABIMS, Odeh, dll.)",
+    "feature2": "Peta visibilitas interaktif global",
+    "feature3": "Perhitungan waktu shalat presisi tinggi",
+    "feature4": "Data efemeris astronomi mendalam",
+    "techStack": "Dibangun dengan Rust, Tauri, dan Standar Web Modern",
+    "thanksTitle": "Terima Kasih Khusus",
+    "thanksContent": "Terima kasih khusus kepada semua peneliti astronomi dan organisasi yang menyediakan model matematika dan dataset yang digunakan dalam aplikasi ini.",
+    "referencesTitle": "Referensi Akademik",
+    "refModern": "Standar Modern & Data",
+    "modern1": "Ephemeris Hisab Rukyat (Kementerian Agama RI)",
+    "modern2": "Kriteria Imkanurrukuyat MABIMS 2021 (3° Lintang, 6.4° Elongasi)",
+    "modern3": "Jean Meeus - Astronomical Algorithms",
+    "modern4": "IMCCE - Institut de Mécanique Céleste",
+    "refScientific": "Teori Ilmiah & Algoritma",
+    "algo1": "Teori Planet VSOP87 (Variations Séculaires des Orbites Planétaires)",
+    "algo2": "Teori Lunar ELP 2000-82/85 (Éphéméride Lunaire Parisienne)",
+    "algo3": "IAU 2000 Nutation & Precious Models",
+    "algo4": "Delta T (ΔT) Polynomial Models (Morrison & Stephenson)"
   }
 }

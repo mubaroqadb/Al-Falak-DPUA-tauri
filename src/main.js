@@ -19,6 +19,7 @@ import './components/MoonPhaseVisualizer.js';
 import './components/LocationSelector.js';
 import './components/LanguageSwitcher.js';
 import './components/ThemeToggle.js';
+import './components/AboutModal.js';
 
 
 // Theme Management
@@ -577,6 +578,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const filename = `hisab-hilal-${new Date().toISOString().split('T')[0]}`;
     exportManager.exportPDF(filename);
   });
+
+  // Handle About Page trigger
+  const aboutBtn = document.getElementById('about-nav-btn');
+  const aboutModal = document.querySelector('about-modal');
+  if (aboutBtn && aboutModal) {
+    aboutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      aboutModal.open();
+    });
+  }
 
   // Map toggle functionality
   const mapToggleBtn = document.getElementById('map-toggle');

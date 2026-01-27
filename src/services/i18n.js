@@ -96,7 +96,7 @@ class I18nManager {
         } else {
           el.value = translation;
         }
-      } else {
+      } else if (!el.hasAttribute('data-i18n-only-attr')) {
         el.textContent = translation;
       }
     });

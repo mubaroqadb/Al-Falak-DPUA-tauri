@@ -112,5 +112,30 @@
     "english": "English",
     "indonesian": "Bahasa Indonesia",
     "arabic": "العربية"
+  },
+  "aboutDetails": {
+    "title": "About Al Falak DPUA",
+    "description": "Al Falak DPUA is a high-precision astronomical calculation tool developed to assist the Islamic community in hilal (crescent moon) visibility prediction and prayer time scheduling.",
+    "version": "Version 2.0.0",
+    "developedBy": "Developed by DPUA Research Team",
+    "coreFeatures": "Core Features",
+    "feature1": "Multi-criteria Hilal visibility assessment (MABIMS, Odeh, etc.)",
+    "feature2": "Global interactive visibility maps",
+    "feature3": "High-precision prayer time calculations",
+    "feature4": "Detailed astronomical ephemeris data",
+    "techStack": "Built with Rust, Tauri, and Modern Web Standards",
+    "thanksTitle": "Special Thanks",
+    "thanksContent": "Special thanks to all astronomical researchers and organizations providing the mathematical models and datasets used in this application.",
+    "referencesTitle": "Academic References",
+    "refModern": "Modern Standards & Data",
+    "modern1": "Ephemeris Hisab Rukyat (Ministry of Religious Affairs RI)",
+    "modern2": "MABIMS 2021 Visibility Criteria (3° Altitude, 6.4° Elongation)",
+    "modern3": "Jean Meeus - Astronomical Algorithms",
+    "modern4": "IMCCE - Institut de Mécanique Céleste",
+    "refScientific": "Scientific Theories & Algorithms",
+    "algo1": "VSOP87 Planetary Theory (Variations Séculaires des Orbites Planétaires)",
+    "algo2": "ELP 2000-82/85 Lunar Theory (Éphéméride Lunaire Parisienne)",
+    "algo3": "IAU 2000 Nutation & Precious Models",
+    "algo4": "Delta T (ΔT) Polynomial Models (Morrison & Stephenson)"
   }
 }
