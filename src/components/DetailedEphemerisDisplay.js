@@ -30,7 +30,7 @@ export class DetailedEphemerisDisplay extends HTMLElement {
       this.innerHTML = `
         <div class="ephemeris-display">
           <div class="error-state">
-            <p>⚠️ Failed to load component</p>
+            <p><svg class="w-5 h-5 text-warning inline mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Failed to load component</p>
             <p>${error.message}</p>
           </div>
         </div>
@@ -41,11 +41,14 @@ export class DetailedEphemerisDisplay extends HTMLElement {
   render() {
     this.innerHTML = `
       <div class="ephemeris-display">
-        <h3>📊 Detailed Ephemeris Data</h3>
+        <h3 class="flex items-center gap-2">
+          <svg class="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Detailed Ephemeris Data
+        </h3>
         
         <div id="ephemeris-content" class="ephemeris-content">
           <div class="no-data">
-            <p>🧮 Perform a calculation to see detailed ephemeris data</p>
+            <p><svg class="w-5 h-5 inline mr-1 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg> Perform a calculation to see detailed ephemeris data</p>
           </div>
         </div>
 
@@ -110,7 +113,7 @@ export class DetailedEphemerisDisplay extends HTMLElement {
       if (!this.ephemerisData) {
         content.innerHTML = `
           <div class="no-data">
-            <p>❌ No ephemeris data available</p>
+            <p><svg class="w-5 h-5 text-error inline mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> No ephemeris data available</p>
           </div>
         `;
         return;
@@ -136,7 +139,7 @@ export class DetailedEphemerisDisplay extends HTMLElement {
     if (content) {
       content.innerHTML = `
         <div class="no-data">
-          <p>🧮 Perform a calculation to see detailed ephemeris data</p>
+          <p><svg class="w-5 h-5 inline mr-1 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg> Perform a calculation to see detailed ephemeris data</p>
         </div>
       `;
     }
@@ -148,12 +151,18 @@ export class DetailedEphemerisDisplay extends HTMLElement {
         <div class="card bg-base-200 shadow-inner">
           <div class="card-body p-4">
             <h4 class="text-xl font-bold flex items-center gap-2">
-              <svg class="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <svg class="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
               HISAB HILAL - ${this.formatDate()}
             </h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 opacity-80 text-sm">
-              <p><strong>📍 Location:</strong> ${this.formatLocation()}</p>
-              <p><strong>🌐 Coordinates:</strong> ${this.formatCoordinates()}</p>
+              <p class="flex items-center gap-1">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <strong>Location:</strong> ${this.formatLocation()}
+              </p>
+              <p class="flex items-center gap-1">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                <strong>Coordinates:</strong> ${this.formatCoordinates()}
+              </p>
             </div>
           </div>
         </div>
@@ -179,8 +188,9 @@ export class DetailedEphemerisDisplay extends HTMLElement {
     return `
       <div class="card bg-base-100 border border-base-300">
         <div class="card-body p-0">
-          <div class="bg-base-200 px-4 py-2 font-bold flex items-center gap-2 rounded-t-xl border-b border-base-300">
-             <span>⏰ Time Information</span>
+          <div class="bg-base-300/50 px-4 py-2 font-bold flex items-center gap-2 rounded-t-xl border-b border-base-300 shadow-sm">
+            <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Time Information</span>
           </div>
           <div class="overflow-x-auto">
             <table class="table table-zebra table-sm w-full">
@@ -209,8 +219,9 @@ export class DetailedEphemerisDisplay extends HTMLElement {
     return `
       <div class="card bg-base-100 border border-base-300">
         <div class="card-body p-0">
-          <div class="bg-base-200 px-4 py-2 font-bold flex items-center gap-2 rounded-t-xl border-b border-base-300">
-             <span>📏 Distances & Semidiameters</span>
+          <div class="bg-base-300/50 px-4 py-2 font-bold flex items-center gap-2 rounded-t-xl border-b border-base-300 shadow-sm">
+            <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <span>Distances & Semidiameters</span>
           </div>
           <div class="overflow-x-auto">
             <table class="table table-zebra table-sm w-full">
@@ -238,8 +249,9 @@ export class DetailedEphemerisDisplay extends HTMLElement {
     return `
       <div class="card bg-base-100 border border-base-300 xl:col-span-2">
         <div class="card-body p-0">
-          <div class="bg-base-200 px-4 py-2 font-bold flex items-center gap-2 rounded-t-xl border-b border-base-300">
-             <span>🌐 Ecliptic Coordinates</span>
+          <div class="bg-base-300/50 px-4 py-2 font-bold flex items-center gap-2 rounded-t-xl border-b border-base-300 shadow-sm">
+            <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <span>Ecliptic Coordinates</span>
           </div>
           <div class="overflow-x-auto">
             <table class="table table-zebra table-sm w-full">
@@ -269,8 +281,9 @@ export class DetailedEphemerisDisplay extends HTMLElement {
     return `
       <div class="card bg-base-100 border border-base-300 xl:col-span-2">
         <div class="card-body p-0">
-          <div class="bg-base-200 px-4 py-2 font-bold flex items-center gap-2 rounded-t-xl border-b border-base-300">
-             <span>⭐ Equatorial Coordinates</span>
+          <div class="bg-base-300/50 px-4 py-2 font-bold flex items-center gap-2 rounded-t-xl border-b border-base-300 shadow-sm">
+            <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span>Equatorial Coordinates</span>
           </div>
           <div class="overflow-x-auto">
             <table class="table table-zebra table-sm w-full">
@@ -300,8 +313,9 @@ export class DetailedEphemerisDisplay extends HTMLElement {
     return `
       <div class="card bg-base-100 border border-base-300 xl:col-span-2">
         <div class="card-body p-0">
-          <div class="bg-base-200 px-4 py-2 font-bold flex items-center gap-2 rounded-t-xl border-b border-base-300">
-             <span>🔭 Horizontal Coordinates</span>
+          <div class="bg-base-300/50 px-4 py-2 font-bold flex items-center gap-2 rounded-t-xl border-b border-base-300 shadow-sm">
+            <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>Horizontal Coordinates</span>
           </div>
           <div class="overflow-x-auto">
             <table class="table table-zebra table-sm w-full">
@@ -334,8 +348,9 @@ export class DetailedEphemerisDisplay extends HTMLElement {
     return `
       <div class="card bg-base-100 border border-base-300">
         <div class="card-body p-0">
-          <div class="bg-base-200 px-4 py-2 font-bold flex items-center gap-2 rounded-t-xl border-b border-base-300">
-             <span>🔧 Corrections & Parallax</span>
+          <div class="bg-base-300/50 px-4 py-2 font-bold flex items-center gap-2 rounded-t-xl border-b border-base-300 shadow-sm">
+            <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            <span>Corrections & Parallax</span>
           </div>
           <div class="overflow-x-auto">
             <table class="table table-zebra table-sm w-full">
@@ -368,7 +383,7 @@ export class DetailedEphemerisDisplay extends HTMLElement {
         <div class="card-body p-0">
           <div class="px-6 py-4 border-b border-white/20">
             <h3 class="text-xl font-bold flex items-center gap-2">
-              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
+              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
               Hilal Visibility Data (Detailed)
             </h3>
           </div>
