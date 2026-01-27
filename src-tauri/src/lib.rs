@@ -11,10 +11,11 @@ pub type Hours = f64;
 // Struktur koordinat geografis
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct GeoLocation {
-    pub latitude: Degrees,  // Lintang (positif = Utara)
-    pub longitude: Degrees, // Bujur (positif = Timur)
-    pub elevation: f64,     // Ketinggian dalam meter
-    pub timezone: f64,      // Zona waktu (WIB = 7.0)
+    pub name: Option<String>, // Nama lokasi (misal: "Jakarta")
+    pub latitude: Degrees,    // Lintang (positif = Utara)
+    pub longitude: Degrees,   // Bujur (positif = Timur)
+    pub elevation: f64,       // Ketinggian dalam meter
+    pub timezone: f64,        // Zona waktu (WIB = 7.0)
 }
 
 // Struktur tanggal Gregorian
@@ -323,6 +324,7 @@ mod tests {
         println!("{}", "=".repeat(80));
 
         let sukabumi = GeoLocation {
+            name: Some("Sukabumi".to_string()),
             latitude: -7.0739,
             longitude: 106.5314,
             elevation: 10.0,

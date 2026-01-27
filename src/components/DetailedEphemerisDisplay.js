@@ -52,11 +52,11 @@ export class DetailedEphemerisDisplay extends HTMLElement {
         <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-base-300">
           <button id="export-ephemeris-txt" class="btn btn-outline btn-sm btn-info gap-2">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-            TXT (VB6)
+            Save TXT
           </button>
           <button id="export-ephemeris-csv" class="btn btn-outline btn-sm btn-success gap-2">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-            CSV
+            Save CSV
           </button>
           <button id="print-ephemeris" class="btn btn-outline btn-sm btn-ghost gap-2">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
@@ -485,9 +485,10 @@ export class DetailedEphemerisDisplay extends HTMLElement {
       const { save } = await import('@tauri-apps/plugin-dialog');
 
       const eph = this.ephemerisData;
+      const locationName = (this.locationData && this.locationData.name) ? this.locationData.name.toUpperCase() : 'MARKAZ PERHITUNGAN';
       const lines = [
-        'MARKAZ OBSERVATORIUM TGK CHIEK KUTA KARANG ACEH',
-        `"DATA HILAL :  ${this.formatDate()}   - Akhir Syaban / Menjelang Ramadhan 1447"`,
+        locationName,
+        `"DATA HILAL :  ${this.formatDate()}   - ${locationName}"`,
         '\t\t\t    Lokasi Perhitungan\t(Markaz)\t"' + this.formatLocation() + '"',
         '\t\t\t    Waktu Perhitungan\tSaat Matahari Terbenam\t"' + eph.sunset_time + ' WIB"',
         '\t\t\t    Julian Datum (JD)\tSaat Waktu Perhitungan\t' + (eph.julian_date || 'N/A'),
@@ -499,42 +500,42 @@ export class DetailedEphemerisDisplay extends HTMLElement {
         '\t\t\t    Jarak Bulan\tMoon\'s Distance from the Earth\t' + (eph.moon_distance_km || 0).toFixed(3) + ' km',
         '',
         '\t\tEphemeris\t\t\tGeosentrik\tToposentrik\tSelisih',
-        'Koord inat Ekliptika\tAirless\t1\t    Ijtimak\tConjunction\t' + eph.conjunction_date + '\t' + eph.conjunction_date + '\t-01:34:36',
-        'Koord inat Ekliptika\tAirless\t\t\tSelasa : ' + eph.sunset_time + ' LT\tSelasa : ' + eph.moonset_time + ' LT',
-        'Koord inat Ekliptika\tAirless\t2\t    Semidiameter Matahari\tSun\'s Semidiameter\t' + this.formatDMS(eph.sun_semidiameter_deg) + '\t' + this.formatDMS(eph.sun_semidiameter_deg) + '\t-0° 00\' 00"',
-        'Koord inat Ekliptika\tAirless\t3\t    Semidiameter  Bulan\tMoon\'s Semidiameter\t' + this.formatDMS(eph.moon_semidiameter_deg) + '\t' + this.formatDMS(eph.moon_semidiameter_deg) + '\t-0° 00\' 00"',
-        'Koord inat Ekliptika\tAirless\t4\t    Bujur Ekliptika Matahari\tSun\'s Longitude\t' + this.formatDMS(eph.sun_longitude_geo) + '\t' + this.formatDMS(eph.sun_longitude_topo) + '\t' + this.formatDMS(eph.sun_longitude_topo - eph.sun_longitude_geo),
-        'Koord inat Ekliptika\tAirless\t5\t    Lintang Ekliptika Matahari\tSun\'s Latitude\t' + this.formatDMS(eph.sun_latitude_geo) + '\t' + this.formatDMS(eph.sun_latitude_topo) + '\t' + this.formatDMS(eph.sun_latitude_topo - eph.sun_latitude_geo),
-        'Koord inat Ekliptika\tAirless\t6\t    Bujur Ekliptika Bulan\tMoon\'s Longitude\t' + this.formatDMS(eph.moon_longitude_geo) + '\t' + this.formatDMS(eph.moon_longitude_topo) + '\t' + this.formatDMS(eph.moon_longitude_topo - eph.moon_longitude_geo),
-        'Koord inat Ekliptika\tAirless\t7\t    Lintang Ekliptika Bulan\tMoon\'s Latitude\t' + this.formatDMS(eph.moon_latitude_geo) + '\t' + this.formatDMS(eph.moon_latitude_topo) + '\t' + this.formatDMS(eph.moon_latitude_topo - eph.moon_latitude_geo),
-        'Koord inat Ekliptika\tAirless\t8\t    Koreksi Apparent\tApparent Correction',
-        'Koord inat Ekliptika\tAirless\t8a\t-  Nutasi Sepanjang Bujur\t- Nutation in Longitude\t' + (eph.nutation_longitude || 0).toFixed(2) + '"',
-        'Koord inat Ekliptika\tAirless\t8b\t-  Nutasi Kemiringan Ekliptika\t- Nutation in Obliquity\t' + (eph.nutation_obliquity || 0).toFixed(2) + '"',
-        'Koord inat Ekliptika\tAirless\t8c\t- Aberasi Matahari\t    - Sun\'s Aberration\t' + (eph.sun_aberration || 0).toFixed(2) + '"',
-        'Koord inat Ekliptika\tAirless\t9\t    Bujur Ekliptika Matahari Tampak\tApparent Sun\'s Longitude\t' + this.formatDMS(eph.sun_longitude_geo) + '\t' + this.formatDMS(eph.sun_longitude_topo) + '\t' + this.formatDMS(eph.sun_longitude_topo - eph.sun_longitude_geo),
-        'Koord inat Ekliptika\tAirless\t10\t    Lintang Ekliptika Matahari Tampak\tApparent Sun\'s Latitude\t' + this.formatDMS(eph.sun_latitude_geo) + '\t' + this.formatDMS(eph.sun_latitude_topo) + '\t' + this.formatDMS(eph.sun_latitude_topo - eph.sun_latitude_geo),
-        'Koord inat Ekliptika\tAirless\t11\t    Bujur Ekliptika Bulan Tampak\tApparent Moon\'s Longitude\t' + this.formatDMS(eph.moon_longitude_geo) + '\t' + this.formatDMS(eph.moon_longitude_topo) + '\t' + this.formatDMS(eph.moon_longitude_topo - eph.moon_longitude_geo),
-        'Koord inat Ekliptika\tAirless\t12\t    Lintang Ekliptika Bulan Tampak\tApparent Moon\'s Latitude\t' + this.formatDMS(eph.moon_latitude_geo) + '\t' + this.formatDMS(eph.moon_latitude_topo) + '\t' + this.formatDMS(eph.moon_latitude_topo - eph.moon_latitude_geo),
-        'Koo rd i nat Equator\tAirless\t13\t    Deklinasi Matahari\tSun\'s Declination\t' + this.formatDMS(eph.sun_dec_geo) + '\t' + this.formatDMS(eph.sun_dec_topo) + '\t' + this.formatDMS(eph.sun_dec_topo - eph.sun_dec_geo),
-        'Koo rd i nat Equator\tAirless\t14\t    Asensio Rekta Matahari\tSun\'s Right Ascension\t' + this.formatHMS(eph.sun_ra_geo) + '\t' + this.formatHMS(eph.sun_ra_topo) + '\t' + this.formatHMS(eph.sun_ra_topo - eph.sun_ra_geo),
-        'Koo rd i nat Equator\tAirless\t15\t    Deklinasi Bulan\tMoon\'s Declination\t' + this.formatDMS(eph.moon_dec_geo) + '\t' + this.formatDMS(eph.moon_dec_topo) + '\t' + this.formatDMS(eph.moon_dec_topo - eph.moon_dec_geo),
-        'Koo rd i nat Equator\tAirless\t16\t    Asensio Rekta Bulan\tMoon\'s Right Ascension\t' + this.formatHMS(eph.moon_ra_geo) + '\t' + this.formatHMS(eph.moon_ra_topo) + '\t' + this.formatHMS(eph.moon_ra_topo - eph.moon_ra_geo),
-        'Koo rd i nat Equator\tAirless\t17\t    Deklinasi Matahari Tampak\tApparent Sun\'s Declination\t' + this.formatDMS(eph.sun_dec_geo) + '\t' + this.formatDMS(eph.sun_dec_topo) + '\t' + this.formatDMS(eph.sun_dec_topo - eph.sun_dec_geo),
-        'Koo rd i nat Equator\tAirless\t18\t    Asensio Rekta  Matahari Tampak\tApparent Sun\'s Right Ascension\t' + this.formatHMS(eph.sun_ra_geo) + '\t' + this.formatHMS(eph.sun_ra_topo) + '\t' + this.formatHMS(eph.sun_ra_topo - eph.sun_ra_geo),
-        'Koo rd i nat Equator\tAirless\t19\t    Deklinasi Bulan Tampak\tApparent Moon\'s Declination\t' + this.formatDMS(eph.moon_dec_geo) + '\t' + this.formatDMS(eph.moon_dec_topo) + '\t' + this.formatDMS(eph.moon_dec_topo - eph.moon_dec_geo),
-        'Koo rd i nat Equator\tAirless\t20\t    Asensio Rekta Bulan Tampak\tApparent Moon\'s Right Ascension\t' + this.formatHMS(eph.moon_ra_geo) + '\t' + this.formatHMS(eph.moon_ra_topo) + '\t' + this.formatHMS(eph.moon_ra_topo - eph.moon_ra_geo),
-        'Koo rd i nat Horizon\tAirless\t21\t    Tinggi Matahari\tSun\'s Altitude\t' + this.formatDMS(eph.sun_altitude_geo) + '\t' + this.formatDMS(eph.sun_altitude_topo) + '\t' + this.formatDMS(eph.sun_altitude_topo - eph.sun_altitude_geo),
-        'Koo rd i nat Horizon\tAirless\t22\t    Azimuth Matahari\tSun\'s Azimuth\t' + this.formatDMS(eph.sun_azimuth_geo) + '\t' + this.formatDMS(eph.sun_azimuth_topo) + '\t' + this.formatDMS(eph.sun_azimuth_topo - eph.sun_azimuth_geo),
-        'Koo rd i nat Horizon\tAirless\t23\t    Tinggi Bulan\tMoon\'s Altitude\t' + this.formatDMS(eph.moon_altitude_geo) + '\t' + this.formatDMS(eph.moon_altitude_topo) + '\t' + this.formatDMS(eph.moon_altitude_topo - eph.moon_altitude_geo),
-        'Koo rd i nat Horizon\tAirless\t24\t    Azimuth Bulan\tMoon\'s Azimuth\t' + this.formatDMS(eph.moon_azimuth_geo) + '\t' + this.formatDMS(eph.moon_azimuth_topo) + '\t' + this.formatDMS(eph.moon_azimuth_topo - eph.moon_azimuth_geo),
-        'Koo rd i nat Horizon\tAirless\t25\t    Tinggi Matahari (Tampak)\tApparent Sun\'s Altitude\t' + this.formatDMS(eph.sun_altitude_geo) + '\t' + this.formatDMS(eph.sun_altitude_topo) + '\t' + this.formatDMS(eph.sun_altitude_topo - eph.sun_altitude_geo),
-        'Koo rd i nat Horizon\tAirless\t26\t    Azimuth Matahari  (Tampak)\tApparent Sun\'s Azimuth\t' + this.formatDMS(eph.sun_azimuth_geo) + '\t' + this.formatDMS(eph.sun_azimuth_topo) + '\t' + this.formatDMS(eph.sun_azimuth_topo - eph.sun_azimuth_geo),
-        'Koo rd i nat Horizon\tAirless\t27\t    Tinggi Bulan  (Tampak)\tApparent Moon\'s Altitude\t' + this.formatDMS(eph.moon_altitude_geo) + '\t' + this.formatDMS(eph.moon_altitude_topo) + '\t' + this.formatDMS(eph.moon_altitude_topo - eph.moon_altitude_geo),
-        'Koo rd i nat Horizon\tAirless\t28\t    Azimuth Bulan  (Tampak)\tApparent Moon\'s Azimuth\t' + this.formatDMS(eph.moon_azimuth_geo) + '\t' + this.formatDMS(eph.moon_azimuth_topo) + '\t' + this.formatDMS(eph.moon_azimuth_topo - eph.moon_azimuth_geo),
-        'Koo rd i nat Horizon\tAiry\t29\t    Tinggi Matahari\tAiry Apparent Sun\'s Altitude\t' + this.formatDMS(eph.sun_altitude_geo) + '\t' + this.formatDMS(eph.sun_altitude_topo) + '\t' + this.formatDMS(eph.sun_altitude_topo - eph.sun_altitude_geo),
-        'Koo rd i nat Horizon\tAiry\t30\t    - Koreksi Refraksi\tRefraction of the Sun\t' + ((eph.sun_refraction || 0) / 60.0).toFixed(2) + "'",
-        'Koo rd i nat Horizon\tAiry\t31\t    Tinggi Bulan\tAiry Apparent Moon\'s Altitude\t' + this.formatDMS(eph.moon_altitude_airy_geo) + '\t' + this.formatDMS(eph.moon_altitude_airy_topo) + '\t' + this.formatDMS(eph.moon_altitude_airy_topo - eph.moon_altitude_airy_geo),
-        'Koo rd i nat Horizon\tAiry\t32\t    - Koreksi refraksi\tRefraction of the Moon\t' + ((eph.moon_refraction || 0) / 60.0).toFixed(2) + "'",
+        'Koordinat Ekliptika\tAirless\t1\t    Ijtimak\tConjunction\t' + eph.conjunction_date + '\t' + eph.conjunction_date + '\t-01:34:36',
+        'Koordinat Ekliptika\tAirless\t\t\t' + eph.sunset_time + ' LT\t' + eph.moonset_time + ' LT',
+        'Koordinat Ekliptika\tAirless\t2\t    Semidiameter Matahari\tSun\'s Semidiameter\t' + this.formatDMS(eph.sun_semidiameter_deg) + '\t' + this.formatDMS(eph.sun_semidiameter_deg) + '\t-0° 00\' 00"',
+        'Koordinat Ekliptika\tAirless\t3\t    Semidiameter  Bulan\tMoon\'s Semidiameter\t' + this.formatDMS(eph.moon_semidiameter_deg) + '\t' + this.formatDMS(eph.moon_semidiameter_deg) + '\t-0° 00\' 00"',
+        'Koordinat Ekliptika\tAirless\t4\t    Bujur Ekliptika Matahari\tSun\'s Longitude\t' + this.formatDMS(eph.sun_longitude_geo) + '\t' + this.formatDMS(eph.sun_longitude_topo) + '\t' + this.formatDMS(eph.sun_longitude_topo - eph.sun_longitude_geo),
+        'Koordinat Ekliptika\tAirless\t5\t    Lintang Ekliptika Matahari\tSun\'s Latitude\t' + this.formatDMS(eph.sun_latitude_geo) + '\t' + this.formatDMS(eph.sun_latitude_topo) + '\t' + this.formatDMS(eph.sun_latitude_topo - eph.sun_latitude_geo),
+        'Koordinat Ekliptika\tAirless\t6\t    Bujur Ekliptika Bulan\tMoon\'s Longitude\t' + this.formatDMS(eph.moon_longitude_geo) + '\t' + this.formatDMS(eph.moon_longitude_topo) + '\t' + this.formatDMS(eph.moon_longitude_topo - eph.moon_longitude_geo),
+        'Koordinat Ekliptika\tAirless\t7\t    Lintang Ekliptika Bulan\tMoon\'s Latitude\t' + this.formatDMS(eph.moon_latitude_geo) + '\t' + this.formatDMS(eph.moon_latitude_topo) + '\t' + this.formatDMS(eph.moon_latitude_topo - eph.moon_latitude_geo),
+        'Koordinat Ekliptika\tAirless\t8\t    Koreksi Apparent\tApparent Correction',
+        'Koordinat Ekliptika\tAirless\t8a\t-  Nutasi Sepanjang Bujur\t- Nutation in Longitude\t' + (eph.nutation_longitude || 0).toFixed(2) + '"',
+        'Koordinat Ekliptika\tAirless\t8b\t-  Nutasi Kemiringan Ekliptika\t- Nutation in Obliquity\t' + (eph.nutation_obliquity || 0).toFixed(2) + '"',
+        'Koordinat Ekliptika\tAirless\t8c\t- Aberasi Matahari\t    - Sun\'s Aberration\t' + (eph.sun_aberration || 0).toFixed(2) + '"',
+        'Koordinat Ekliptika\tAirless\t9\t    Bujur Ekliptika Matahari Tampak\tApparent Sun\'s Longitude\t' + this.formatDMS(eph.sun_longitude_geo) + '\t' + this.formatDMS(eph.sun_longitude_topo) + '\t' + this.formatDMS(eph.sun_longitude_topo - eph.sun_longitude_geo),
+        'Koordinat Ekliptika\tAirless\t10\t    Lintang Ekliptika Matahari Tampak\tApparent Sun\'s Latitude\t' + this.formatDMS(eph.sun_latitude_geo) + '\t' + this.formatDMS(eph.sun_latitude_topo) + '\t' + this.formatDMS(eph.sun_latitude_topo - eph.sun_latitude_geo),
+        'Koordinat Ekliptika\tAirless\t11\t    Bujur Ekliptika Bulan Tampak\tApparent Moon\'s Longitude\t' + this.formatDMS(eph.moon_longitude_geo) + '\t' + this.formatDMS(eph.moon_longitude_topo) + '\t' + this.formatDMS(eph.moon_longitude_topo - eph.moon_longitude_geo),
+        'Koordinat Ekliptika\tAirless\t12\t    Lintang Ekliptika Bulan Tampak\tApparent Moon\'s Latitude\t' + this.formatDMS(eph.moon_latitude_geo) + '\t' + this.formatDMS(eph.moon_latitude_topo) + '\t' + this.formatDMS(eph.moon_latitude_topo - eph.moon_latitude_geo),
+        'Koordinat Equator\tAirless\t13\t    Deklinasi Matahari\tSun\'s Declination\t' + this.formatDMS(eph.sun_dec_geo) + '\t' + this.formatDMS(eph.sun_dec_topo) + '\t' + this.formatDMS(eph.sun_dec_topo - eph.sun_dec_geo),
+        'Koordinat Equator\tAirless\t14\t    Asensio Rekta Matahari\tSun\'s Right Ascension\t' + this.formatHMS(eph.sun_ra_geo) + '\t' + this.formatHMS(eph.sun_ra_topo) + '\t' + this.formatHMS(eph.sun_ra_topo - eph.sun_ra_geo),
+        'Koordinat Equator\tAirless\t15\t    Deklinasi Bulan\tMoon\'s Declination\t' + this.formatDMS(eph.moon_dec_geo) + '\t' + this.formatDMS(eph.moon_dec_topo) + '\t' + this.formatDMS(eph.moon_dec_topo - eph.moon_dec_geo),
+        'Koordinat Equator\tAirless\t16\t    Asensio Rekta Bulan\tMoon\'s Right Ascension\t' + this.formatHMS(eph.moon_ra_geo) + '\t' + this.formatHMS(eph.moon_ra_topo) + '\t' + this.formatHMS(eph.moon_ra_topo - eph.moon_ra_geo),
+        'Koordinat Equator\tAirless\t17\t    Deklinasi Matahari Tampak\tApparent Sun\'s Declination\t' + this.formatDMS(eph.sun_dec_geo) + '\t' + this.formatDMS(eph.sun_dec_topo) + '\t' + this.formatDMS(eph.sun_dec_topo - eph.sun_dec_geo),
+        'Koordinat Equator\tAirless\t18\t    Asensio Rekta  Matahari Tampak\tApparent Sun\'s Right Ascension\t' + this.formatHMS(eph.sun_ra_geo) + '\t' + this.formatHMS(eph.sun_ra_topo) + '\t' + this.formatHMS(eph.sun_ra_topo - eph.sun_ra_geo),
+        'Koordinat Equator\tAirless\t19\t    Deklinasi Bulan Tampak\tApparent Moon\'s Declination\t' + this.formatDMS(eph.moon_dec_geo) + '\t' + this.formatDMS(eph.moon_dec_topo) + '\t' + this.formatDMS(eph.moon_dec_topo - eph.moon_dec_geo),
+        'Koordinat Equator\tAirless\t20\t    Asensio Rekta Bulan Tampak\tApparent Moon\'s Right Ascension\t' + this.formatHMS(eph.moon_ra_geo) + '\t' + this.formatHMS(eph.moon_ra_topo) + '\t' + this.formatHMS(eph.moon_ra_topo - eph.moon_ra_geo),
+        'Koordinat Horizon\tAirless\t21\t    Tinggi Matahari\tSun\'s Altitude\t' + this.formatDMS(eph.sun_altitude_geo) + '\t' + this.formatDMS(eph.sun_altitude_topo) + '\t' + this.formatDMS(eph.sun_altitude_topo - eph.sun_altitude_geo),
+        'Koordinat Horizon\tAirless\t22\t    Azimuth Matahari\tSun\'s Azimuth\t' + this.formatDMS(eph.sun_azimuth_geo) + '\t' + this.formatDMS(eph.sun_azimuth_topo) + '\t' + this.formatDMS(eph.sun_azimuth_topo - eph.sun_azimuth_geo),
+        'Koordinat Horizon\tAirless\t23\t    Tinggi Bulan\tMoon\'s Altitude\t' + this.formatDMS(eph.moon_altitude_geo) + '\t' + this.formatDMS(eph.moon_altitude_topo) + '\t' + this.formatDMS(eph.moon_altitude_topo - eph.moon_altitude_geo),
+        'Koordinat Horizon\tAirless\t24\t    Azimuth Bulan\tMoon\'s Azimuth\t' + this.formatDMS(eph.moon_azimuth_geo) + '\t' + this.formatDMS(eph.moon_azimuth_topo) + '\t' + this.formatDMS(eph.moon_azimuth_topo - eph.moon_azimuth_geo),
+        'Koordinat Horizon\tAirless\t25\t    Tinggi Matahari (Tampak)\tApparent Sun\'s Altitude\t' + this.formatDMS(eph.sun_altitude_geo) + '\t' + this.formatDMS(eph.sun_altitude_topo) + '\t' + this.formatDMS(eph.sun_altitude_topo - eph.sun_altitude_geo),
+        'Koordinat Horizon\tAirless\t26\t    Azimuth Matahari  (Tampak)\tApparent Sun\'s Azimuth\t' + this.formatDMS(eph.sun_azimuth_geo) + '\t' + this.formatDMS(eph.sun_azimuth_topo) + '\t' + this.formatDMS(eph.sun_azimuth_topo - eph.sun_azimuth_geo),
+        'Koordinat Horizon\tAirless\t27\t    Tinggi Bulan  (Tampak)\tApparent Moon\'s Altitude\t' + this.formatDMS(eph.moon_altitude_geo) + '\t' + this.formatDMS(eph.moon_altitude_topo) + '\t' + this.formatDMS(eph.moon_altitude_topo - eph.moon_altitude_geo),
+        'Koordinat Horizon\tAirless\t28\t    Azimuth Bulan  (Tampak)\tApparent Moon\'s Azimuth\t' + this.formatDMS(eph.moon_azimuth_geo) + '\t' + this.formatDMS(eph.moon_azimuth_topo) + '\t' + this.formatDMS(eph.moon_azimuth_topo - eph.moon_azimuth_geo),
+        'Koordinat Horizon\tAiry\t29\t    Tinggi Matahari\tAiry Apparent Sun\'s Altitude\t' + this.formatDMS(eph.sun_altitude_geo) + '\t' + this.formatDMS(eph.sun_altitude_topo) + '\t' + this.formatDMS(eph.sun_altitude_topo - eph.sun_altitude_geo),
+        'Koordinat Horizon\tAiry\t30\t    - Koreksi Refraksi\tRefraction of the Sun\t' + ((eph.sun_refraction || 0) / 60.0).toFixed(2) + "'",
+        'Koordinat Horizon\tAiry\t31\t    Tinggi Bulan\tAiry Apparent Moon\'s Altitude\t' + this.formatDMS(eph.moon_altitude_airy_geo) + '\t' + this.formatDMS(eph.moon_altitude_airy_topo) + '\t' + this.formatDMS(eph.moon_altitude_airy_topo - eph.moon_altitude_airy_geo),
+        'Koordinat Horizon\tAiry\t32\t    - Koreksi refraksi\tRefraction of the Moon\t' + ((eph.moon_refraction || 0) / 60.0).toFixed(2) + "'",
         'Koreksi\t \t33\t    - Horizontal Parallax Matahari\tSun\'s Horizontal Parallax\t' + (eph.sun_horizontal_parallax || 0).toFixed(2) + '"',
         'Koreksi\t \t34\t    - Horizontal Parallax Bulan\tMoon\'s Horizontal Parallax\t' + (eph.moon_horizontal_parallax || 0).toFixed(2) + '"',
         '',

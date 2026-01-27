@@ -491,6 +491,7 @@ mod tests {
     fn test_sukabumi_topocentric_feb18_2026() {
         // VB6 reference: Sukabumi Feb 18, 2026
         let location = GeoLocation {
+            name: None,
             latitude: -7.0 - 4.0 / 60.0 - 26.0 / 3600.0,
             longitude: 106.0 + 31.0 / 60.0 + 53.0 / 3600.0,
             elevation: 10.0,

@@ -34,6 +34,7 @@ body {
   base-100: #ffffff;
   base-200: #f8fafc;
   base-300: #f1f5f9;
+  base-content: #1e293b;
 }
 
 @plugin "daisyui/theme" {
@@ -128,8 +129,12 @@ html * {
   height: 100%;
   z-index: -1;
   pointer-events: none;
-  background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+  background: radial-gradient(ellipse at bottom, #f1f5f9 0%, #ffffff 100%);
   overflow: hidden;
+}
+
+[data-theme="dark"] .star-field {
+  background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
 }
 
 .star {

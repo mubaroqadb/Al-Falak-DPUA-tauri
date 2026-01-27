@@ -19,6 +19,7 @@ export class HilalApp {
 
     // Current application state
     this.currentLocation = {
+      name: 'Jakarta',
       latitude: -6.2, // Jakarta coordinates as default
       longitude: 106.816666,
       elevation: 8,
@@ -137,6 +138,7 @@ export class HilalApp {
       this.locationSelector.addEventListener('city-changed', (event) => {
         const city = event.detail.city;
         this.currentLocation = {
+          name: city.name,
           latitude: city.lat,
           longitude: city.lon,
           elevation: city.elev || 0,
@@ -190,6 +192,7 @@ export class HilalApp {
         const { lat, lng } = event.detail;
         this.currentLocation = {
           ...this.currentLocation,
+          name: `Custom Location (${lat.toFixed(2)}, ${lng.toFixed(2)})`,
           latitude: lat,
           longitude: lng
         };

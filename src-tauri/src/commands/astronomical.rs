@@ -8,11 +8,11 @@ pub struct AstronomicalDataResponse {
     pub location: GeoLocation,
     pub sun_position: CelestialPosition,
     pub moon_position: CelestialPosition,
-    pub moon_phase: f64,        // 0-1 (0=new, 0.5=full, 1=new)
-    pub moon_age_hours: f64,    // Jam sejak new moon
-    pub moon_altitude: f64,     // Altitude di atas horizon
-    pub moon_distance_km: f64,  // Distance ke bumi
-    pub sunset_time: f64,       // Waktu maghrib dalam jam
+    pub moon_phase: f64,       // 0-1 (0=new, 0.5=full, 1=new)
+    pub moon_age_hours: f64,   // Jam sejak new moon
+    pub moon_altitude: f64,    // Altitude di atas horizon
+    pub moon_distance_km: f64, // Distance ke bumi
+    pub sunset_time: f64,      // Waktu maghrib dalam jam
     pub timestamp: String,
 }
 
@@ -82,6 +82,7 @@ mod tests {
     #[test]
     fn test_invalid_hour() {
         let location = GeoLocation {
+            name: None,
             latitude: -6.2,
             longitude: 106.8,
             elevation: 0.0,
@@ -95,6 +96,7 @@ mod tests {
     #[test]
     fn test_valid_input() {
         let location = GeoLocation {
+            name: None,
             latitude: -6.2,
             longitude: 106.8,
             elevation: 0.0,

@@ -31,10 +31,7 @@ pub struct Kriteria29Result {
 ///
 /// CATATAN: Definisi KIG tidak ditemukan di dokumentasi yang tersedia.
 /// Ini adalah placeholder yang memerlukan penelitian lebih lanjut.
-pub fn evaluate_kig(
-    _location: &GeoLocation,
-    _date: &GregorianDate,
-) -> KigResult {
+pub fn evaluate_kig(_location: &GeoLocation, _date: &GregorianDate) -> KigResult {
     KigResult {
         is_visible: false,
         note: "KIG criteria: Definition not found in available documentation. Requires further research.".to_string(),
@@ -45,10 +42,7 @@ pub fn evaluate_kig(
 ///
 /// CATATAN: Definisi Kriteria 29 tidak ditemukan di dokumentasi yang tersedia.
 /// Ini adalah placeholder yang memerlukan penelitian lebih lanjut.
-pub fn evaluate_kriteria_29(
-    _location: &GeoLocation,
-    _date: &GregorianDate,
-) -> Kriteria29Result {
+pub fn evaluate_kriteria_29(_location: &GeoLocation, _date: &GregorianDate) -> Kriteria29Result {
     Kriteria29Result {
         is_visible: false,
         note: "Kriteria 29: Definition not found in available documentation. Requires further research.".to_string(),
@@ -62,6 +56,7 @@ mod tests {
     #[test]
     fn test_kig_placeholder() {
         let location = GeoLocation {
+            name: None,
             latitude: 0.0,
             longitude: 0.0,
             elevation: 0.0,
@@ -81,6 +76,7 @@ mod tests {
     #[test]
     fn test_kriteria_29_placeholder() {
         let location = GeoLocation {
+            name: None,
             latitude: 0.0,
             longitude: 0.0,
             elevation: 0.0,

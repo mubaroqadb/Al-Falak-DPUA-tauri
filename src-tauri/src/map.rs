@@ -78,6 +78,7 @@ pub fn calculate_visibility_zones_internal(
 
             let mut eval_date = obs_date.clone();
             let location = crate::GeoLocation {
+                name: None,
                 latitude: lat,
                 longitude: lon,
                 elevation: 0.0,

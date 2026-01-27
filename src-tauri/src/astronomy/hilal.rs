@@ -418,6 +418,7 @@ mod tests {
     fn test_moon_age_calculation() {
         // Test dengan tanggal contoh
         let location = GeoLocation {
+            name: None,
             latitude: -6.2,
             longitude: 106.8,
             elevation: 0.0,
@@ -452,6 +453,7 @@ mod tests {
     fn test_sukabumi_18_feb_2026() {
         // VB6 Reference data untuk Sukabumi, 18 Feb 2026
         let location = GeoLocation {
+            name: None,
             latitude: -7.0739,   // 7° 04' 26" S
             longitude: 106.5314, // 106° 31' 53" E
             elevation: 10.0,

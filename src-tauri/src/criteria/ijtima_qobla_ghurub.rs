@@ -52,6 +52,7 @@ mod tests {
     #[test]
     fn test_ijtima_qobla_ghurub_basic() {
         let location = GeoLocation {
+            name: None,
             latitude: -6.2,
             longitude: 106.8,
             elevation: 0.0,
@@ -74,6 +75,7 @@ mod tests {
     #[test]
     fn test_ijtima_qobla_ghurub_logical() {
         let location = GeoLocation {
+            name: None,
             latitude: 0.0,
             longitude: 0.0,
             elevation: 0.0,

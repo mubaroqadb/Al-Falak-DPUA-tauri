@@ -24,21 +24,18 @@ pub struct LfnuResult {
 ///
 /// Kriteria LFNU dari Lembaga Falakiyah Nahdlatul Ulama
 /// Standar praktis yang sama dengan MABIMS (Lama)
-pub fn evaluate_lfnu(
-    location: &GeoLocation,
-    date: &GregorianDate,
-) -> LfnuResult {
+pub fn evaluate_lfnu(location: &GeoLocation, date: &GregorianDate) -> LfnuResult {
     // Hitung altitude bulan pada saat maghrib (TOPOCENTRIC)
     let moon_altitude = crate::astronomy::altitude_at_sunset(location, date, true);
-    
+
     // Hitung elongasi pada saat maghrib (TOPOCENTRIC)
     let elongation = crate::astronomy::elongation_at_sunset(location, date, true);
-    
+
     // Evaluasi kriteria LFNU
     let altitude_ok = moon_altitude >= 2.0;
     let elongation_ok = elongation >= 3.0;
     let is_visible = altitude_ok && elongation_ok;
-    
+
     LfnuResult {
         is_visible,
         moon_altitude,
@@ -55,6 +52,7 @@ mod tests {
     #[test]
     fn test_lfnu_criteria_requirements() {
         let location = GeoLocation {
+            name: None,
             latitude: -6.2,
             longitude: 106.8,
             elevation: 0.0,
@@ -67,7 +65,7 @@ mod tests {
         };
 
         let result = evaluate_lfnu(&location, &date);
-        
+
         // Hasil harus konsisten dengan komponen-nya
         if result.altitude_ok && result.elongation_ok {
             assert!(result.is_visible);
@@ -80,6 +78,7 @@ mod tests {
     fn test_lfnu_altitude_threshold() {
         // Test bahwa altitude ≥ 2° adalah threshold
         let location = GeoLocation {
+            name: None,
             latitude: 0.0,
             longitude: 0.0,
             elevation: 0.0,
@@ -92,7 +91,7 @@ mod tests {
         };
 
         let result = evaluate_lfnu(&location, &date);
-        
+
         // Threshold check
         assert_eq!(result.altitude_ok, result.moon_altitude >= 2.0);
         assert_eq!(result.elongation_ok, result.elongation >= 3.0);

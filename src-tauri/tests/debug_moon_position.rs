@@ -5,6 +5,7 @@ use tauri_app_lib::*;
 fn debug_moon_position_sukabumi() {
     // Sukabumi, 18 Feb 2026, sunset
     let location = GeoLocation {
+        name: None,
         latitude: -7.0 - 4.0 / 60.0 - 26.0 / 3600.0,
         longitude: 106.0 + 31.0 / 60.0 + 53.0 / 3600.0,
         elevation: 10.0,

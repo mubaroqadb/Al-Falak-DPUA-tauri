@@ -27,15 +27,15 @@ pub fn evaluate_turkey(
 ) -> TurkeyResult {
     // Hitung altitude bulan pada saat maghrib
     let moon_altitude = crate::astronomy::altitude_at_sunset(location, date, use_topocentric);
-    
+
     // Hitung elongasi pada saat maghrib
     let elongation = crate::astronomy::elongation_at_sunset(location, date, use_topocentric);
-    
+
     // Evaluasi kriteria Turkey
     let altitude_ok = moon_altitude >= 5.0;
     let elongation_ok = elongation >= 8.0;
     let is_visible = altitude_ok && elongation_ok;
-    
+
     TurkeyResult {
         is_visible,
         moon_altitude,
@@ -52,6 +52,7 @@ mod tests {
     #[test]
     fn test_turkey_criteria_requirements() {
         let location = GeoLocation {
+            name: None,
             latitude: 39.0,
             longitude: 35.0,
             elevation: 0.0,
@@ -64,7 +65,7 @@ mod tests {
         };
 
         let result = evaluate_turkey(&location, &date, false);
-        
+
         // Hasil harus konsisten dengan komponen-nya
         if result.altitude_ok && result.elongation_ok {
             assert!(result.is_visible);

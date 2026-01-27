@@ -21,7 +21,7 @@ export class LocationSelector extends HTMLElement {
   async loadData() {
     try {
       // 1. Load static database from VB6 extraction
-      const response = await fetch('/src/assets/locations.json');
+      const response = await fetch('/locations.json');
       const data = await response.json();
       this.locations = data;
 

@@ -584,6 +584,7 @@ mod tests {
     #[test]
     fn test_invalid_month() {
         let location = GeoLocation {
+            name: None,
             latitude: -6.2,
             longitude: 106.8,
             elevation: 0.0,
@@ -597,6 +598,7 @@ mod tests {
     #[test]
     fn test_invalid_day() {
         let location = GeoLocation {
+            name: None,
             latitude: -6.2,
             longitude: 106.8,
             elevation: 0.0,

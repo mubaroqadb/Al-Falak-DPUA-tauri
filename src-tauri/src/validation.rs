@@ -223,6 +223,7 @@ pub const VISIBILITY_TEST_CASES: &[VisibilityTestCase] = &[
     // Kasus di Jakarta - konjungsi yang terlihat
     VisibilityTestCase {
         location: GeoLocation {
+            name: None,
             latitude: -6.2088,
             longitude: 106.8456,
             elevation: 8.0,
@@ -238,6 +239,7 @@ pub const VISIBILITY_TEST_CASES: &[VisibilityTestCase] = &[
     // Kasus di Makkah - konjungsi yang sulit terlihat
     VisibilityTestCase {
         location: GeoLocation {
+            name: None,
             latitude: 21.3891,
             longitude: 39.8579,
             elevation: 277.0,
@@ -343,6 +345,7 @@ mod vb6_validation {
             println!("\n📍 Lokasi #{}: {}", i + 1, case.location_name);
 
             let location = GeoLocation {
+                name: None,
                 latitude: case.latitude,
                 longitude: case.longitude,
                 elevation: 10.0, // Assuming standard elevation
