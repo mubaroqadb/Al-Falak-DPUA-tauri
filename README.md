@@ -17,8 +17,8 @@ Berikut adalah beberapa tangkapan layar dari aplikasi:
 ![Multi Bahasa](src/assets/Dokumentasi/Screenshot%202026-01-27%20at%2011.49.09.png)
 *Interface bahasa arab.*
 
-![Hasil Perhitungan](src/assets/Dokumentasi/Screenshot%2026-01-27%at%12.45.32.png)
-*Hasil Perhitungan kriteria hilal.*
+![Hasil Perhitungan](src/assets/Dokumentasi/Screenshot%202026-01-27%20at%2012.45.32.png)
+*Hasil perhitungan kriteria rukyat hilal.*
 
 ![Pengaturan Mode](src/assets/Dokumentasi/Screenshot%202026-01-27%20at%2011.50.37.png)
 *Mode gelap.*
