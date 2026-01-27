@@ -10,6 +10,13 @@ Aplikasi Hisab Rukyat Hilal berbasis Tauri untuk perhitungan awal bulan Hijriah.
 
 Aplikasi ini menggunakan algoritma astronomi untuk menghitung posisi Matahari dan Bulan, serta menerapkan berbagai kriteria rukyat hilal untuk menentukan awal bulan Hijriah.
 
+## Download
+
+Unduh versi terbaru aplikasi:
+
+- **macOS (ARM64)**: [Al Falak DPUA_2.0.0_aarch64.dmg](https://github.com/mubaroqadb/Al-Falak-DPUA-tauri/raw/main/src-tauri/target/release/bundle/dmg/Al%20Falak%20DPUA_2.0.0_aarch64.dmg)
+- **Windows (x64)**: [Al Falak DPUA_2.0.0_x64-setup.exe](https://github.com/mubaroqadb/Al-Falak-DPUA-tauri/raw/main/src-tauri/target/x86_64-pc-windows-gnu/release/bundle/nsis/Al%20Falak%20DPUA_2.0.0_x64-setup.exe)
+
 ## Teknologi
 
 - **Frontend**: Vanilla JavaScript ES6+, HTML, CSS
