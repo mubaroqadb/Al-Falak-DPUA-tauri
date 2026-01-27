@@ -1,4 +1,4 @@
-# Al-Falak-DPUA-tauri
+# Al-Falak-DPUA
 
 Aplikasi Hisab Rukyat Hilal berbasis Tauri untuk perhitungan awal bulan Hijriah.
 
