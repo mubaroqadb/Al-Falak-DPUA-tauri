@@ -1,5 +1,4 @@
-// Map Visualization Web Component
-// Handles interactive map display with Leaflet
+import { i18n, t } from '../services/i18n.js';
 
 export class MapVisualization extends HTMLElement {
   constructor() {
@@ -175,12 +174,13 @@ export class MapVisualization extends HTMLElement {
     if (!visibilityData || visibilityData.length === 0) return;
 
     // Standard AHC palette (Translucent for scientific overlay feel)
+    // Accurate Times (Odeh Criterion) Palette
     const colors = {
-      4: { color: 'rgba(50, 205, 50, 0.4)', label: 'A: Easily Visible' },
-      3: { color: 'rgba(255, 0, 255, 0.4)', label: 'B: Visible with Aid' },
-      2: { color: 'rgba(0, 255, 255, 0.4)', label: 'C: Optical Aid Required' },
-      1: { color: 'rgba(65, 105, 225, 0.4)', label: 'D: Difficult' },
-      0: { color: 'rgba(220, 20, 60, 0.15)', label: 'E: Impossible' }
+      4: { color: 'rgba(0, 128, 0, 0.5)', label: t('visibilityLevels.level4') },    // Green
+      3: { color: 'rgba(255, 0, 255, 0.5)', label: t('visibilityLevels.level3') }, // Magenta
+      2: { color: 'rgba(0, 0, 255, 0.5)', label: t('visibilityLevels.level2') },    // Blue
+      1: { color: 'rgba(0, 0, 0, 0.0)', label: t('visibilityLevels.level1') },     // Label exists but no color
+      0: { color: 'rgba(255, 0, 0, 0.3)', label: t('visibilityLevels.level0') }     // Red
     };
 
     // Use Canvas renderer to eliminate seams/gaps between segments
@@ -224,7 +224,7 @@ export class MapVisualization extends HTMLElement {
         const rect = L.rectangle(bounds, {
           stroke: false,
           fillColor: style.color.replace(/rgba\((.*),.*\)/, 'rgb($1)'), 
-          fillOpacity: parseFloat(style.color.match(/0\.\d+/)[0]),
+          fillOpacity: style.color.includes('rgba(0, 0, 0, 0.0)') ? 0 : parseFloat(style.color.match(/0\.\d+/)[0]),
           renderer: canvasRenderer,
           interactive: true
         });
@@ -235,7 +235,7 @@ export class MapVisualization extends HTMLElement {
         rect.bindTooltip(`
           <div class="text-[10px]">
             <span class="font-bold">${style.label}</span><br>
-            q: <span class="font-mono">${zone.q_value.toFixed(2)}</span><br>
+            q: <span class="font-mono text-primary">${zone.q_value.toFixed(2)}</span><br>
             Lat: <span class="font-mono">${zone.latitude.toFixed(1)}</span>
           </div>
         `, { sticky: true, opacity: 0.9, direction: 'top' });
@@ -258,15 +258,26 @@ export class MapVisualization extends HTMLElement {
 
     legendContainer.innerHTML = Object.entries(colors)
       .reverse()
-      .map(([level, info]) => `
-        <div class="flex items-center gap-2 p-2 bg-base-100 rounded-lg shadow-xs border border-base-200">
-          <div class="w-4 h-4 rounded-xs shrink-0 ring-1 ring-black/10" style="background-color: ${info.color.replace('0.4', '0.8')};"></div>
-          <div class="flex flex-col">
-            <span class="text-[10px] font-bold leading-tight">${info.label.split(':')[0]}</span>
-            <span class="text-[9px] opacity-60 leading-tight">${info.label.split(':')[1]}</span>
+      .map(([level, info]) => {
+        const isTransparent = info.color.includes('rgba(0, 0, 0, 0.0)');
+        const colorBox = isTransparent 
+          ? `<div class="w-4 h-4 rounded-xs shrink-0 ring-1 ring-base-content/20 bg-transparent border-dash-2"></div>`
+          : `<div class="w-4 h-4 rounded-xs shrink-0 ring-1 ring-black/10" style="background-color: ${info.color.replace(/0\.\d+/, '0.8')};"></div>`;
+        
+        const labelParts = info.label.split(':');
+        const code = labelParts[0].trim();
+        const desc = labelParts[1] ? labelParts[1].trim() : '';
+
+        return `
+          <div class="flex items-center gap-2 p-2 bg-base-100/50 rounded-lg shadow-xs border border-base-content/5">
+            ${colorBox}
+            <div class="flex flex-col">
+              <span class="text-[10px] font-bold leading-tight">${code}</span>
+              <span class="text-[9px] opacity-60 leading-tight">${desc}</span>
+            </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
   }
 
   // Set the primary marker for the calculation site

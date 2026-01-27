@@ -137,5 +137,13 @@
     "algo2": "ELP 2000-82/85 Lunar Theory (Éphéméride Lunaire Parisienne)",
     "algo3": "IAU 2000 Nutation & Precious Models",
     "algo4": "Delta T (ΔT) Polynomial Models (Morrison & Stephenson)"
+  },
+  "visibilityLevels": {
+    "title": "Visibility Legend (Odeh Standard)",
+    "level4": "A: Easily Visible by Naked Eye",
+    "level3": "B: Could be Seen by Naked Eye",
+    "level2": "C: Need Optical Aid",
+    "level1": "D: Not Possible",
+    "level0": "E: Impossible"
   }
 }
