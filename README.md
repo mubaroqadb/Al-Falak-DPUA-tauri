@@ -10,6 +10,24 @@ Aplikasi Hisab Rukyat Hilal berbasis Tauri untuk perhitungan awal bulan Hijriah.
 
 Aplikasi ini menggunakan algoritma astronomi untuk menghitung posisi Matahari dan Bulan, serta menerapkan berbagai kriteria rukyat hilal untuk menentukan awal bulan Hijriah.
 
+## Screenshots
+
+Berikut adalah beberapa tangkapan layar dari aplikasi:
+
+![Halaman Utama](src/assets/Dokumentasi/Screenshot%202026-01-27%20at%2011.48.38.png)
+*Halaman utama aplikasi dengan menu navigasi.*
+
+![Perhitungan Hisab](src/assets/Dokumentasi/Screenshot%202026-01-27%20at%2011.49.09.png)
+*Interface perhitungan hisab rukyat hilal.*
+
+![Peta Lokasi](src/assets/Dokumentasi/Screenshot%202026-01-27%20at%2011.50.08.png)
+*Visualisasi peta untuk lokasi rukyat.*
+
+![Hasil Perhitungan](src/assets/Dokumentasi/Screenshot%202026-01-27%20at%2011.50.37.png)
+*Hasil perhitungan kriteria rukyat hilal.*
+
+[Lihat Dokumentasi Lengkap](./src/assets/Dokumentasi/)
+
 ## Download
 
 Unduh versi terbaru aplikasi:
