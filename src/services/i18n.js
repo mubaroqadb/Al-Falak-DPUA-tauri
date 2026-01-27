@@ -14,31 +14,31 @@ class I18nManager {
     try {
       for (const lang of languages) {
         const url = `/i18n/${lang}.json`;
-        console.log(`🔄 i18n: Attempting to load ${lang} from ${url}`);
+        console.log(`i18n: Attempting to load ${lang} from ${url}`);
         const response = await fetch(url);
-        console.log(`📡 i18n: Fetch response for ${lang}:`, response.status, response.statusText);
+        console.log(`i18n: Fetch response for ${lang}:`, response.status, response.statusText);
         if (response.ok) {
           this.translations[lang] = await response.json();
-          console.log(`✅ i18n: Successfully loaded ${lang} translations (${Object.keys(this.translations[lang]).length} keys)`);
+          console.log(`i18n: Successfully loaded ${lang} translations (${Object.keys(this.translations[lang]).length} keys)`);
         } else {
-          console.warn(`⚠️ i18n: Failed to load ${lang} translations - Status: ${response.status}`);
+          console.warn(`i18n: Failed to load ${lang} translations - Status: ${response.status}`);
         }
       }
     } catch (error) {
-      console.error('❌ i18n: Error loading translations:', error);
+      console.error('i18n: Error loading translations:', error);
     }
   }
 
   // Set current language
   setLanguage(lang) {
-    console.log(`🌐 i18n: setLanguage called with '${lang}'`);
+    console.log(`i18n: setLanguage called with '${lang}'`);
     if (this.translations[lang]) {
       this.currentLanguage = lang;
       this.applyLanguageToDOM(lang);
       localStorage.setItem('app-language', lang);
-      console.log(`✅ i18n: Language changed to: ${lang} (RTL: ${this.isRTL()})`);
+      console.log(`i18n: Language changed to: ${lang} (RTL: ${this.isRTL()})`);
     } else {
-      console.warn(`⚠️ i18n: Language '${lang}' not available. Available: ${Object.keys(this.translations).join(', ')}`);
+      console.warn(`i18n: Language '${lang}' not available. Available: ${Object.keys(this.translations).join(', ')}`);
     }
   }
 
@@ -48,7 +48,7 @@ class I18nManager {
   }
 
   // Get translated string using dot notation
-  // Example: t('labels.date') returns "📅 Calculation Date" (EN) or "📅 Tanggal Perhitungan" (ID)
+  // Example: t('labels.date') returns "Calculation Date" (EN) or "Tanggal Perhitungan" (ID)
   t(key, defaultValue = key) {
     const keys = key.split('.');
     let value = this.translations[this.currentLanguage];
@@ -76,19 +76,19 @@ class I18nManager {
 
   // Apply language to document direction and element translations
   applyLanguageToDOM(lang) {
-    console.log(`🔄 i18n: Applying language '${lang}' to DOM`);
+    console.log(`i18n: Applying language '${lang}' to DOM`);
     const isRTL = this.rtlLanguages.includes(lang);
     document.documentElement.lang = lang;
     document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
-    console.log(`📝 i18n: Set document lang='${lang}', dir='${isRTL ? 'rtl' : 'ltr'}'`);
+    console.log(`i18n: Set document lang='${lang}', dir='${isRTL ? 'rtl' : 'ltr'}'`);
 
     // Update all data-i18n attributes
     const elements = document.querySelectorAll('[data-i18n]');
-    console.log(`🔍 i18n: Found ${elements.length} elements with data-i18n attributes`);
+    console.log(`i18n: Found ${elements.length} elements with data-i18n attributes`);
     elements.forEach((el) => {
       const key = el.getAttribute('data-i18n');
       const translation = this.t(key, key);
-      console.log(`📝 i18n: Translating '${key}' → '${translation}'`);
+      console.log(`i18n: Translating '${key}' → '${translation}'`);
 
       if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
         if (el.hasAttribute('data-i18n-placeholder')) {

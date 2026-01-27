@@ -14,13 +14,13 @@
     "about": "Tentang"
   },
   "labels": {
-    "date": "📅 Tanggal Perhitungan",
-    "location": "📍 Pilih Lokasi",
+    "date": "Tanggal Perhitungan",
+    "location": "Pilih Lokasi",
     "latitude": "Lintang",
     "longitude": "Bujur",
     "elevation": "Ketinggian (m)",
     "timezone": "Zona Waktu",
-    "criteria": "🔭 Kriteria Visibilitas",
+    "criteria": "Kriteria Visibilitas",
     "calculate": "HITUNG",
     "results": "Hasil",
     "ephemeris": "Efeméris",

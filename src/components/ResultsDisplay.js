@@ -17,8 +17,9 @@ export class ResultsDisplay extends HTMLElement {
         <h3>Calculation Results</h3>
 
         <div id="results-content" class="results-content">
-          <div class="no-results">
-            <p>🧮 Select a location and criteria to see calculation results</p>
+          <div class="no-results flex flex-col items-center justify-center p-8 opacity-60">
+            <svg class="w-12 h-12 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
+            <p>Select a location and criteria to see calculation results</p>
           </div>
         </div>
 
@@ -51,9 +52,10 @@ export class ResultsDisplay extends HTMLElement {
 
     if (!result) {
       content.innerHTML = `
-        <div class="no-results">
-          <p>❌ No calculation results available</p>
-          <p>Please select a location and criteria, then click calculate.</p>
+        <div class="no-results flex flex-col items-center justify-center p-8 opacity-60">
+          <svg class="w-12 h-12 mb-4 text-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <p class="font-bold">No calculation results available</p>
+          <p class="text-xs">Please select a location and criteria, then click calculate.</p>
         </div>
       `;
       return;
@@ -62,9 +64,10 @@ export class ResultsDisplay extends HTMLElement {
     // Handle different result formats
     if (result.error) {
       content.innerHTML = `
-        <div class="error-results">
-          <p>⚠️ Calculation Error</p>
-          <p>${result.error}</p>
+        <div class="error-results flex flex-col items-center justify-center p-8 text-error bg-error/10 rounded-xl">
+          <svg class="w-12 h-12 mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <p class="font-bold">Calculation Error</p>
+          <p class="text-sm">${result.error}</p>
         </div>
       `;
       return;
@@ -102,7 +105,10 @@ export class ResultsDisplay extends HTMLElement {
       <div class="results-grid">
         <!-- Basic Information -->
         <div class="result-section">
-          <h4>📅 Basic Information</h4>
+          <h4 class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            Basic Information
+          </h4>
           <div class="result-item">
             <span class="label">Date:</span>
             <span class="value font-mono">${this.formatDate(result.date)}</span>
@@ -179,7 +185,10 @@ export class ResultsDisplay extends HTMLElement {
 
         <!-- Solar Data -->
         <div class="result-section">
-          <h4>☀️ Solar Data</h4>
+          <h4 class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="5"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            Solar Data
+          </h4>
           <div class="result-item">
             <span class="label">Sunset Time:</span>
             <span class="value font-mono">${result.sunset_time ? this.formatTime(result.sunset_time) : 'N/A'}</span>
@@ -196,10 +205,17 @@ export class ResultsDisplay extends HTMLElement {
 
         <!-- Visibility Assessment -->
         <div class="result-section">
-          <h4>👁️ Visibility Assessment</h4>
+          <h4 class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            Visibility Assessment
+          </h4>
           <div class="visibility-result ${result.is_visible ? 'visible' : 'not-visible'}">
             <div class="visibility-status">
-              <span class="status-icon">${result.is_visible ? '✅' : '❌'}</span>
+              <span class="status-icon">
+                ${result.is_visible ? 
+                  '<svg class="w-6 h-6 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' : 
+                  '<svg class="w-6 h-6 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'}
+              </span>
               <span class="status-text">${result.is_visible ? 'HILAL TERLIHAT' : 'HILAL TIDAK TERLIHAT'}</span>
             </div>
             <div class="visibility-details">
@@ -214,7 +230,10 @@ export class ResultsDisplay extends HTMLElement {
         <!-- Additional Data -->
         ${result.additional_data ? `
           <div class="result-section">
-            <h4>📊 Additional Data</h4>
+            <h4 class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-info" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+              Additional Data
+            </h4>
             <div class="additional-data">
               ${this.renderAdditionalData(result.additional_data)}
             </div>
@@ -230,19 +249,34 @@ export class ResultsDisplay extends HTMLElement {
     // Altitude check
     if (result.moon_altitude !== undefined) {
       const altCheck = result.moon_altitude > 3;
-      checks.push(`<li class="${altCheck ? 'pass' : 'fail'}">Altitude > 3°: ${result.moon_altitude.toFixed(2)}° ${altCheck ? '✅' : '❌'}</li>`);
+      checks.push(`<li class="${altCheck ? 'pass' : 'fail'} flex items-center gap-2">
+        <span>Altitude > 3°: ${result.moon_altitude.toFixed(2)}°</span>
+        ${altCheck ? 
+          '<svg class="w-4 h-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>' : 
+          '<svg class="w-4 h-4 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>'}
+      </li>`);
     }
 
     // Elongation check
     if (result.elongation !== undefined) {
       const elongCheck = result.elongation > 6.4;
-      checks.push(`<li class="${elongCheck ? 'pass' : 'fail'}">Elongation > 6.4°: ${result.elongation.toFixed(2)}° ${elongCheck ? '✅' : '❌'}</li>`);
+      checks.push(`<li class="${elongCheck ? 'pass' : 'fail'} flex items-center gap-2">
+        <span>Elongation > 6.4°: ${result.elongation.toFixed(2)}°</span>
+        ${elongCheck ? 
+          '<svg class="w-4 h-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>' : 
+          '<svg class="w-4 h-4 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>'}
+      </li>`);
     }
 
     // Age check
     if (result.moon_age !== undefined) {
       const ageCheck = result.moon_age > 0;
-      checks.push(`<li class="${ageCheck ? 'pass' : 'fail'}">Age > 0h: ${result.moon_age.toFixed(2)}h ${ageCheck ? '✅' : '❌'}</li>`);
+      checks.push(`<li class="${ageCheck ? 'pass' : 'fail'} flex items-center gap-2">
+        <span>Age > 0h: ${result.moon_age.toFixed(2)}h</span>
+        ${ageCheck ? 
+          '<svg class="w-4 h-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>' : 
+          '<svg class="w-4 h-4 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>'}
+      </li>`);
     }
 
     return checks.join('');

@@ -14,13 +14,13 @@
     "about": "About"
   },
   "labels": {
-    "date": "📅 Calculation Date",
-    "location": "📍 Select Location",
+    "date": "Calculation Date",
+    "location": "Select Location",
     "latitude": "Latitude",
     "longitude": "Longitude",
     "elevation": "Elevation (m)",
     "timezone": "Timezone",
-    "criteria": "🔭 Visibility Criteria",
+    "criteria": "Visibility Criteria",
     "calculate": "CALCULATE",
     "results": "Results",
     "ephemeris": "Ephemeris",

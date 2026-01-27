@@ -408,8 +408,15 @@ class ExportManager {
   showToast(message, type = 'info') {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
+    const iconHtml = {
+      'success': '<svg class="w-5 h-5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+      'error': '<svg class="w-5 h-5 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+      'warning': '<svg class="w-5 h-5 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>',
+      'info': '<svg class="w-5 h-5 text-info" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+    };
+    
     toast.innerHTML = `
-      <span class="toast-icon">${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'}</span>
+      <span class="toast-icon">${iconHtml[type] || iconHtml.info}</span>
       <span class="toast-message">${message}</span>
       <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
     `;
@@ -520,15 +527,15 @@ class MapControlsManager {
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('🚀 Initializing Enhanced Hisab Hilal Application...');
+  console.log('Initializing Enhanced Hisab Hilal Application...');
 
   // Initialize i18n first
   await i18n.init();
-  console.log(`🌐 i18n initialized (language: ${i18n.getLanguage()})`);
+  console.log(`i18n initialized (language: ${i18n.getLanguage()})`);
 
   // Listen for language changes
   window.addEventListener('language-changed', (event) => {
-    console.log(`🌐 Language changed event received: ${event.detail.language}`);
+    console.log(`Language changed event received: ${event.detail.language}`);
   });
 
   // Initialize managers
@@ -542,9 +549,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   // CRITICAL: Initialize the app to attach event listeners
   app.init().then(() => {
-    console.log('✅ HilalApp initialized successfully');
+    console.log('HilalApp initialized successfully');
   }).catch(error => {
-    console.error('❌ Failed to initialize HilalApp:', error);
+    console.error('Failed to initialize HilalApp:', error);
   });
   
   // Make app available globally for hero button
@@ -556,17 +563,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Listen for calculation results to update export data
   document.addEventListener('calculation-complete', (event) => {
     exportManager.setData(event.detail);
-    console.log('📊 Export data updated');
+    console.log('Export data updated');
   });
 
   // Listen for export requests from components
   document.addEventListener('export-click', () => {
-    console.log('📨 Export event received');
+    console.log('Export event received');
     exportManager.showExportModal();
   });
 
   document.addEventListener('print-click', () => {
-    console.log('📨 Print event received');
+    console.log('Print event received');
     const filename = `hisab-hilal-${new Date().toISOString().split('T')[0]}`;
     exportManager.exportPDF(filename);
   });
@@ -643,7 +650,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   if (heroCalculateBtn) {
     heroCalculateBtn.addEventListener('click', async () => {
-      console.log('🧮 Hero Calculate clicked');
+      console.log('Hero Calculate clicked');
       
       // Show loading
       heroCalculateBtn.classList.add('btn-disabled');
@@ -707,5 +714,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.requestAnimationFrame(step);
   }
 
-  console.log('✅ Application initialized successfully');
+  console.log('Application initialized successfully');
 });

@@ -32,7 +32,7 @@ export class HilalApp {
   }
 
   async init() {
-    console.log('📱 Initializing UI components...');
+    console.log('Initializing UI components...');
 
     // Wait for DOM to be ready and components to be defined
     await this.waitForComponents();
@@ -46,7 +46,7 @@ export class HilalApp {
     // Load initial data
     await this.loadInitialData();
 
-    console.log('🎯 Application ready for use');
+    console.log('Application ready for use');
   }
 
   async waitForComponents() {
@@ -74,7 +74,7 @@ export class HilalApp {
     // Listen for FAB calculate button
     if (this.calculateButton) {
       this.calculateButton.addEventListener('fab-calculate', async () => {
-        console.log('🧮 FAB Calculate clicked');
+        console.log('FAB Calculate clicked');
         this.calculateButton.setCalculating(true);
         this.showLoading('Calculating visibility maps and data...'); // Show immediately
         
@@ -98,7 +98,7 @@ export class HilalApp {
     const heroBtn = document.getElementById('hero-calculate-btn');
     if (heroBtn) {
       heroBtn.addEventListener('click', async () => {
-        console.log('🧮 Hero Calculate clicked');
+        console.log('Hero Calculate clicked');
         const spinner = document.getElementById('hero-loading');
         
         // UI State: Loading
@@ -129,7 +129,7 @@ export class HilalApp {
     if (criteriaSelector) {
       criteriaSelector.addEventListener('criteria-changed', (event) => {
         this.selectedCriteria = event.detail.criteria;
-        console.log('🔭 Criteria changed to:', this.selectedCriteria);
+        console.log('Criteria changed to:', this.selectedCriteria);
       });
     }
 
@@ -144,7 +144,7 @@ export class HilalApp {
           elevation: city.elev || 0,
           timezone: city.tz
         };
-        console.log('📍 City selected from database:', city.name, this.currentLocation);
+        console.log('City selected from database:', city.name, this.currentLocation);
       });
     }
 
@@ -158,7 +158,7 @@ export class HilalApp {
       
       dateInput.addEventListener('change', () => {
         this.currentDate = new Date(dateInput.value);
-        console.log('📅 Date changed to:', this.currentDate);
+        console.log('Date changed to:', this.currentDate);
       });
     }
 
@@ -166,14 +166,14 @@ export class HilalApp {
     if (this.criteriaPanel) {
       this.criteriaPanel.addEventListener('criteria-changed', (event) => {
         this.selectedCriteria = event.detail.criteria;
-        console.log('📋 Criteria changed to:', this.selectedCriteria);
+        console.log('Criteria changed to:', this.selectedCriteria);
         this.updateVisibilityZones();
         this.updateCalculations();
       });
 
       // Listen for calculation requests
       this.criteriaPanel.addEventListener('calculate-hilal', (event) => {
-        console.log('🔢 Manual calculation requested for criteria:', event.detail.criteria);
+        console.log('Manual calculation requested for criteria:', event.detail.criteria);
         this.selectedCriteria = event.detail.criteria;
         this.updateCalculations();
       });
@@ -183,7 +183,7 @@ export class HilalApp {
     if (this.mapVisualization) {
       this.mapVisualization.addEventListener('location-selected', (event) => {
         this.currentLocation = event.detail.location;
-        console.log('📍 Location changed to:', this.currentLocation);
+        console.log('Location changed to:', this.currentLocation);
         this.updateCalculations();
       });
 
@@ -196,7 +196,7 @@ export class HilalApp {
           latitude: lat,
           longitude: lng
         };
-        console.log('🖱️ Map clicked at:', lat, lng);
+        console.log('Map clicked at:', lat, lng);
         // Don't auto-calculate, wait for user to click Calculate button
       });
     }
@@ -205,7 +205,7 @@ export class HilalApp {
     document.addEventListener('calculate-hilal', async (event) => {
       const { criteria, date, location } = event.detail;
       
-      console.log('📊 Calculate hilal requested:', { criteria, date, location });
+      console.log('Calculate hilal requested:', { criteria, date, location });
       
       // Update app state
       this.selectedCriteria = criteria;
@@ -220,7 +220,7 @@ export class HilalApp {
     // Listen for criteria changes
     document.addEventListener('criteria-changed', (event) => {
       this.selectedCriteria = event.detail.criteria;
-      console.log('🔍 Criteria changed to:', this.selectedCriteria);
+      console.log('Criteria changed to:', this.selectedCriteria);
       // Update visibility zones with new criteria
       this.updateVisibilityZones();
     });
@@ -228,7 +228,7 @@ export class HilalApp {
     // Listen for date changes (could be from a date picker component in the future)
     document.addEventListener('date-changed', (event) => {
       this.currentDate = event.detail.date;
-      console.log('📅 Date changed to:', this.currentDate);
+      console.log('Date changed to:', this.currentDate);
       // Don't auto-update, wait for user to click Calculate
     });
   }
@@ -248,13 +248,13 @@ export class HilalApp {
         );
       }
 
-      console.log('✅ App initialized. Ready for user input.');
-      console.log('👉 Please select date, location, and criteria, then click Calculate button.');
+      console.log('App initialized. Ready for user input.');
+      console.log('Please select date, location, and criteria, then click Calculate button.');
 
       // NO auto-calculation - wait for user to click Calculate button
 
     } catch (error) {
-      console.error('❌ Error loading initial data:', error);
+      console.error('Error loading initial data:', error);
       this.showError('Failed to initialize application');
     }
   }
@@ -262,12 +262,12 @@ export class HilalApp {
   async updateVisibilityZones() {
     // Skip if not in Tauri context
     if (!isTauri()) {
-      console.warn('⚠️ Skipping visibility zones update - Tauri context not available');
+      console.warn('Skipping visibility zones update - Tauri context not available');
       return;
     }
 
     try {
-      console.log('🗺️ Updating visibility zones...');
+      console.log('Updating visibility zones...');
 
       const params = {
         date: this.currentDate,
@@ -286,7 +286,7 @@ export class HilalApp {
       this.dataStore.setVisibilityData(visibilityData);
 
     } catch (error) {
-      console.error('❌ Error updating visibility zones:', error);
+      console.error('Error updating visibility zones:', error);
       this.showError('Failed to update visibility zones');
     }
   }
@@ -295,7 +295,7 @@ export class HilalApp {
     if (!isTauri()) return;
 
     try {
-      console.log('🕌 Updating prayer times...');
+      console.log('Mosque: Updating prayer times...');
       
       const params = {
         location: this.currentLocation,
@@ -308,9 +308,9 @@ export class HilalApp {
         this.prayerTimesDisplay.updateData(prayerTimes, this.currentLocation, this.currentDate);
       }
       
-      console.log('✅ Prayer times updated:', prayerTimes);
+      console.log('Prayer times updated:', prayerTimes);
     } catch (error) {
-      console.error('❌ Error updating prayer times:', error);
+      console.error('Error updating prayer times:', error);
       // Don't show error toast here to avoid spamming if main calc succeeds
     }
   }
@@ -318,15 +318,15 @@ export class HilalApp {
   async updateCalculations() {
     // Skip if not in Tauri context
     if (!isTauri()) {
-      console.warn('⚠️ Skipping calculations update - Tauri context not available');
+      console.warn('Skipping calculations update - Tauri context not available');
       return;
     }
 
     // showLoading handled by caller to coordinate with map updates
     
     try {
-      console.log('🔢 Updating calculations for location:', this.currentLocation);
-      console.log('📍 Location details - lat:', this.currentLocation.latitude, 'lon:', this.currentLocation.longitude);
+      console.log('Updating calculations for location:', this.currentLocation);
+      console.log('Location details - lat:', this.currentLocation.latitude, 'lon:', this.currentLocation.longitude);
 
       // Extract date components
       const year = this.currentDate.getFullYear();
@@ -340,7 +340,7 @@ export class HilalApp {
         day
       };
 
-      console.log('📤 Sending params to backend:', JSON.stringify(params, null, 2));
+      console.log('Sending params to backend:', JSON.stringify(params, null, 2));
 
       // Calculate for all criteria
       const result = await this.api.calculateHilalAllCriteria(params);
@@ -364,8 +364,8 @@ export class HilalApp {
 
       this.currentCalculation = result;
 
-      console.log('📥 Received result location:', result.location);
-      console.log('📊 Result details:', JSON.stringify(result, null, 2));
+      console.log('Received result location:', result.location);
+      console.log('Result details:', JSON.stringify(result, null, 2));
 
       // REMOVED: Detailed hilal data merge that was overwriting correct criteria results
       // The criteria_results already contain all necessary data from backend
@@ -399,12 +399,12 @@ export class HilalApp {
         detail: result
       }));
 
-      console.log('✅ Calculations updated successfully');
+      console.log('Calculations updated successfully');
       // Success toast removed as per user request (redundant with loading animation)
       // this.showSuccess('Calculation completed successfully');
 
     } catch (error) {
-      console.error('❌ Error updating calculations:', error);
+      console.error('Error updating calculations:', error);
       this.showError('Failed to update calculations: ' + error.message);
     } 
     // finally block removed, handled by caller
@@ -458,7 +458,9 @@ export class HilalApp {
     const toast = document.createElement('div');
     toast.className = 'toast toast-error';
     toast.innerHTML = `
-      <span class="toast-icon">⚠️</span>
+      <span class="toast-icon">
+        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+      </span>
       <span class="toast-message">${message}</span>
       <button class="toast-close" onclick="this.parentElement.remove()">×</button>
     `;

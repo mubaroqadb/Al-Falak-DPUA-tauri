@@ -9,7 +9,7 @@ async function getInvoke() {
   if (cachedInvoke) return cachedInvoke;
 
   // Log current environment for debugging
-  console.log('🔍 Detecting Tauri context...');
+  console.log('Detecting Tauri context...');
   console.log('  window.__TAURI__ exists:', typeof window !== 'undefined' && !!window.__TAURI__);
   console.log('  window.__TAURI__.core:', window?.__TAURI__?.core);
   console.log('  window.__TAURI__.invoke:', window?.__TAURI__?.invoke);
@@ -20,7 +20,7 @@ async function getInvoke() {
     if (window.__TAURI__.core?.invoke) {
       cachedInvoke = window.__TAURI__.core.invoke.bind(window.__TAURI__.core);
       isTauriContext = true;
-      console.log('✅ Tauri invoke loaded from window.__TAURI__.core');
+      console.log('Tauri invoke loaded from window.__TAURI__.core');
       return cachedInvoke;
     }
     
@@ -28,7 +28,7 @@ async function getInvoke() {
     if (window.__TAURI__.invoke) {
       cachedInvoke = window.__TAURI__.invoke.bind(window.__TAURI__);
       isTauriContext = true;
-      console.log('✅ Tauri invoke loaded from window.__TAURI__');
+      console.log('Tauri invoke loaded from window.__TAURI__');
       return cachedInvoke;
     }
   }
@@ -39,17 +39,17 @@ async function getInvoke() {
     if (tauriApi?.invoke) {
       cachedInvoke = tauriApi.invoke;
       isTauriContext = true;
-      console.log('✅ Tauri invoke loaded via dynamic import');
+      console.log('Tauri invoke loaded via dynamic import');
       return cachedInvoke;
     }
   } catch (err) {
-    console.warn('⚠️ Tauri core import failed:', err.message);
+    console.warn('Tauri core import failed:', err.message);
   }
 
   // If still not available, show helpful error
   isTauriContext = false;
   const errorMsg = 'Tauri invoke tidak tersedia. Aplikasi harus dijalankan via "npm run tauri dev" atau Tauri build.';
-  console.error('❌', errorMsg);
+  console.error(errorMsg);
   throw new Error(errorMsg);
 }
 
@@ -74,7 +74,7 @@ export class HilalAPI {
    */
   async calculateHilalAllCriteria(params) {
     try {
-      console.log('🔗 API Call - calculateHilalAllCriteria:', params);
+      console.log('API Call - calculateHilalAllCriteria:', params);
       const invoke = await getInvoke();
       const result = await invoke('calculate_hilal_visibility_command', {
         location: params.location,
@@ -83,10 +83,10 @@ export class HilalAPI {
         day: params.day
       });
 
-      console.log('✅ API Response - calculateHilalAllCriteria:', result);
+      console.log('API Response - calculateHilalAllCriteria:', result);
       return result;
     } catch (error) {
-      console.error('❌ API Error - calculateHilalAllCriteria:', error);
+      console.error('API Error - calculateHilalAllCriteria:', error);
       throw new Error(`Failed to calculate hilal for all criteria: ${error.message}`);
     }
   }
@@ -101,7 +101,7 @@ export class HilalAPI {
    */
   async getVisibilityZones(params) {
     try {
-      console.log('🔗 API Call - getVisibilityZones:', params);
+      console.log('API Call - getVisibilityZones:', params);
       const invoke = await getInvoke();
       const result = await invoke('calculate_visibility_zones', {
         date: params.date.toISOString(),
@@ -109,10 +109,10 @@ export class HilalAPI {
         stepDegrees: params.step_degrees || 2.0
       });
 
-      console.log('✅ API Response - getVisibilityZones:', result);
+      console.log('API Response - getVisibilityZones:', result);
       return result;
     } catch (error) {
-      console.error('❌ API Error - getVisibilityZones:', error);
+      console.error('API Error - getVisibilityZones:', error);
       throw new Error(`Failed to get visibility zones: ${error.message}`);
     }
   }
@@ -127,7 +127,7 @@ export class HilalAPI {
    */
   async getEphemeris(params) {
     try {
-      console.log('🔗 API Call - getEphemeris:', params);
+      console.log('API Call - getEphemeris:', params);
       const invoke = await getInvoke();
       const result = await invoke('get_ephemeris_data', {
         location: params.location,
@@ -135,10 +135,10 @@ export class HilalAPI {
         end_date: params.end_date.toISOString()
       });
 
-      console.log('✅ API Response - getEphemeris:', result);
+      console.log('API Response - getEphemeris:', result);
       return result;
     } catch (error) {
-      console.error('❌ API Error - getEphemeris:', error);
+      console.error('API Error - getEphemeris:', error);
       throw new Error(`Failed to get ephemeris data: ${error.message}`);
     }
   }
@@ -151,16 +151,16 @@ export class HilalAPI {
    */
   async calculateQibla(params) {
     try {
-      console.log('🔗 API Call - calculateQibla:', params);
+      console.log('API Call - calculateQibla:', params);
       const invoke = await getInvoke();
       const result = await invoke('calculate_qibla_direction', {
         location: params.location
       });
 
-      console.log('✅ API Response - calculateQibla:', result);
+      console.log('API Response - calculateQibla:', result);
       return result;
     } catch (error) {
-      console.error('❌ API Error - calculateQibla:', error);
+      console.error('API Error - calculateQibla:', error);
       throw new Error(`Failed to calculate Qibla: ${error.message}`);
     }
   }
@@ -174,17 +174,17 @@ export class HilalAPI {
    */
   async getPrayerTimes(params) {
     try {
-      console.log('🔗 API Call - getPrayerTimes:', params);
+      console.log('API Call - getPrayerTimes:', params);
       const invoke = await getInvoke();
       const result = await invoke('get_prayer_times', {
         location: params.location,
         date: params.date.toISOString()
       });
 
-      console.log('✅ API Response - getPrayerTimes:', result);
+      console.log('API Response - getPrayerTimes:', result);
       return result;
     } catch (error) {
-      console.error('❌ API Error - getPrayerTimes:', error);
+      console.error('API Error - getPrayerTimes:', error);
       throw new Error(`Failed to get prayer times: ${error.message}`);
     }
   }
@@ -200,7 +200,7 @@ export class HilalAPI {
    */
   async getDetailedHilalData(params) {
     try {
-      console.log('🔗 API Call - getDetailedHilalData:', params);
+      console.log('API Call - getDetailedHilalData:', params);
       const invoke = await getInvoke();
       const result = await invoke('get_detailed_hilal_data', {
         location: params.location,
@@ -209,10 +209,10 @@ export class HilalAPI {
         day: params.day
       });
 
-      console.log('✅ API Response - getDetailedHilalData:', result);
+      console.log('API Response - getDetailedHilalData:', result);
       return result;
     } catch (error) {
-      console.error('❌ API Error - getDetailedHilalData:', error);
+      console.error('API Error - getDetailedHilalData:', error);
       throw new Error(`Failed to get detailed hilal data: ${error.message}`);
     }
   }
@@ -230,7 +230,7 @@ export class HilalAPI {
    */
   async getAstronomicalDataNew(params) {
     try {
-      console.log('🔗 API Call - getAstronomicalDataNew:', params);
+      console.log('API Call - getAstronomicalDataNew:', params);
       const invoke = await getInvoke();
       const result = await invoke('get_astronomical_data_command', {
         location: params.location,
@@ -241,10 +241,10 @@ export class HilalAPI {
         minute: params.minute || 0
       });
 
-      console.log('✅ API Response - getAstronomicalDataNew:', result);
+      console.log('API Response - getAstronomicalDataNew:', result);
       return result;
     } catch (error) {
-      console.error('❌ API Error - getAstronomicalDataNew:', error);
+      console.error('API Error - getAstronomicalDataNew:', error);
       throw new Error(`Failed to get astronomical data: ${error.message}`);
     }
   }
@@ -256,14 +256,14 @@ export class HilalAPI {
    */
   async validateLocation(location) {
     try {
-      console.log('🔗 API Call - validateLocation:', location);
+      console.log('API Call - validateLocation:', location);
       const invoke = await getInvoke();
       const result = await invoke('validate_location_command', { location });
 
-      console.log('✅ API Response - validateLocation:', result);
+      console.log('API Response - validateLocation:', result);
       return result;
     } catch (error) {
-      console.error('❌ API Error - validateLocation:', error);
+      console.error('API Error - validateLocation:', error);
       throw new Error(`Failed to validate location: ${error.message}`);
     }
   }
@@ -277,7 +277,7 @@ export class HilalAPI {
    */
   async gregorianToHijri(year, month, day) {
     try {
-      console.log('🔗 API Call - gregorianToHijri:', { year, month, day });
+      console.log('API Call - gregorianToHijri:', { year, month, day });
       const invoke = await getInvoke();
       const result = await invoke('gregorian_to_hijri_command', {
         year,
@@ -285,10 +285,10 @@ export class HilalAPI {
         day
       });
 
-      console.log('✅ API Response - gregorianToHijri:', result);
+      console.log('API Response - gregorianToHijri:', result);
       return result;
     } catch (error) {
-      console.error('❌ API Error - gregorianToHijri:', error);
+      console.error('API Error - gregorianToHijri:', error);
       throw new Error(`Failed to convert to Hijri: ${error.message}`);
     }
   }
@@ -302,7 +302,7 @@ export class HilalAPI {
    */
   async hijriToGregorian(year, month, day) {
     try {
-      console.log('🔗 API Call - hijriToGregorian:', { year, month, day });
+      console.log('API Call - hijriToGregorian:', { year, month, day });
       const invoke = await getInvoke();
       const result = await invoke('hijri_to_gregorian_command', {
         year,
@@ -310,10 +310,10 @@ export class HilalAPI {
         day
       });
 
-      console.log('✅ API Response - hijriToGregorian:', result);
+      console.log('API Response - hijriToGregorian:', result);
       return result;
     } catch (error) {
-      console.error('❌ API Error - hijriToGregorian:', error);
+      console.error('API Error - hijriToGregorian:', error);
       throw new Error(`Failed to convert to Gregorian: ${error.message}`);
     }
   }
@@ -324,14 +324,14 @@ export class HilalAPI {
    */
   async runValidationTests() {
     try {
-      console.log('🔗 API Call - runValidationTests');
+      console.log('API Call - runValidationTests');
       const invoke = await getInvoke();
       const result = await invoke('run_validation_tests_command');
 
-      console.log('✅ API Response - runValidationTests:', result);
+      console.log('API Response - runValidationTests:', result);
       return result;
     } catch (error) {
-      console.error('❌ API Error - runValidationTests:', error);
+      console.error('API Error - runValidationTests:', error);
       throw new Error(`Failed to run validation tests: ${error.message}`);
     }
   }
