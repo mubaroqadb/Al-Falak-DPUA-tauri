@@ -35,16 +35,19 @@ Unduh versi terbaru aplikasi:
 ## Teknologi
 
 - **Frontend**: Vanilla JavaScript ES6+, HTML, CSS
-- **Backend**: Rust dengan Tauri
+- **Backend**: Rust dengan Tauri 2.0
 - **Astronomi**: Algoritma Meeus dan validasi terhadap VB6
 
 ## Fitur
 
-- Perhitungan posisi Matahari dan Bulan
-- Implementasi berbagai kriteria rukyat hilal (MABIMS, Wujudul Hilal, dll.)
-- Visualisasi peta lokasi
-- Dukungan multi-bahasa (Indonesia, English, Arabic)
-- Validasi terhadap hasil VB6
+- Perhitungan posisi Matahari dan Bulan yang presisi.
+- Implementasi berbagai kriteria rukyat hilal (MABIMS, Wujudul Hilal, dll.).
+- **Dukungan Hari Pasaran Jawa** (Legi, Pahing, Pon, Wage, Kliwon) di seluruh output data.
+- **Konversi Kalender Hijriah Terpadu** menggunakan algoritma *Civil Hijri (Tabular)* yang robust.
+- Visualisasi peta lokasi dan kurva visibilitas.
+- Dukungan multi-bahasa (Indonesia, English, Arabic).
+- Validasi ketat terhadap hasil referensi VB6.
+- Label zona waktu dinamis (WIB, WITA, WIT) berdasarkan offset lokasi.
 
 ## Perbedaan Algoritma & Formula (Tauri vs VB6)
 
@@ -56,50 +59,31 @@ Analisis ini membedah perbedaan fundamental antara aplikasi **Al Falak DPUA-taur
 
 | Aspek | Al Falak (VB6) | Al Falak DPUA (Tauri) |
 | :--- | :--- | :--- |
-| **Bahasa Pemrograman** | Visual Basic 6.0 (Legacy) | Rust (Backend) + React (Frontend) |
+| **Teknologi Frontend**| VB6 Form (Desktop) | Vanilla HTML/JS (WebView) |
+| **Backend Core** | Visual Basic 6.0 Runtime | Rust dengan Tauri 2.0 |
 | **Tipe Data Numerik** | `Double` (64-bit Float) | `f64` (64-bit IEEE 754) |
-| **Eksekusi** | Single-threaded (Satu per satu) | Multi-threaded (Paralel) |
-| **Modularitas** | Module `.bas` dengan variabel global | Struct & Function yang murni (State-less) |
+| **Kalender & Pasaran** | Masehi & Hijriah | Masehi, Hijriah, & Pasaran Jawa |
+| **Algoritma Konjungsi**| Geosentrik (Meeus Series) | Toposentrik (Newton-Raphson Iteration) |
+| **Eksekusi & Modul** | Single-threaded (VB6) | Multi-threaded (Rust Modules) |
 
 ---
 
 ## 2. Perbedaan Algoritma Utama
 
-### A. Posisi Matahari (VSOP87 Truncation)
-Meskipun keduanya menggunakan teori VSOP87, terdapat perbedaan pada jumlah suku yang diambil:
-- **VB6:** Menggunakan pemangkasan 64 suku (Jean Meeus version). Ini dipilih untuk kecepatan komputer tahun 90-an.
-- **Tauri:** Memiliki mode **"Legacy Parity"** yang menggunakan 64 suku yang sama persis (`sun_vb6.rs`), namun juga mendukung presisi penuh jika dibutuhkan.
+### 1. High-Fidelity VB6 Parity
+Untuk menjaga kepercayaan pengguna terhadap hasil hisab tradisional, implementasi backend Rust menggunakan mode kepatuhan logic yang ketat terhadap kode sumber VB6 asli:
+- **VSOP87 64-Term Truncation**: Menyamai presisi VB6 `JeanMeeus` yang membatasi suku perturbasi matahari untuk sinkronisasi hasil.
+- **Piecewise Delta T**: Mengimplementasikan formula Delta T bertahap dari Meeus (1991) sesuai logic VB6 `Astro` (mencakup rentang tahun <500 SM hingga >2000 M).
+- **Refraction-Parallax Sequence**: Mengikuti urutan koreksi di VB6 `Transformasi` (Refraksi Airy diterapkan pada *Apparent Altitude* sebelum koreksi Parallaks), berbeda dengan urutan standar IAU namun identik dengan referensi.
+- **Moon scaling bug fix**: Menyamai perlakuan nilai `SigmaL` di VB6 `PosisiBulan` di mana pembagian konstanta (1.000.000) dilakukan pada nilai derajat sebelum konversi radian.
 
-### B. Posisi Bulan (Jean Meeus Chapter 47)
-Terdapat perbaikan krusial pada kode Rust (`lunar_position.rs`) terkait cara penanganan angka desimal:
-- **Fix Discrepancy:** Di VB6, pembagian konstanta (per satu juta) sering dilakukan pada nilai derajat sebelum dikonversi ke radian. Beberapa pustaka modern (seperti `astro-rust` lama) melakukan pembagian *setelah* radian, yang menyebabkan selisih di digit ke-8. Tauri mengikuti cara VB6 untuk menjamin angka hasil "Hisab" tetap sama.
+### 2. Kalender Hijriah & Pasaran Jawa
+- **Penanggalan Hijriah**: Menggunakan algoritma aritmatik Civil Hijri (Kuwaiti) dengan konstanta hari `354.367056` yang identik dengan VB6 `Calendar_Conversion`.
+- **Siklus Pasaran**: Implementasi formula `(JD + 0.5) mod 5` untuk menentukan hari pasaran (Legi, Pahing, Pon, Wage, Kliwon) secara akurat sesuai tradisi Jawa.
 
-### C. Delta T (Koreksi Waktu)
-Delta T adalah selisih antara waktu dinamis (TDT) dan waktu universal (UT).
-- **VB6:** Menggunakan formula piecewise (potong-potong) dari buku Jean Meeus edisi lama.
-- **Tauri:** Mengimplementasikan ulang formula piecewise VB6 tersebut secara harfiah agar hasil Ijtima' tidak bergeser satu detik pun dari hasil lama.
-
----
-
-## 3. Logika Ephemeris yang "Unik" (Symmetry Fixes)
-
-Ada beberapa algoritma di Tauri yang dibuat "salah secara astronomi modern" tetapi "benar secara VB6" demi menjaga konsistensi:
-
-1.  **Urutan Refraksi & Paralaks:** 
-    - Secara astronomi murni: Paralaks dihitung dahulu, baru Refraksi.
-    - **Tauri mengikuti VB6:** Menghitung Refraksi pada tinggi pusat piringan (center) dahulu, baru mengoreksi Paralaks. Hal ini penting karena VB6 menggunakan "Apparent Geocentric Altitude" sebagai basis perhitungan paralaks.
-2.  **Iterasi Ijtima' (Conjunction):**
-    - **VB6:** Sering menggunakan interpolasi linear sederhana antara dua jam.
-    - **Tauri:** Menggunakan metode **Brent's Method** atau **Newton-Raphson** untuk mencari titik nol selisih bujur Matahari dan Bulan. Hasilnya lebih presisi hingga $\pm 0.1$ detik.
-
----
-
-## 4. Keunggulan Teknis Versi Tauri
-
-Meskipun secara formula "meniru" VB6, versi Tauri menang dalam hal:
-1.  **Type Safety:** Di VB6, kesalahan unit (derajat vs radian) sering tidak terdeteksi hingga terjadi error saat runtime. Di Rust, ini dijaga ketat oleh compiler.
-2.  **Topocentric Refinement:** Tauri menghitung posisi toposentrik secara langsung dari koordinat ekliptika (Jean Meeus Chapter 39 & 40), meminimalisir akumulasi error pembulatan yang terjadi di VB6 saat konversi berkali-kali dari Equator ke Horizon.
-3.  **Algoritma Kontemporer:** Penambahan kriteria **MABIMS Baru** (3-6.4) yang dihitung secara dinamis dengan algoritma ArcV (Arc of Vision) yang lebih akurat.
+### 3. Topocentric Conjunction & MABIMS
+- **Topocentric Iteration**: Peningkatan dari ijtima' geosentrik standar menjadi pencarian konjungsi berbasis pengamat lokal (*topocentric*) menggunakan iterasi Newton-Raphson untuk akurasi konvergensi waktu yang lebih tinggi.
+- **Kriteria MABIMS Baru**: Implementasi kriteria MABIMS Baru (Tinggi 3°, Elongasi 6.4°) berbasis parameter toposentrik (Altitude & Elongation) yang telah divalidasi silang dengan subrutin `MabimsVisibility` pada VB6.
 
 ---
 
