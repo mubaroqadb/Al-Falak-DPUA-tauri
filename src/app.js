@@ -296,9 +296,9 @@ export class HilalApp {
       if (this.dateMode === 'hijri') {
         // Use Hijri date input
         const params = {
-          hijriYear: this.currentHijriDate.hijriYear,
-          hijriMonth: this.currentHijriDate.hijriMonth,
-          hijriDay: this.currentHijriDate.hijriDay,
+          hijri_year: this.currentHijriDate.hijriYear,
+          hijri_month: this.currentHijriDate.hijriMonth,
+          hijri_day: this.currentHijriDate.hijriDay,
           criteria: this.selectedCriteria,
           step_degrees: 2.0
         };
@@ -337,9 +337,9 @@ export class HilalApp {
       if (this.dateMode === 'hijri') {
         const params = {
           location: this.currentLocation,
-          hijriYear: this.currentHijriDate.hijriYear,
-          hijriMonth: this.currentHijriDate.hijriMonth,
-          hijriDay: this.currentHijriDate.hijriDay
+          hijri_year: this.currentHijriDate.hijriYear,
+          hijri_month: this.currentHijriDate.hijriMonth,
+          hijri_day: this.currentHijriDate.hijriDay
         };
         prayerTimes = await this.api.getPrayerTimesHijri(params);
       } else {
@@ -386,9 +386,9 @@ export class HilalApp {
         // Use Hijri date input
         const params = {
           location: this.currentLocation,
-          hijriYear: this.currentHijriDate.hijriYear,
-          hijriMonth: this.currentHijriDate.hijriMonth,
-          hijriDay: this.currentHijriDate.hijriDay
+          hijri_year: this.currentHijriDate.hijriYear,
+          hijri_month: this.currentHijriDate.hijriMonth,
+          hijri_day: this.currentHijriDate.hijriDay
         };
         console.log('Sending Hijri params to backend:', JSON.stringify(params, null, 2));
 

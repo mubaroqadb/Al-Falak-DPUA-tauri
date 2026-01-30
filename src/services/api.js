@@ -351,9 +351,9 @@ export class HilalAPI {
       const invoke = await getInvoke();
       const result = await invoke('get_prayer_times_hijri', {
         location: params.location,
-        hijri_year: params.hijriYear,
-        hijri_month: params.hijriMonth,
-        hijri_day: params.hijriDay
+        hijri_year: params.hijri_year,
+        hijri_month: params.hijri_month,
+        hijri_day: params.hijri_day
       });
 
       console.log('API Response - getPrayerTimesHijri:', result);
@@ -379,9 +379,9 @@ export class HilalAPI {
       console.log('API Call - getVisibilityZonesHijri:', params);
       const invoke = await getInvoke();
       const result = await invoke('calculate_visibility_zones_hijri', {
-        hijri_year: params.hijriYear,
-        hijri_month: params.hijriMonth,
-        hijri_day: params.hijriDay,
+        hijri_year: params.hijri_year,
+        hijri_month: params.hijri_month,
+        hijri_day: params.hijri_day,
         criteria: params.criteria,
         step_degrees: params.step_degrees || 2.0
       });
@@ -409,9 +409,9 @@ export class HilalAPI {
       const invoke = await getInvoke();
       const result = await invoke('get_detailed_hilal_data_hijri', {
         location: params.location,
-        hijri_year: params.hijriYear,
-        hijri_month: params.hijriMonth,
-        hijri_day: params.hijriDay
+        hijri_year: params.hijri_year,
+        hijri_month: params.hijri_month,
+        hijri_day: params.hijri_day
       });
 
       console.log('API Response - getDetailedHilalDataHijri:', result);
@@ -437,9 +437,9 @@ export class HilalAPI {
       const invoke = await getInvoke();
       const result = await invoke('calculate_hilal_visibility_hijri_command', {
         location: params.location,
-        hijri_year: params.hijriYear,
-        hijri_month: params.hijriMonth,
-        hijri_day: params.hijriDay
+        hijri_year: params.hijri_year,
+        hijri_month: params.hijri_month,
+        hijri_day: params.hijri_day
       });
 
       console.log('API Response - calculateHilalAllCriteriaHijri:', result);
