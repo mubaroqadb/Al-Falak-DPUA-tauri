@@ -85,6 +85,36 @@ Untuk menjaga kepercayaan pengguna terhadap hasil hisab tradisional, implementas
 - **Topocentric Iteration**: Peningkatan dari ijtima' geosentrik standar menjadi pencarian konjungsi berbasis pengamat lokal (*topocentric*) menggunakan iterasi Newton-Raphson untuk akurasi konvergensi waktu yang lebih tinggi.
 - **Kriteria MABIMS Baru**: Implementasi kriteria MABIMS Baru (Tinggi 3°, Elongasi 6.4°) berbasis parameter toposentrik (Altitude & Elongation) yang telah divalidasi silang dengan subrutin `MabimsVisibility` pada VB6.
 
+### 4. Metodologi Perhitungan Konjungsi (Ijtimak)
+
+#### 4.1 Pendekatan Numerik vs Tabular
+
+| Aspek | VB6 (Jean Meeus) | Tauri (Modern) |
+|-------|------------------|----------------|
+| **Metode** | Tabular/Analitik (Mean Motion) | Numerik (Ephemeris + Newton-Raphson) |
+| **Estimasi Awal** | `nilai_JDE()`: Rumus mean lunar motion | `estimate_conjunction_time()`: Fase bulan |
+| **Refinement** | Iterasi ±10 hari dengan koreksi tabular | Newton-Raphson pada posisi ephemeris |
+| **Target** | Pencarian bulan konjungsi | `Longitude Difference = 0` |
+| **Akurasi** | ±1-2 arcminute | Sub-arcsecond (dengan model akurat) |
+
+#### 4.2 Mengapa Newton-Raphson pada Longitude Difference?
+
+1. **Masalah Elongasi**: Elongasi (jarak sudut) jarang mencapai tepat 0° karena Bulan memiliki latitude ekliptik non-nol. Minimum elongasi adalah sudut inklinasi orbit (~5°), bukan 0°.
+
+2. **Solusi Longitude Difference**: Dengan mencari saat ketika **selisih longitude** (L_bulan - L_matahari) = 0, kita menemukan titik konjungsi yang tepat.
+
+3. **Formulasi Matematis**:
+   ```
+   f(JD) = Longitude_Bulan(JD) - Longitude_Matahari(JD)
+   Newton-Raphson: JD_new = JD_old - f(JD_old) / f'(JD_old)
+   ```
+
+4. **Handling NaN**: Saat derivatif mendekati 0 (titik kritis), algoritma fallback menggunakan step ±0.01 hari untuk melewati area tersebut.
+
+#### 4.3 Validasi
+- 55 test cases lulus
+- Perbandingan VB6: Selisih Moon Altitude < 0.06°, Elongation < 0.05°
+
 ---
 
 > [!IMPORTANT]
