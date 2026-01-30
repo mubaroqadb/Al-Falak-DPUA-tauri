@@ -2,6 +2,7 @@
 // Allows user to select date using Hijri calendar (Tanggal Hijriyah)
 
 import { i18n } from '../services/i18n.js';
+import { HilalAPI, isTauri } from '../services/api.js';
 
 export class HijriDateInput extends HTMLElement {
   constructor() {
@@ -11,13 +12,31 @@ export class HijriDateInput extends HTMLElement {
     this.hijriDay = 1;
     this.dateMode = 'gregorian'; // 'gregorian' or 'hijri'
     this.i18n = i18n;
+    this.api = new HilalAPI();
+    
+    // Store converted dates for display
+    this.convertedHijriDate = null;
+    this.convertedGregorianDate = null;
+    this.isConverting = false;
   }
 
-  connectedCallback() {
+  async connectedCallback() {
     // Set default to current Hijri date (approximate)
     this.setDefaultHijriDate();
     this.render();
     this.setupEventListeners();
+    
+    // Initial conversion on load
+    if (isTauri()) {
+      if (this.dateMode === 'gregorian') {
+        const gregorianInput = this.querySelector('#calc-date');
+        if (gregorianInput) {
+          await this.convertGregorianToHijri(new Date(gregorianInput.value));
+        }
+      } else {
+        await this.convertHijriToGregorian();
+      }
+    }
   }
 
   setDefaultHijriDate() {
@@ -114,8 +133,10 @@ export class HijriDateInput extends HTMLElement {
           <p class="hijri-date-display" id="hijri-date-display">
             ${this.hijriDay} ${currentMonth?.label || ''} ${this.hijriYear} ${t('hijriDate.arabicYearSuffix')}
           </p>
+          ${this.renderConvertedDateDisplay()}
         </div>
       </div>
+      ${this.renderDualDateDisplay()}
 
       <style>
         .hijri-date-input {
@@ -240,6 +261,94 @@ export class HijriDateInput extends HTMLElement {
           border-radius: 8px;
           margin-top: 8px;
         }
+
+        .converted-date-display {
+          text-align: center;
+          font-size: 0.9rem;
+          color: #495057;
+          padding: 8px;
+          background: #f8f9fa;
+          border-radius: 6px;
+          margin-top: 8px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .conversion-label {
+          font-size: 0.75rem;
+          color: #868e96;
+        }
+
+        .converted-date {
+          font-weight: 500;
+          color: #1971c2;
+        }
+
+        .dual-date-display {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 16px;
+          padding: 16px;
+          background: linear-gradient(135deg, #e7f5ff 0%, #fff4e6 100%);
+          border-radius: 12px;
+          margin-top: 12px;
+          position: relative;
+        }
+
+        .dual-date-display.converting {
+          opacity: 0.7;
+        }
+
+        .date-box {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+          flex: 1;
+        }
+
+        .date-label {
+          font-size: 0.75rem;
+          color: #868e96;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .date-value {
+          font-size: 1rem;
+          font-weight: 600;
+          color: #212529;
+          text-align: center;
+        }
+
+        .hijri-box .date-value {
+          color: #1971c2;
+        }
+
+        .gregorian-box .date-value {
+          color: #e8590c;
+        }
+
+        .conversion-arrow {
+          font-size: 1.5rem;
+          color: #adb5bd;
+          font-weight: 300;
+        }
+
+        .conversion-loading {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: rgba(255, 255, 255, 0.95);
+          padding: 8px 16px;
+          border-radius: 20px;
+          font-size: 0.875rem;
+          color: #1971c2;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
       </style>
     `;
   }
@@ -265,25 +374,30 @@ export class HijriDateInput extends HTMLElement {
     const gregorianInput = this.querySelector('#calc-date');
     if (gregorianInput) {
       gregorianInput.value = new Date().toISOString().split('T')[0];
-      gregorianInput.addEventListener('change', (e) => {
-        this.dispatchGregorianDateChange(new Date(e.target.value));
+      gregorianInput.addEventListener('change', async (e) => {
+        const date = new Date(e.target.value);
+        this.dispatchGregorianDateChange(date);
+        // Convert to Hijri automatically
+        await this.convertGregorianToHijri(date);
       });
     }
 
     // Hijri day select
     const hijriDay = this.querySelector('#hijri-day');
     if (hijriDay) {
-      hijriDay.addEventListener('change', (e) => {
+      hijriDay.addEventListener('change', async (e) => {
         this.hijriDay = parseInt(e.target.value);
         this.updateHijriDisplay();
         this.dispatchHijriDateChange();
+        // Convert to Gregorian automatically
+        await this.convertHijriToGregorian();
       });
     }
 
     // Hijri month select
     const hijriMonth = this.querySelector('#hijri-month');
     if (hijriMonth) {
-      hijriMonth.addEventListener('change', (e) => {
+      hijriMonth.addEventListener('change', async (e) => {
         this.hijriMonth = parseInt(e.target.value);
         // Adjust day if it exceeds the month's max days
         if (this.hijriDay > 29) {
@@ -292,16 +406,20 @@ export class HijriDateInput extends HTMLElement {
         }
         this.updateHijriDisplay();
         this.dispatchHijriDateChange();
+        // Convert to Gregorian automatically
+        await this.convertHijriToGregorian();
       });
     }
 
     // Hijri year input
     const hijriYear = this.querySelector('#hijri-year');
     if (hijriYear) {
-      hijriYear.addEventListener('change', (e) => {
+      hijriYear.addEventListener('change', async (e) => {
         this.hijriYear = parseInt(e.target.value) || 1446;
         this.updateHijriDisplay();
         this.dispatchHijriDateChange();
+        // Convert to Gregorian automatically
+        await this.convertHijriToGregorian();
       });
     }
   }
@@ -326,14 +444,17 @@ export class HijriDateInput extends HTMLElement {
       detail: { mode: this.dateMode }
     }));
 
-    // Dispatch initial date change
+    // Dispatch initial date change and convert
     if (mode === 'gregorian') {
       const gregorianInput = this.querySelector('#calc-date');
       if (gregorianInput) {
-        this.dispatchGregorianDateChange(new Date(gregorianInput.value));
+        const date = new Date(gregorianInput.value);
+        this.dispatchGregorianDateChange(date);
+        this.convertGregorianToHijri(date);
       }
     } else {
       this.dispatchHijriDateChange();
+      this.convertHijriToGregorian();
     }
   }
 
@@ -364,6 +485,125 @@ export class HijriDateInput extends HTMLElement {
         mode: 'hijri'
       }
     }));
+  }
+
+  // Render converted date display for Hijri input mode
+  renderConvertedDateDisplay() {
+    if (this.dateMode !== 'hijri' || !this.convertedGregorianDate) {
+      return '';
+    }
+    const { year, month, day } = this.convertedGregorianDate;
+    const gregorianDateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return `
+      <div class="converted-date-display">
+        <span class="conversion-label">Bertepatan dengan:</span>
+        <span class="converted-date">${gregorianDateStr} M</span>
+      </div>
+    `;
+  }
+
+  // Render dual date display showing both dates
+  renderDualDateDisplay() {
+    if (!this.convertedHijriDate && !this.convertedGregorianDate) {
+      return '';
+    }
+
+    let hijriStr = '';
+    let gregorianStr = '';
+
+    if (this.convertedHijriDate) {
+      const months = this.getHijriMonths();
+      const monthName = months.find(m => m.value === this.convertedHijriDate.month)?.label || '';
+      hijriStr = `${this.convertedHijriDate.day} ${monthName} ${this.convertedHijriDate.year} H`;
+    } else if (this.dateMode === 'hijri') {
+      const months = this.getHijriMonths();
+      const monthName = months.find(m => m.value === this.hijriMonth)?.label || '';
+      hijriStr = `${this.hijriDay} ${monthName} ${this.hijriYear} H`;
+    }
+
+    if (this.convertedGregorianDate) {
+      const { year, month, day } = this.convertedGregorianDate;
+      gregorianStr = `${day} ${this.getGregorianMonthName(month)} ${year} M`;
+    }
+
+    return `
+      <div class="dual-date-display ${this.isConverting ? 'converting' : ''}">
+        <div class="date-box hijri-box">
+          <span class="date-label">Tanggal Hijriah</span>
+          <span class="date-value">${hijriStr || '-'}</span>
+        </div>
+        <div class="conversion-arrow">⇄</div>
+        <div class="date-box gregorian-box">
+          <span class="date-label">Tanggal Masehi</span>
+          <span class="date-value">${gregorianStr || '-'}</span>
+        </div>
+        ${this.isConverting ? '<div class="conversion-loading">Menghitung...</div>' : ''}
+      </div>
+    `;
+  }
+
+  getGregorianMonthName(month) {
+    const months = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    return months[month - 1] || '';
+  }
+
+  // Convert Hijri to Gregorian using API
+  async convertHijriToGregorian() {
+    if (!isTauri()) {
+      console.warn('Cannot convert date - Tauri context not available');
+      return;
+    }
+
+    this.isConverting = true;
+    this.render();
+
+    try {
+      const result = await this.api.hijriToGregorian({
+        year: this.hijriYear,
+        month: this.hijriMonth,
+        day: this.hijriDay
+      });
+      this.convertedGregorianDate = result;
+      console.log('Converted Hijri to Gregorian:', this.hijriYear, this.hijriMonth, this.hijriDay, '->', result);
+    } catch (error) {
+      console.error('Failed to convert Hijri to Gregorian:', error);
+      this.convertedGregorianDate = null;
+    } finally {
+      this.isConverting = false;
+      this.render();
+      this.setupEventListeners();
+    }
+  }
+
+  // Convert Gregorian to Hijri using API
+  async convertGregorianToHijri(date) {
+    if (!isTauri()) {
+      console.warn('Cannot convert date - Tauri context not available');
+      return;
+    }
+
+    this.isConverting = true;
+    this.render();
+
+    try {
+      const result = await this.api.gregorianToHijri({
+        year: date.getFullYear(),
+        month: date.getMonth() + 1,
+        day: date.getDate()
+      });
+      this.convertedHijriDate = result;
+      console.log('Converted Gregorian to Hijri:', date, '->', result);
+    } catch (error) {
+      console.error('Failed to convert Gregorian to Hijri:', error);
+      this.convertedHijriDate = null;
+    } finally {
+      this.isConverting = false;
+      this.render();
+      this.setupEventListeners();
+    }
   }
 
   // Public methods for external control

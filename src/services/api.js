@@ -449,4 +449,54 @@ export class HilalAPI {
       throw new Error(`Failed to calculate hilal for Hijri date: ${error.message}`);
     }
   }
+
+  /**
+   * Convert Gregorian date to Hijri date
+   * @param {Object} params - Parameters
+   * @param {number} params.year - Gregorian year
+   * @param {number} params.month - Gregorian month (1-12)
+   * @param {number} params.day - Gregorian day (1-31)
+   * @returns {Promise<Object>} Hijri date { year, month, day }
+   */
+  async gregorianToHijri(params) {
+    try {
+      console.log('API Call - gregorianToHijri:', params);
+      const invoke = await getInvoke();
+      const result = await invoke('gregorian_to_hijri_command', {
+        year: params.year,
+        month: params.month,
+        day: params.day
+      });
+      console.log('API Response - gregorianToHijri:', result);
+      return result;
+    } catch (error) {
+      console.error('API Error - gregorianToHijri:', error);
+      throw new Error(`Failed to convert Gregorian to Hijri: ${error.message}`);
+    }
+  }
+
+  /**
+   * Convert Hijri date to Gregorian date
+   * @param {Object} params - Parameters
+   * @param {number} params.year - Hijri year
+   * @param {number} params.month - Hijri month (1-12)
+   * @param {number} params.day - Hijri day (1-30)
+   * @returns {Promise<Object>} Gregorian date { year, month, day }
+   */
+  async hijriToGregorian(params) {
+    try {
+      console.log('API Call - hijriToGregorian:', params);
+      const invoke = await getInvoke();
+      const result = await invoke('hijri_to_gregorian_command', {
+        year: params.year,
+        month: params.month,
+        day: params.day
+      });
+      console.log('API Response - hijriToGregorian:', result);
+      return result;
+    } catch (error) {
+      console.error('API Error - hijriToGregorian:', error);
+      throw new Error(`Failed to convert Hijri to Gregorian: ${error.message}`);
+    }
+  }
 }
