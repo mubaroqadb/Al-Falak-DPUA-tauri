@@ -105,6 +105,7 @@ fn calculate_elongation_at_jd(jd: f64) -> f64 {
 }
 
 /// Refine waktu konjungsi toposentrik
+/// FIX: Menggunakan Longitude Difference sebagai target, bukan Elongasi
 fn refine_topocentric_conjunction_time(
     jd_initial: f64,
     location: &crate::GeoLocation,
@@ -114,13 +115,15 @@ fn refine_topocentric_conjunction_time(
     let mut iterations = 0;
 
     loop {
-        let (angle_a, derivative) = compute_topocentric_angle_and_derivative(jd, location);
+        let (longitude_diff, derivative) =
+            compute_topocentric_longitude_difference_and_derivative(jd, location);
 
         if derivative.abs() < 1e-10 || iterations >= config.max_iterations {
             break;
         }
 
-        let correction = -angle_a / derivative;
+        // Newton-Raphson: x_new = x - f(x)/f'(x)
+        let correction = -longitude_diff / derivative;
         jd += correction;
         iterations += 1;
 
@@ -132,18 +135,56 @@ fn refine_topocentric_conjunction_time(
     jd
 }
 
-fn compute_topocentric_angle_and_derivative(jd: f64, location: &crate::GeoLocation) -> (f64, f64) {
-    let angle_a = compute_topocentric_elongation_angle(jd, location);
+/// Hitung selisih longitude toposentrik dan derivative-nya
+fn compute_topocentric_longitude_difference_and_derivative(
+    jd: f64,
+    location: &crate::GeoLocation,
+) -> (f64, f64) {
+    let longitude_diff = compute_topocentric_longitude_difference(jd, location);
 
     // Finite difference (1 jam = 1/24 hari) untuk kestabilan di toposentrik
     let delta = 1.0 / 24.0;
     let jd_next = jd + delta;
-    let angle_b = compute_topocentric_elongation_angle(jd_next, location);
+    let longitude_diff_next = compute_topocentric_longitude_difference(jd_next, location);
 
-    let derivative = (angle_b - angle_a) / delta;
-    (angle_a, derivative)
+    let derivative = (longitude_diff_next - longitude_diff) / delta;
+    (longitude_diff, derivative)
 }
 
+/// Hitung selisih longitude toposentrik antara bulan dan matahari
+/// Returns selisih longitude dalam derajat (normalized ke [-180, 180])
+fn compute_topocentric_longitude_difference(jd: f64, location: &crate::GeoLocation) -> f64 {
+    let moon_geo = crate::astronomy::moon_position(jd);
+    let moon_topo = crate::astronomy::topocentric::moon_topocentric_position(
+        location,
+        jd,
+        moon_geo.right_ascension,
+        moon_geo.declination,
+        moon_geo.distance,
+        moon_geo.longitude,
+        moon_geo.latitude,
+    );
+
+    // Sun topo ≈ geo (simplification)
+    let sun_geo = crate::astronomy::sun_position(jd);
+
+    // Selisih longitude toposentrik: L_moon_topo - L_sun
+    let mut diff = moon_topo.longitude - sun_geo.longitude;
+
+    // Normalize ke [-180, 180] derajat
+    while diff > 180.0 {
+        diff -= 360.0;
+    }
+    while diff < -180.0 {
+        diff += 360.0;
+    }
+
+    diff
+}
+
+/// Hitung elongasi angle toposentrik antara bulan-matahari pada waktu jd
+/// Returns the absolute elongation angle (0 to π)
+/// NOTE: Fungsi ini dipertahankan untuk kompatibilitas dan reporting
 fn compute_topocentric_elongation_angle(jd: f64, location: &crate::GeoLocation) -> f64 {
     let moon_geo = crate::astronomy::moon_position(jd);
     let moon_topo = crate::astronomy::topocentric::moon_topocentric_position(
@@ -161,7 +202,6 @@ fn compute_topocentric_elongation_angle(jd: f64, location: &crate::GeoLocation) 
 
     // Calculate angular separation in ecliptic coordinates (topo)
     let dlon = (moon_topo.longitude - sun_geo.longitude).to_radians();
-    let dlat = (moon_topo.latitude - sun_geo.latitude).to_radians();
 
     let moon_lat_rad = moon_topo.latitude.to_radians();
     let sun_lat_rad = sun_geo.latitude.to_radians();

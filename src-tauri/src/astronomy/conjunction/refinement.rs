@@ -17,19 +17,22 @@ impl Default for RefinementConfig {
 
 /// Refine waktu konjungsi menggunakan iterasi Newton-Raphson
 ///
-/// Mencari waktu ketika elongasi bulan-matahari minimum (= konjungsi)
+/// Mencari waktu ketika selisih longitude bulan-matahari = 0 (konjungsi)
+/// FIX: Menggunakan Longitude Difference sebagai target, bukan Elongasi,
+/// karena elongasi jarang mencapai 0 akibat latitude bulan.
 pub fn refine_conjunction_time(jd_initial: f64, config: RefinementConfig) -> f64 {
     let mut jd = jd_initial;
     let mut iterations = 0;
 
     loop {
-        let (angle_a, derivative) = compute_angle_and_derivative(jd);
+        let (longitude_diff, derivative) = compute_longitude_difference_and_derivative(jd);
 
         if should_stop(derivative, iterations, &config) {
             break;
         }
 
-        let correction = -angle_a / derivative;
+        // Newton-Raphson: x_new = x - f(x)/f'(x)
+        let correction = -longitude_diff / derivative;
         jd += correction;
         iterations += 1;
 
@@ -41,27 +44,48 @@ pub fn refine_conjunction_time(jd_initial: f64, config: RefinementConfig) -> f64
     jd
 }
 
-/// Hitung angle elongasi dan derivative
-fn compute_angle_and_derivative(jd: f64) -> (f64, f64) {
-    let angle_a = compute_elongation_angle(jd);
+/// Hitung selisih longitude dan derivative-nya
+fn compute_longitude_difference_and_derivative(jd: f64) -> (f64, f64) {
+    let longitude_diff = compute_longitude_difference(jd);
 
-    // Hitung derivative menggunakan finite difference (1 hari ke depan)
-    let jd_next = jd + 1.0;
-    let angle_b = compute_elongation_angle(jd_next);
+    // Hitung derivative menggunakan finite difference (1 jam = 1/24 hari)
+    let delta = 1.0 / 24.0;
+    let jd_next = jd + delta;
+    let longitude_diff_next = compute_longitude_difference(jd_next);
 
-    let derivative = angle_b - angle_a;
-    (angle_a, derivative)
+    let derivative = (longitude_diff_next - longitude_diff) / delta;
+    (longitude_diff, derivative)
+}
+
+/// Hitung selisih longitude antara bulan dan matahari
+/// Returns selisih longitude dalam derajat (normalized ke [-180, 180])
+fn compute_longitude_difference(jd: f64) -> f64 {
+    let moon_pos = crate::astronomy::moon_position(jd);
+    let sun_pos = crate::astronomy::sun_position(jd);
+
+    // Selisih longitude: L_moon - L_sun
+    let mut diff = moon_pos.longitude - sun_pos.longitude;
+
+    // Normalize ke [-180, 180] derajat
+    while diff > 180.0 {
+        diff -= 360.0;
+    }
+    while diff < -180.0 {
+        diff += 360.0;
+    }
+
+    diff
 }
 
 /// Hitung elongasi angle antara bulan-matahari pada waktu jd
 /// Returns the absolute elongation angle (0 to π)
+/// NOTE: Fungsi ini dipertahankan untuk kompatibilitas dan reporting
 fn compute_elongation_angle(jd: f64) -> f64 {
     let moon_pos = crate::astronomy::moon_position(jd);
     let sun_pos = crate::astronomy::sun_position(jd);
 
     // Calculate angular separation using spherical law of cosines
     let dlon = (moon_pos.longitude - sun_pos.longitude).to_radians();
-    let dlat = (moon_pos.latitude - sun_pos.latitude).to_radians();
 
     // Spherical law of cosines for angular separation
     let moon_lat_rad = moon_pos.latitude.to_radians();
