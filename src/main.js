@@ -13,7 +13,6 @@ import './components/ValidationPanel.js';
 import './components/DetailedEphemerisDisplay.js';
 import './components/PrayerTimesDisplay.js';
 import './components/CalculateButton.js';
-import './components/CalculateButton.js';
 import './components/ModernCriteriaSelector.js';
 import './components/MoonPhaseVisualizer.js';
 import './components/LocationSelector.js';

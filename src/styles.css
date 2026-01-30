@@ -121,7 +121,8 @@ html {
   text-shadow: 0 0 10px currentColor;
 }
 
-html * {
+/* Apply transitions only to interactive elements that need them (better performance) */
+button, a, input, textarea, select, .card, .btn, .tab, .badge, .stat {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 

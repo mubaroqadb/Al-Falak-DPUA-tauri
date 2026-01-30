@@ -228,12 +228,34 @@ export class LocationSelector extends HTMLElement {
     registerForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const formData = new FormData(registerForm);
+      const lat = parseFloat(formData.get('lat'));
+      const lon = parseFloat(formData.get('lon'));
+      const tz = parseFloat(formData.get('tz'));
+
+      // Validate latitude (-90 to 90)
+      if (isNaN(lat) || lat < -90 || lat > 90) {
+        alert('Latitude harus antara -90 dan 90 derajat');
+        return;
+      }
+
+      // Validate longitude (-180 to 180)
+      if (isNaN(lon) || lon < -180 || lon > 180) {
+        alert('Longitude harus antara -180 dan 180 derajat');
+        return;
+      }
+
+      // Validate timezone (-12 to 14)
+      if (isNaN(tz) || tz < -12 || tz > 14) {
+        alert('Timezone harus antara -12 dan +14');
+        return;
+      }
+
       const newCity = {
         name: formData.get('name'),
         country: formData.get('country'),
-        lat: parseFloat(formData.get('lat')),
-        lon: parseFloat(formData.get('lon')),
-        tz: parseFloat(formData.get('tz')),
+        lat: lat,
+        lon: lon,
+        tz: tz,
         elev: parseFloat(formData.get('elev')) || 0,
         isCustom: true
       };

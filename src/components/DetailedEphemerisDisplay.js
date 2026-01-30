@@ -201,11 +201,11 @@ export class DetailedEphemerisDisplay extends HTMLElement {
                 </tr>
               </thead>
               <tbody>
-                <tr><td>Conjunction (Ijtima')</td><td class="text-right font-mono">${eph.conjunction_date}</td></tr>
-                <tr><td>Sunset Time</td><td class="text-right font-mono text-primary font-bold">${eph.sunset_time}</td></tr>
-                <tr><td>Moonset Time</td><td class="text-right font-mono">${eph.moonset_time}</td></tr>
-                <tr><td>Lag Time</td><td class="text-right font-mono font-bold text-secondary">${eph.lag_time}</td></tr>
-                <tr><td>Delta T</td><td class="text-right font-mono">${eph.delta_t.toFixed(2)}s</td></tr>
+                <tr><td>Conjunction (Ijtima')</td><td class="text-right font-mono">${eph?.conjunction_date ?? 'N/A'}</td></tr>
+                <tr><td>Sunset Time</td><td class="text-right font-mono text-primary font-bold">${eph?.sunset_time ?? 'N/A'}</td></tr>
+                <tr><td>Moonset Time</td><td class="text-right font-mono">${eph?.moonset_time ?? 'N/A'}</td></tr>
+                <tr><td>Lag Time</td><td class="text-right font-mono font-bold text-secondary">${eph?.lag_time ?? 'N/A'}</td></tr>
+                <tr><td>Delta T</td><td class="text-right font-mono">${eph?.delta_t?.toFixed(2) ?? 'N/A'}s</td></tr>
               </tbody>
             </table>
           </div>

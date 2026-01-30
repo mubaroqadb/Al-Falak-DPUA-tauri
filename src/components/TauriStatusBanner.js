@@ -32,10 +32,18 @@ export class TauriStatusBanner extends HTMLElement {
             <p>Aplikasi berjalan di browser, bukan Tauri window. Fitur backend tidak tersedia.</p>
             <p><small>Gunakan <code>npm run tauri dev</code> untuk menjalankan aplikasi lengkap, atau tutup tab browser dan gunakan window Tauri yang terbuka.</small></p>
           </div>
-          <button class="banner-close" onclick="this.parentElement.parentElement.remove()">×</button>
+          <button class="banner-close">×</button>
         </div>
       </div>
     `;
+
+    // Add event listener to close button (safe approach - no inline onclick)
+    const closeBtn = this.querySelector('.banner-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        this.remove();
+      });
+    }
   }
 
   showSuccess() {

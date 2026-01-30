@@ -84,7 +84,8 @@ export class HilalApp {
         
         try {
           // Critical: Yield to event loop to allow UI paint
-          await new Promise(resolve => setTimeout(resolve, 10));
+          // Use requestAnimationFrame for more reliable yielding
+          await new Promise(resolve => requestAnimationFrame(resolve));
 
           await this.updateVisibilityZones();
           await this.updateCalculations();
@@ -112,7 +113,8 @@ export class HilalApp {
         
         try {
           // Critical: Yield to event loop to allow UI paint
-          await new Promise(resolve => setTimeout(resolve, 10));
+          // Use requestAnimationFrame for more reliable yielding
+          await new Promise(resolve => requestAnimationFrame(resolve));
 
           await this.updateVisibilityZones();
           await this.updateCalculations();

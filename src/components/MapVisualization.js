@@ -54,9 +54,15 @@ export class MapVisualization extends HTMLElement {
 
   disconnectedCallback() {
     if (this.map) {
+      // Clean up event listeners before removing map
+      this.map.off('click', this.handleMapClick);
       this.map.remove();
       this.map = null;
     }
+    // Clear all layer arrays to prevent memory leaks
+    this.visibilityLayers = [];
+    this.prayerTimeLayers = [];
+    this.markers = [];
   }
 
   initMap() {
@@ -134,13 +140,24 @@ export class MapVisualization extends HTMLElement {
     // Create marker at clicked location
     const marker = L.marker([lat, lng]).addTo(this.map);
 
-    // Add popup with coordinates
-    marker.bindPopup(`
+    // Add popup with coordinates (safe - no inline onclick)
+    const popupContent = document.createElement('div');
+    popupContent.innerHTML = `
       <b>Location Selected</b><br>
       Latitude: ${lat.toFixed(6)}<br>
       Longitude: ${lng.toFixed(6)}<br>
-      <button onclick="this.closest('.leaflet-popup').remove()">Select This Location</button>
-    `).openPopup();
+      <button class="leaflet-popup-close-button btn btn-xs btn-primary mt-2">Select This Location</button>
+    `;
+
+    // Add event listener to button (safe approach)
+    const selectBtn = popupContent.querySelector('.leaflet-popup-close-button');
+    if (selectBtn) {
+      selectBtn.addEventListener('click', () => {
+        marker.closePopup();
+      });
+    }
+
+    marker.bindPopup(popupContent).openPopup();
 
     // Store marker
     this.markers.push(marker);
@@ -332,8 +349,20 @@ export class MapVisualization extends HTMLElement {
       });
       polyline.addTo(this.map);
       this.prayerTimeLayers.push(polyline);
-      polyline.bindPopup(`<b>${curve.prayerType}</b><br>Time: ${curve.time || 'N/A'}`);
+
+      // Create popup content safely using DOM (no template literals with unescaped data)
+      const popupContent = document.createElement('div');
+      popupContent.innerHTML = `<b>${this.escapeHtml(curve.prayerType)}</b><br>Time: ${this.escapeHtml(curve.time || 'N/A')}`;
+      polyline.bindPopup(popupContent);
     });
+  }
+
+  // Helper to escape HTML content
+  escapeHtml(text) {
+    if (typeof text !== 'string') return text;
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   getPrayerTimeColor(prayerType) {
@@ -351,32 +380,35 @@ export class MapVisualization extends HTMLElement {
     console.log('🧹 Cleared all markers');
   }
 
-  // Handle map click
+  // Handle map click (duplicate - remove this method, use the one above)
   handleMapClick(event) {
     const { lat, lng } = event.latlng;
     const marker = L.marker([lat, lng]).addTo(this.map);
-    marker.bindPopup(`
-      <div class="text-xs">
-        <b>Location Selected</b><br>
-        Lat: <span class="font-mono">${lat.toFixed(6)}</span><br>
-        Lon: <span class="font-mono">${lng.toFixed(6)}</span><br>
-        <button class="btn btn-xs btn-primary mt-2" id="btn-select-this-final">Use This Location</button>
-      </div>
-    `).openPopup();
-    this.markers.push(marker);
 
-    setTimeout(() => {
-      const btn = document.getElementById('btn-select-this-final');
-      if (btn) {
-        btn.addEventListener('click', () => {
-          this.dispatchEvent(new CustomEvent('location-selected', {
-            detail: { location: { latitude: lat, longitude: lng, elevation: 0, timezone: this.calculateTimezone(lng) } },
-            bubbles: true
-          }));
-          marker.closePopup();
-        });
-      }
-    }, 100);
+    // Create popup content safely using DOM (no inline onclick)
+    const popupContent = document.createElement('div');
+    popupContent.className = 'text-xs';
+    popupContent.innerHTML = `
+      <b>Location Selected</b><br>
+      Lat: <span class="font-mono">${lat.toFixed(6)}</span><br>
+      Lon: <span class="font-mono">${lng.toFixed(6)}</span><br>
+      <button class="btn btn-xs btn-primary mt-2 select-location-btn">Use This Location</button>
+    `;
+
+    // Add event listener to button (safe approach)
+    const selectBtn = popupContent.querySelector('.select-location-btn');
+    if (selectBtn) {
+      selectBtn.addEventListener('click', () => {
+        this.dispatchEvent(new CustomEvent('location-selected', {
+          detail: { location: { latitude: lat, longitude: lng, elevation: 0, timezone: this.calculateTimezone(lng) } },
+          bubbles: true
+        }));
+        marker.closePopup();
+      });
+    }
+
+    marker.bindPopup(popupContent).openPopup();
+    this.markers.push(marker);
   }
 
   fitToData() {

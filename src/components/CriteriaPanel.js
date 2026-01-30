@@ -691,8 +691,16 @@ class CriteriaPanel extends HTMLElement {
     toast.innerHTML = `
       <span class="toast-icon">⚠️</span>
       <span class="toast-message">${message}</span>
-      <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+      <button class="toast-close">&times;</button>
     `;
+
+    // Add event listener to close button (safe approach - no inline onclick)
+    const closeBtn = toast.querySelector('.toast-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        toast.remove();
+      });
+    }
     toast.style.cssText = `
       position: fixed;
       top: 20px;
