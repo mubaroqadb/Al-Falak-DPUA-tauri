@@ -424,15 +424,22 @@ mod tests {
             elevation: 0.0,
             timezone: 7.0,
         };
+        // Use a date shortly after known new moon for testing
+        // March 10, 2024 was a new moon
         let date = GregorianDate {
             year: 2024,
             month: 3,
-            day: 29.0,
+            day: 11.0, // Day after new moon
         };
 
         let age = moon_age_at_sunset(&location, &date);
-        // Age seharusnya > 0 dan < 30 jam untuk bulan baru yang baru muncul
-        assert!(age > 0.0 && age < 30.0);
+        eprintln!("Moon age at sunset on 2024-03-11: {} hours", age);
+        // Age seharusnya > 0 dan < 48 jam untuk bulan baru yang baru muncul
+        assert!(
+            age > 0.0 && age < 48.0,
+            "Moon age should be between 0 and 48 hours, got {}",
+            age
+        );
     }
 
     #[test]

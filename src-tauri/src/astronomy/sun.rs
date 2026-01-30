@@ -119,11 +119,14 @@ pub fn equation_of_time(jd: JulianDay) -> f64 {
 /// Hitung waktu sunset untuk lokasi tertentu
 ///
 /// Formula VB6-compatible exact port dari Jean Meeus / VSOP
+///
+/// FIX: Menggunakan iterasi yang lebih akurat untuk menghitung sunset
+/// dengan mempertimbangkan perubahan deklinasi matahari sepanjang hari.
 pub fn calculate_sunset(
     location: &crate::GeoLocation,
     date: &crate::GregorianDate,
 ) -> crate::Hours {
-    // Konversi tanggal ke Julian Day (ambil integer part saja untuk iterasi pertama)
+    // Konversi tanggal ke Julian Day
     let date_only = crate::GregorianDate {
         year: date.year,
         month: date.month,
@@ -131,45 +134,43 @@ pub fn calculate_sunset(
     };
     let jd = crate::calendar::gregorian_to_jd(&date_only);
 
-    // Altitude untuk sunset = -0.8333° (VB6 default includes semidiameter + refraction)
+    // Altitude untuk sunset = -0.8333° (VB6 default: -0°50' = -0.8333°)
+    // Ini sudah termasuk semidiameter matahari (16') + refraksi (34')
     let altitude_sunset = -0.8333_f64;
 
-    // First iteration - using JD at noon
-    let jd_noon = jd + 0.5; // Approximate noon
-
-    // VB6 formula port:
-    // e = JM_EquationOfTime(Year, Month, Day)
-    // h = VSOP_SunHourAngle(Lintang, Alt, Year, Month, Day)
-    // Sunset = 12 - e + h + kwd(Tz, Bujur)
-
-    let eot = equation_of_time(jd_noon);
-    let ha = vsop_sun_hour_angle(location.latitude, altitude_sunset, jd_noon);
-
-    if ha == 999.0 {
-        // No sunset possible
-        return 999.0;
-    }
-
     let kwd = location.timezone - (location.longitude / 15.0);
-    let mut sunset_local = 12.0 - eot + ha + kwd;
 
-    // Second iteration (VB6 pattern)
-    // Convert to UT for JD calculation
-    let sunset_ut = sunset_local - location.timezone;
-    let jd_sunset = jd + (sunset_ut / 24.0);
+    // Iterasi untuk mencari waktu sunset yang akurat
+    let mut sunset_local = 18.0; // Initial guess
 
-    // Recalculate with more accurate JD
-    let eot2 = equation_of_time(jd_sunset);
-    let ha2 = vsop_sun_hour_angle(location.latitude, altitude_sunset, jd_sunset);
+    for _ in 0..5 {
+        // 5 iterasi untuk konvergensi
+        // Convert local time to UT for JD calculation
+        let sunset_ut = sunset_local - location.timezone;
+        let jd_sunset = jd + (sunset_ut / 24.0);
 
-    if ha2 != 999.0 {
-        sunset_local = 12.0 - eot2 + ha2 + kwd;
+        // Hitung equation of time dan hour angle
+        let eot = equation_of_time(jd_sunset);
+        let ha = vsop_sun_hour_angle(location.latitude, altitude_sunset, jd_sunset);
+
+        if ha == 999.0 {
+            return 999.0; // No sunset possible
+        }
+
+        // Hitung waktu sunset baru
+        let new_sunset = 12.0 - eot + ha + kwd;
+
+        // Check konvergensi
+        if (new_sunset - sunset_local).abs() < 0.001 {
+            // 3.6 detik
+            break;
+        }
+
+        sunset_local = new_sunset;
     }
 
     // Normalisasi ke 0-24
-    sunset_local = sunset_local.rem_euclid(24.0);
-
-    sunset_local
+    sunset_local.rem_euclid(24.0)
 }
 
 /// VSOP Sun Hour Angle - exact VB6 port

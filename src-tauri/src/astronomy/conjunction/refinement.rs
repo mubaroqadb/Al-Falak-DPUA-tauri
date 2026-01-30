@@ -16,7 +16,7 @@ impl Default for RefinementConfig {
 }
 
 /// Refine waktu konjungsi menggunakan iterasi Newton-Raphson
-/// 
+///
 /// Mencari waktu ketika elongasi bulan-matahari minimum (= konjungsi)
 pub fn refine_conjunction_time(jd_initial: f64, config: RefinementConfig) -> f64 {
     let mut jd = jd_initial;
@@ -54,12 +54,25 @@ fn compute_angle_and_derivative(jd: f64) -> (f64, f64) {
 }
 
 /// Hitung elongasi angle antara bulan-matahari pada waktu jd
+/// Returns the absolute elongation angle (0 to π)
 fn compute_elongation_angle(jd: f64) -> f64 {
     let moon_pos = crate::astronomy::moon_position(jd);
     let sun_pos = crate::astronomy::sun_position(jd);
-    let dlon = (moon_pos.longitude - sun_pos.longitude).to_radians();
 
-    normalize_angle(dlon)
+    // Calculate angular separation using spherical law of cosines
+    let dlon = (moon_pos.longitude - sun_pos.longitude).to_radians();
+    let dlat = (moon_pos.latitude - sun_pos.latitude).to_radians();
+
+    // Spherical law of cosines for angular separation
+    let moon_lat_rad = moon_pos.latitude.to_radians();
+    let sun_lat_rad = sun_pos.latitude.to_radians();
+
+    let cos_angle = moon_lat_rad.sin() * sun_lat_rad.sin()
+        + moon_lat_rad.cos() * sun_lat_rad.cos() * dlon.cos();
+
+    // Clamp to valid range and return angle
+    let cos_angle = cos_angle.clamp(-1.0, 1.0);
+    cos_angle.acos()
 }
 
 /// Normalize angle ke [-π, π]

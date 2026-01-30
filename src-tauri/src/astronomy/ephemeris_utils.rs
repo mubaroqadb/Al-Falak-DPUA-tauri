@@ -25,29 +25,36 @@ pub fn calculate_azimuth(hour_angle_deg: f64, declination_deg: f64, latitude_deg
 
 /// Calculate moonset time for a given location and date
 /// Returns hours from midnight in local time
+///
+/// CRITICAL FIX: This function now properly searches for when moon altitude
+/// crosses ZERO (horizon), not just minimum altitude.
 pub fn calculate_moonset(location: &GeoLocation, date: &GregorianDate) -> f64 {
     let jd_start = crate::calendar::gregorian_to_jd(date);
 
-    // Search for moonset (when moon altitude crosses horizon)
-    // Start from noon and search forward
-    let mut best_time = 18.0; // Default estimate
-    let mut min_altitude_diff = f64::MAX;
+    // First, find approximate moonset time by checking altitude sign change
+    let mut prev_alt =
+        super::topocentric::moon_altitude_topocentric(location, jd_start + (12.0 / 24.0));
+    let mut moonset_hour = 18.0; // Default
 
-    // Search in 1-minute increments around sunset time
-    for minutes in 0..(24 * 60) {
+    // Search in 1-minute increments from noon to midnight
+    for minutes in (12 * 60)..(24 * 60) {
         let hour = minutes as f64 / 60.0;
         let jd = jd_start + (hour / 24.0);
 
         let moon_alt = super::topocentric::moon_altitude_topocentric(location, jd);
-        let altitude_diff = moon_alt.abs(); // Distance from horizon
 
-        if altitude_diff < min_altitude_diff && hour > 12.0 {
-            min_altitude_diff = altitude_diff;
-            best_time = hour;
+        // Check if moon crosses horizon (positive to negative)
+        if prev_alt > 0.0 && moon_alt <= 0.0 {
+            // Found the crossing point, refine with linear interpolation
+            let fraction = prev_alt / (prev_alt - moon_alt);
+            moonset_hour = hour - (1.0 / 60.0) * (1.0 - fraction);
+            break;
         }
+
+        prev_alt = moon_alt;
     }
 
-    best_time
+    moonset_hour
 }
 
 /// Calculate lag time (difference between sunset and moonset)

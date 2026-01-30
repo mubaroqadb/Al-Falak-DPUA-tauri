@@ -175,13 +175,56 @@ pub struct HilalCalculationResult {
     pub timestamp: String,
 }
 
-/// Calculate hilal visibility untuk semua kriteria
+/// Calculate hilal visibility untuk semua kriteria (dengan input Gregorian)
 #[tauri::command]
 pub fn calculate_hilal_visibility_command(
     location: GeoLocation,
     year: i32,
     month: u8,
     day: u8,
+) -> Result<HilalCalculationResult, String> {
+    calculate_hilal_visibility_internal(location, year, month, day, false)
+}
+
+/// Calculate hilal visibility dengan input tanggal Hijriah
+/// Input: tahun, bulan Hijriah, dan hari (biasanya 29 atau 30 untuk akhir bulan)
+#[tauri::command]
+pub fn calculate_hilal_visibility_hijri_command(
+    location: GeoLocation,
+    hijri_year: i32,
+    hijri_month: u8,
+    hijri_day: u8,
+) -> Result<HilalCalculationResult, String> {
+    // Konversi tanggal Hijriah ke Gregorian
+    let hijri_date = crate::calendar::HijriDate::new(hijri_year, hijri_month, hijri_day);
+    let gregorian_date = crate::calendar::hijri_to_gregorian(&hijri_date);
+
+    println!(
+        "📅 Input Hijri: {}-{}-{} -> Gregorian: {}-{}-{}",
+        hijri_year,
+        hijri_month,
+        hijri_day,
+        gregorian_date.year,
+        gregorian_date.month,
+        gregorian_date.day
+    );
+
+    calculate_hilal_visibility_internal(
+        location,
+        gregorian_date.year,
+        gregorian_date.month,
+        gregorian_date.day as u8,
+        true, // Flag untuk menandai input dari Hijriah
+    )
+}
+
+/// Internal function untuk menghitung hilal visibility
+fn calculate_hilal_visibility_internal(
+    location: GeoLocation,
+    year: i32,
+    month: u8,
+    day: u8,
+    is_hijri_input: bool,
 ) -> Result<HilalCalculationResult, String> {
     // Log received location untuk debugging
     println!(
