@@ -20,12 +20,32 @@ impl Default for RefinementConfig {
 /// Mencari waktu ketika selisih longitude bulan-matahari = 0 (konjungsi)
 /// FIX: Menggunakan Longitude Difference sebagai target, bukan Elongasi,
 /// karena elongasi jarang mencapai 0 akibat latitude bulan.
+/// FIX: Menangani kasus derivative = 0 untuk menghindari NaN.
 pub fn refine_conjunction_time(jd_initial: f64, config: RefinementConfig) -> f64 {
     let mut jd = jd_initial;
     let mut iterations = 0;
+    let mut nan_count = 0;
 
     loop {
         let (longitude_diff, derivative) = compute_longitude_difference_and_derivative(jd);
+
+        // Cek jika derivative terlalu kecil atau invalid
+        if derivative.abs() < 1e-10 || !derivative.is_finite() {
+            // Gunakan estimasi sederhana: rata-rata synodic month motion adalah ~12.2 derajat/hari
+            // Atau sekitar 0.5 derajat/jam
+            // Fallback: tambahkan offset kecil untuk melewati konjungsi
+            if longitude_diff > 0.0 {
+                jd -= 0.01; // mundur jika bulan masih di depan matahari
+            } else {
+                jd += 0.01; // maju jika bulan sudah di belakang matahari
+            }
+            nan_count += 1;
+            if nan_count > 5 {
+                break; // Keluar setelah beberapa upaya fallback
+            }
+            iterations += 1;
+            continue;
+        }
 
         if should_stop(derivative, iterations, &config) {
             break;
@@ -33,6 +53,22 @@ pub fn refine_conjunction_time(jd_initial: f64, config: RefinementConfig) -> f64
 
         // Newton-Raphson: x_new = x - f(x)/f'(x)
         let correction = -longitude_diff / derivative;
+
+        // Jika correction menghasilkan NaN atau infinity, gunakan fallback
+        if !correction.is_finite() {
+            if longitude_diff > 0.0 {
+                jd -= 0.01;
+            } else {
+                jd += 0.01;
+            }
+            nan_count += 1;
+            if nan_count > 5 {
+                break;
+            }
+            iterations += 1;
+            continue;
+        }
+
         jd += correction;
         iterations += 1;
 
