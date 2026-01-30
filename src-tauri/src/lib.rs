@@ -188,6 +188,10 @@ fn get_prayer_times(
     map.insert("isya".to_string(), times.isya);
     map.insert("tengah_malam".to_string(), times.tengah_malam);
     map.insert("p3_malam".to_string(), times.p3_malam);
+    map.insert(
+        "day_name".to_string(),
+        crate::calendar::javanese::get_full_day_name(calendar::gregorian_to_jd(&parsed_date)),
+    );
 
     Ok(map)
 }
@@ -300,6 +304,7 @@ fn get_detailed_hilal_data(
         refraction: 0.6,
         arcv: elongation - 5.0,
         crescent_width: 0.5,
+        day_name: crate::calendar::javanese::get_full_day_name(jd),
     })
 }
 

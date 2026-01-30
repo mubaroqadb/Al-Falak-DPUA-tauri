@@ -635,6 +635,9 @@ fn calculate_detailed_ephemeris(
         crescent_position_topo: moon_azimuth_topo - sun_azimuth_topo,
         observation_date_hijri: crate::calendar::gregorian_to_hijri(observation_date)
             .to_formatted_string(),
+        day_name: crate::calendar::javanese::get_full_day_name(crate::calendar::gregorian_to_jd(
+            observation_date,
+        )),
     }
 }
 

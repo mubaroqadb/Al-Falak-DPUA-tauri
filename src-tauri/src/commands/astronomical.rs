@@ -72,6 +72,7 @@ pub fn get_astronomical_data_command(
         moon_altitude,
         moon_distance_km,
         sunset_time: sunset_hour,
+        day_name: crate::calendar::javanese::get_full_day_name(jd),
         timestamp: chrono::Local::now().to_rfc3339(),
     })
 }
