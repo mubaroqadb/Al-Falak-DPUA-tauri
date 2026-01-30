@@ -20,6 +20,7 @@ import './components/LocationSelector.js';
 import './components/LanguageSwitcher.js';
 import './components/ThemeToggle.js';
 import './components/AboutModal.js';
+import './components/HijriDateInput.js';
 
 
 // Theme Management

@@ -112,5 +112,14 @@
     "english": "English",
     "indonesian": "Bahasa Indonesia",
     "arabic": "العربية"
+  },
+  "hijriDate": {
+    "title": "Tanggal Hijriyah",
+    "gregorian": "Masehi",
+    "hijri": "Hijriyah",
+    "day": "Tanggal",
+    "month": "Bulan",
+    "year": "Tahun",
+    "arabicYearSuffix": "H"
   }
 }

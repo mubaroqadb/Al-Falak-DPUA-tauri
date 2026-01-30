@@ -73,11 +73,15 @@ export class PrayerTimesDisplay extends HTMLElement {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     }) : 'N/A';
 
+    // Get Hari Jawa (Javanese day name) from backend
+    const hariJawa = this.prayerTimes.day_name || '';
+
     return `
       <div class="prayer-schedule">
         <div class="schedule-header">
           <h4>Jadwal Shalat</h4>
-          <p>${dateStr}</p>
+          <p class="date-display">${dateStr}</p>
+          ${hariJawa ? `<p class="hari-jawa">${hariJawa}</p>` : ''}
           <small>${this.formatLocation()}</small>
         </div>
 
@@ -136,6 +140,21 @@ export class PrayerTimesDisplay extends HTMLElement {
         .prayer-item.ashr { border-left-color: #ff922b; }
         .prayer-item.maghrib { border-left-color: #fa5252; }
         .prayer-item.isya { border-left-color: #5c7cfa; }
+
+        /* Hari Jawa styling */
+        .hari-jawa {
+          font-size: 1.1em;
+          font-weight: 600;
+          color: #5c7cfa;
+          margin: 4px 0;
+          padding: 6px 12px;
+          background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+          border-radius: 6px;
+          display: inline-block;
+        }
+        .date-display {
+          color: #868e96;
+        }
       </style>
     `;
   }

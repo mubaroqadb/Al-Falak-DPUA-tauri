@@ -335,4 +335,118 @@ export class HilalAPI {
       throw new Error(`Failed to run validation tests: ${error.message}`);
     }
   }
+
+  /**
+   * Get prayer times using Hijri date input
+   * @param {Object} params - Prayer times parameters
+   * @param {Object} params.location - Location object
+   * @param {number} params.hijriYear - Hijri year
+   * @param {number} params.hijriMonth - Hijri month (1-12)
+   * @param {number} params.hijriDay - Hijri day (1-30)
+   * @returns {Promise<Object>} Prayer times data
+   */
+  async getPrayerTimesHijri(params) {
+    try {
+      console.log('API Call - getPrayerTimesHijri:', params);
+      const invoke = await getInvoke();
+      const result = await invoke('get_prayer_times_hijri', {
+        location: params.location,
+        hijri_year: params.hijriYear,
+        hijri_month: params.hijriMonth,
+        hijri_day: params.hijriDay
+      });
+
+      console.log('API Response - getPrayerTimesHijri:', result);
+      return result;
+    } catch (error) {
+      console.error('API Error - getPrayerTimesHijri:', error);
+      throw new Error(`Failed to get prayer times for Hijri date: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get visibility zones using Hijri date input
+   * @param {Object} params - Zone calculation parameters
+   * @param {number} params.hijriYear - Hijri year
+   * @param {number} params.hijriMonth - Hijri month (1-12)
+   * @param {number} params.hijriDay - Hijri day (1-30)
+   * @param {string} params.criteria - Visibility criteria
+   * @param {number} params.step_degrees - Grid resolution in degrees
+   * @returns {Promise<Array>} Array of visibility zones
+   */
+  async getVisibilityZonesHijri(params) {
+    try {
+      console.log('API Call - getVisibilityZonesHijri:', params);
+      const invoke = await getInvoke();
+      const result = await invoke('calculate_visibility_zones_hijri', {
+        hijri_year: params.hijriYear,
+        hijri_month: params.hijriMonth,
+        hijri_day: params.hijriDay,
+        criteria: params.criteria,
+        step_degrees: params.step_degrees || 2.0
+      });
+
+      console.log('API Response - getVisibilityZonesHijri:', result);
+      return result;
+    } catch (error) {
+      console.error('API Error - getVisibilityZonesHijri:', error);
+      throw new Error(`Failed to get visibility zones for Hijri date: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get detailed hilal data using Hijri date input
+   * @param {Object} params - Parameters
+   * @param {Object} params.location - Location object
+   * @param {number} params.hijriYear - Hijri year
+   * @param {number} params.hijriMonth - Hijri month (1-12)
+   * @param {number} params.hijriDay - Hijri day (1-30)
+   * @returns {Promise<Object>} Detailed hilal data
+   */
+  async getDetailedHilalDataHijri(params) {
+    try {
+      console.log('API Call - getDetailedHilalDataHijri:', params);
+      const invoke = await getInvoke();
+      const result = await invoke('get_detailed_hilal_data_hijri', {
+        location: params.location,
+        hijri_year: params.hijriYear,
+        hijri_month: params.hijriMonth,
+        hijri_day: params.hijriDay
+      });
+
+      console.log('API Response - getDetailedHilalDataHijri:', result);
+      return result;
+    } catch (error) {
+      console.error('API Error - getDetailedHilalDataHijri:', error);
+      throw new Error(`Failed to get detailed hilal data for Hijri date: ${error.message}`);
+    }
+  }
+
+  /**
+   * Calculate hilal visibility for all criteria using Hijri date input
+   * @param {Object} params - Calculation parameters
+   * @param {Object} params.location - Location object {latitude, longitude, elevation, timezone}
+   * @param {number} params.hijriYear - Hijri year
+   * @param {number} params.hijriMonth - Hijri month (1-12)
+   * @param {number} params.hijriDay - Hijri day (1-30)
+   * @returns {Promise<Object>} All criteria results with visibility
+   */
+  async calculateHilalAllCriteriaHijri(params) {
+    try {
+      console.log('API Call - calculateHilalAllCriteriaHijri:', params);
+      const invoke = await getInvoke();
+      const result = await invoke('calculate_hilal_visibility_hijri_command', {
+        location: params.location,
+        hijri_year: params.hijriYear,
+        hijri_month: params.hijriMonth,
+        hijri_day: params.hijriDay
+      });
+
+      console.log('API Response - calculateHilalAllCriteriaHijri:', result);
+      return result;
+    } catch (error) {
+      console.error('API Error - calculateHilalAllCriteriaHijri:', error);
+      throw new Error(`Failed to calculate hilal for Hijri date: ${error.message}`);
+    }
+  }
 }

@@ -64,7 +64,7 @@
             <div class="card glass-panel shadow-2xl">
               <div class="card-body">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  <!-- Date Input -->
+                  <!-- Date Input (Gregorian/Hijri) -->
                   <div class="form-control">
                     <label class="label">
                       <span class="label-text font-semibold flex items-center gap-2">
@@ -72,7 +72,7 @@
                         <span data-i18n="labels.date">Calculation Date</span>
                       </span>
                     </label>
-                    <input type="date" id="calc-date" class="input input-bordered input-primary" />
+                    <hijri-date-input id="main-date-input"></hijri-date-input>
                   </div>
 
                   <!-- New Integrated Location Selector -->

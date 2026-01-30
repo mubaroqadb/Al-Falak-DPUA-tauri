@@ -16,6 +16,7 @@ export class HilalApp {
     this.resultsDisplay = null;
     this.criteriaResultsDisplay = null;
     this.detailedEphemerisDisplay = null;
+    this.hijriDateInput = null;
 
     // Current application state
     this.currentLocation = {
@@ -27,8 +28,10 @@ export class HilalApp {
     };
 
     this.currentDate = new Date();
+    this.currentHijriDate = { hijriYear: 1446, hijriMonth: 7, hijriDay: 1 };
     this.selectedCriteria = 'MABIMS';
     this.currentCalculation = null;
+    this.dateMode = 'gregorian'; // 'gregorian' or 'hijri'
   }
 
   async init() {
@@ -51,7 +54,7 @@ export class HilalApp {
 
   async waitForComponents() {
     // Wait for custom elements to be defined
-    const components = ['map-visualization', 'criteria-panel', 'results-display', 'criteria-results-display', 'validation-panel', 'detailed-ephemeris-display', 'prayer-times-display'];
+    const components = ['map-visualization', 'criteria-panel', 'results-display', 'criteria-results-display', 'validation-panel', 'detailed-ephemeris-display', 'prayer-times-display', 'hijri-date-input'];
 
     for (const component of components) {
       await customElements.whenDefined(component);
@@ -68,6 +71,7 @@ export class HilalApp {
     this.prayerTimesDisplay = document.querySelector('prayer-times-display');
     this.calculateButton = document.querySelector('calculate-button');
     this.locationSelector = document.querySelector('location-selector');
+    this.hijriDateInput = document.querySelector('hijri-date-input');
   }
 
   setupEventListeners() {
@@ -225,12 +229,31 @@ export class HilalApp {
       this.updateVisibilityZones();
     });
 
-    // Listen for date changes (could be from a date picker component in the future)
-    document.addEventListener('date-changed', (event) => {
-      this.currentDate = event.detail.date;
-      console.log('Date changed to:', this.currentDate);
-      // Don't auto-update, wait for user to click Calculate
-    });
+    // Listen for date changes from HijriDateInput component
+    if (this.hijriDateInput) {
+      this.hijriDateInput.addEventListener('date-changed', (event) => {
+        if (event.detail.mode === 'gregorian') {
+          this.dateMode = 'gregorian';
+          this.currentDate = event.detail.date;
+          console.log('Date changed (Gregorian):', this.currentDate);
+        } else {
+          this.dateMode = 'hijri';
+          this.currentHijriDate = {
+            hijriYear: event.detail.hijriYear,
+            hijriMonth: event.detail.hijriMonth,
+            hijriDay: event.detail.hijriDay
+          };
+          console.log('Date changed (Hijri):', this.currentHijriDate);
+        }
+        // Don't auto-update, wait for user to click Calculate
+      });
+
+      // Listen for date mode changes
+      this.hijriDateInput.addEventListener('date-mode-changed', (event) => {
+        this.dateMode = event.detail.mode;
+        console.log('Date mode changed to:', this.dateMode);
+      });
+    }
   }
 
   async loadInitialData() {
@@ -269,13 +292,26 @@ export class HilalApp {
     try {
       console.log('Updating visibility zones...');
 
-      const params = {
-        date: this.currentDate,
-        criteria: this.selectedCriteria,
-        step_degrees: 2.0 // Restored High Fidelity (Async renderer handles this smoothly now)
-      };
-
-      const visibilityData = await this.api.getVisibilityZones(params);
+      let visibilityData;
+      if (this.dateMode === 'hijri') {
+        // Use Hijri date input
+        const params = {
+          hijriYear: this.currentHijriDate.hijriYear,
+          hijriMonth: this.currentHijriDate.hijriMonth,
+          hijriDay: this.currentHijriDate.hijriDay,
+          criteria: this.selectedCriteria,
+          step_degrees: 2.0
+        };
+        visibilityData = await this.api.getVisibilityZonesHijri(params);
+      } else {
+        // Use Gregorian date input
+        const params = {
+          date: this.currentDate,
+          criteria: this.selectedCriteria,
+          step_degrees: 2.0
+        };
+        visibilityData = await this.api.getVisibilityZones(params);
+      }
 
       if (this.mapVisualization) {
         // Await the chunked rendering process
@@ -297,15 +333,30 @@ export class HilalApp {
     try {
       console.log('Mosque: Updating prayer times...');
       
-      const params = {
-        location: this.currentLocation,
-        date: this.currentDate
-      };
-
-      const prayerTimes = await this.api.getPrayerTimes(params);
+      let prayerTimes;
+      if (this.dateMode === 'hijri') {
+        const params = {
+          location: this.currentLocation,
+          hijriYear: this.currentHijriDate.hijriYear,
+          hijriMonth: this.currentHijriDate.hijriMonth,
+          hijriDay: this.currentHijriDate.hijriDay
+        };
+        prayerTimes = await this.api.getPrayerTimesHijri(params);
+      } else {
+        const params = {
+          location: this.currentLocation,
+          date: this.currentDate
+        };
+        prayerTimes = await this.api.getPrayerTimes(params);
+      }
       
       if (this.prayerTimesDisplay) {
-        this.prayerTimesDisplay.updateData(prayerTimes, this.currentLocation, this.currentDate);
+        if (this.dateMode === 'hijri') {
+          // Pass hijri date info to display
+          this.prayerTimesDisplay.updateData(prayerTimes, this.currentLocation, this.currentHijriDate);
+        } else {
+          this.prayerTimesDisplay.updateData(prayerTimes, this.currentLocation, this.currentDate);
+        }
       }
       
       console.log('Prayer times updated:', prayerTimes);
@@ -327,23 +378,39 @@ export class HilalApp {
     try {
       console.log('Updating calculations for location:', this.currentLocation);
       console.log('Location details - lat:', this.currentLocation.latitude, 'lon:', this.currentLocation.longitude);
+      console.log('Date mode:', this.dateMode);
 
-      // Extract date components
-      const year = this.currentDate.getFullYear();
-      const month = this.currentDate.getMonth() + 1;
-      const day = this.currentDate.getDate();
+      let result;
 
-      const params = {
-        location: this.currentLocation,
-        year,
-        month,
-        day
-      };
+      if (this.dateMode === 'hijri') {
+        // Use Hijri date input
+        const params = {
+          location: this.currentLocation,
+          hijriYear: this.currentHijriDate.hijriYear,
+          hijriMonth: this.currentHijriDate.hijriMonth,
+          hijriDay: this.currentHijriDate.hijriDay
+        };
+        console.log('Sending Hijri params to backend:', JSON.stringify(params, null, 2));
 
-      console.log('Sending params to backend:', JSON.stringify(params, null, 2));
+        // Calculate for all criteria using Hijri date
+        result = await this.api.calculateHilalAllCriteriaHijri(params);
+      } else {
+        // Use Gregorian date input (original behavior)
+        const year = this.currentDate.getFullYear();
+        const month = this.currentDate.getMonth() + 1;
+        const day = this.currentDate.getDate();
 
-      // Calculate for all criteria
-      const result = await this.api.calculateHilalAllCriteria(params);
+        const params = {
+          location: this.currentLocation,
+          year,
+          month,
+          day
+        };
+        console.log('Sending Gregorian params to backend:', JSON.stringify(params, null, 2));
+
+        // Calculate for all criteria
+        result = await this.api.calculateHilalAllCriteria(params);
+      }
 
       // Validate result structure
       if (!result || typeof result !== 'object') {
