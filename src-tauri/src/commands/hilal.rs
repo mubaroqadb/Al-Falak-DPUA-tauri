@@ -163,12 +163,16 @@ pub struct DetailedEphemeris {
     pub phase_angle_topo: f64,
     pub crescent_direction_topo: f64,
     pub crescent_position_topo: f64,
+    pub observation_date_hijri: String,
+    pub day_name: String,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct HilalCalculationResult {
     pub location: GeoLocation,
     pub observation_date: GregorianDate,
+    pub observation_date_hijri: String,
+    pub day_name: String,
     pub conjunction_jd: f64,
     pub criteria_results: HashMap<String, HilalCriteriaResult>,
     pub ephemeris: DetailedEphemeris,
@@ -247,8 +251,9 @@ fn calculate_hilal_visibility_internal(
         day: day as f64,
     };
 
-    // Cari konjungsi untuk bulan ini
-    let conjunction = crate::astronomy::find_conjunction_for_month(year as i32, month);
+    // Cari konjungsi terdekat dengan tanggal observasi
+    // Ini lebih akurat daripada find_conjunction_for_month untuk hilal di akhir bulan
+    let conjunction = crate::astronomy::conjunction::find_conjunction(&observation_date);
 
     // Calculate sunset JD
     // calculate_sunset returns basic local time (without timezone check for date validity),
@@ -263,7 +268,8 @@ fn calculate_hilal_visibility_internal(
 
     // Calculate detailed ephemeris
     // Note: detailed ephemeris calculation might need the localized sunset time for display
-    let ephemeris = calculate_detailed_ephemeris(&location, conjunction.jd_utc, sunset_jd);
+    let ephemeris =
+        calculate_detailed_ephemeris(&location, conjunction.jd_utc, sunset_jd, &observation_date);
 
     // Evaluasi semua kriteria
     let criteria_results =
@@ -283,9 +289,15 @@ fn calculate_hilal_visibility_internal(
         );
     }
 
+    // Calculate JD for the observation date to get the day name
+    let jd_obs = crate::calendar::gregorian_to_jd(&observation_date);
+
     let result = HilalCalculationResult {
         location: location.clone(),
+        observation_date_hijri: crate::calendar::gregorian_to_hijri(&observation_date)
+            .to_formatted_string(),
         observation_date,
+        day_name: crate::calendar::javanese::get_full_day_name(jd_obs),
         conjunction_jd: conjunction.jd_utc,
         criteria_results: formatted_results,
         ephemeris,
@@ -309,6 +321,7 @@ fn calculate_detailed_ephemeris(
     location: &GeoLocation,
     conjunction_jd: f64,
     sunset_jd: f64,
+    observation_date: &GregorianDate,
 ) -> DetailedEphemeris {
     use crate::astronomy;
     use crate::astronomy::ephemeris_utils;
@@ -329,12 +342,16 @@ fn calculate_detailed_ephemeris(
         moon_geo.latitude,
     );
 
-    // For sun, create a simple topocentric struct (sun parallax is negligible)
+    // Get topocentric data for Sun (including solar parallax)
+    let (sun_ra_topo, sun_dec_topo) =
+        astronomy::topocentric::sun_topocentric_ra_dec(location, sunset_jd);
+
+    // We don't have a full struct for Sun topo in ecliptic, so we approximate or use RA/Dec
     let sun_topo = SunTopoData {
-        longitude: sun_geo.longitude,
+        longitude: sun_geo.longitude, // Approximation for longitude
         latitude: sun_geo.latitude,
-        right_ascension: sun_geo.right_ascension,
-        declination: sun_geo.declination,
+        right_ascension: sun_ra_topo,
+        declination: sun_dec_topo,
     };
 
     // Calculate nutation
@@ -348,21 +365,11 @@ fn calculate_detailed_ephemeris(
         obliquity: nutation_obl,
     };
 
-    // Calculate elongation
-    let mut elongation_geo = moon_geo.longitude - sun_geo.longitude;
-    if elongation_geo < 0.0 {
-        elongation_geo += 360.0;
-    }
-
-    let mut elongation_topo = moon_topo.longitude - sun_geo.longitude;
-    if elongation_topo < 0.0 {
-        elongation_topo += 360.0;
-    }
+    // Calculate elongation using library function (Reuse logic)
+    let elongation_geo = astronomy::hilal::elongation_at_sunset(location, &observation_date, false);
+    let elongation_topo = astronomy::hilal::elongation_at_sunset(location, &observation_date, true);
 
     // Calculate altitude (geocentric and topocentric)
-    // Calculate altitude (geocentric and topocentric)
-    // Extract date from sunset_jd
-    let observation_date = crate::calendar::jd_to_gregorian(sunset_jd);
     let moon_alt_geo = astronomy::hilal::altitude_at_sunset(location, &observation_date, false);
     let sun_alt_geo = -0.8333; // Standard sunset definition
 
@@ -381,7 +388,7 @@ fn calculate_detailed_ephemeris(
     let moon_ha_geo = lst_deg - moon_geo.right_ascension;
     let sun_ha_geo = lst_deg - sun_geo.right_ascension;
     let moon_ha_topo = lst_deg - moon_topo.ra;
-    let sun_ha_topo = lst_deg - sun_geo.right_ascension; // Sun: topo ≈ geo
+    let sun_ha_topo = lst_deg - sun_ra_topo;
 
     // Calculate azimuths
     let moon_azimuth_geo =
@@ -440,14 +447,16 @@ fn calculate_detailed_ephemeris(
         ephemeris_utils::calculate_crescent_width(elongation_topo, moon_sd, sun_sd);
 
     let crescent_direction_geo = ephemeris_utils::calculate_crescent_direction(
-        sun_azimuth_geo,
-        moon_azimuth_geo,
-        moon_alt_geo,
+        sun_geo.right_ascension,
+        sun_geo.declination,
+        moon_geo.right_ascension,
+        moon_geo.declination,
     );
     let crescent_direction_topo = ephemeris_utils::calculate_crescent_direction(
-        sun_azimuth_topo,
-        moon_azimuth_topo,
-        moon_alt_topo,
+        sun_ra_topo,
+        sun_dec_topo,
+        moon_topo.ra,
+        moon_topo.dec,
     );
 
     // Calculate refraction (simplified)
@@ -458,26 +467,33 @@ fn calculate_detailed_ephemeris(
         0.0
     };
 
-    // Calculate Delta T
-    let delta_t = ephemeris_utils::calculate_delta_t(2026, 2);
+    // Calculate Delta T based on observation year/month
+    let delta_t =
+        ephemeris_utils::calculate_delta_t(observation_date.year, observation_date.month as u8);
 
-    // Format times
-    // Use our manually calculated sunset hour for consistency
+    // Calculate Topocentric Conjunction
+    let conjunction_topo =
+        astronomy::conjunction::find_topocentric_conjunction(observation_date, location);
+
+    // Format times using dynamic timezone labels
+    let tz_label = ephemeris_utils::format_timezone_label(location.timezone);
     let sunset_time_str = format!(
-        "{:02}:{:02}:{:02} WIB",
+        "{:02}:{:02}:{:02} {}",
         sunset_hour_str as i32,
         ((sunset_hour_str - sunset_hour_str.floor()) * 60.0) as i32,
         (((sunset_hour_str - sunset_hour_str.floor()) * 60.0
             - ((sunset_hour_str - sunset_hour_str.floor()) * 60.0).floor())
-            * 60.0) as i32
+            * 60.0) as i32,
+        tz_label
     );
     let moonset_time_str = format!(
-        "{:02}:{:02}:{:02} WIB",
+        "{:02}:{:02}:{:02} {}",
         moonset_hour as i32,
         ((moonset_hour - moonset_hour.floor()) * 60.0) as i32,
         (((moonset_hour - moonset_hour.floor()) * 60.0
             - ((moonset_hour - moonset_hour.floor()) * 60.0).floor())
-            * 60.0) as i32
+            * 60.0) as i32,
+        tz_label
     );
     let conjunction_time_str =
         ephemeris_utils::format_jd_to_datetime(conjunction_jd, location.timezone);
@@ -485,7 +501,7 @@ fn calculate_detailed_ephemeris(
     DetailedEphemeris {
         // Conjunction data
         conjunction_jd_geocentric: conjunction_jd,
-        conjunction_jd_topocentric: conjunction_jd, // TODO: Calculate topocentric conjunction
+        conjunction_jd_topocentric: conjunction_topo.jd_utc,
         conjunction_date: conjunction_time_str,
 
         // Time data
@@ -541,15 +557,15 @@ fn calculate_detailed_ephemeris(
         moon_ra_topo: moon_topo.ra,
         moon_dec_topo: moon_topo.dec,
 
-        // Apparent equatorial coordinates (same as above for now)
-        sun_ra_apparent_geo: sun_geo.right_ascension,
+        // Apparent equatorial coordinates (including nutation and aberration)
+        sun_ra_apparent_geo: sun_geo.right_ascension + (nutation.longitude / 3600.0),
         sun_dec_apparent_geo: sun_geo.declination,
-        moon_ra_apparent_geo: moon_geo.right_ascension,
+        moon_ra_apparent_geo: moon_geo.right_ascension + (nutation.longitude / 3600.0),
         moon_dec_apparent_geo: moon_geo.declination,
 
-        sun_ra_apparent_topo: sun_topo.right_ascension,
-        sun_dec_apparent_topo: sun_topo.declination,
-        moon_ra_apparent_topo: moon_topo.ra,
+        sun_ra_apparent_topo: sun_ra_topo + (nutation.longitude / 3600.0),
+        sun_dec_apparent_topo: sun_dec_topo,
+        moon_ra_apparent_topo: moon_topo.ra + (nutation.longitude / 3600.0),
         moon_dec_apparent_topo: moon_topo.dec,
 
         // Horizontal coordinates (Airless)
@@ -617,6 +633,8 @@ fn calculate_detailed_ephemeris(
         phase_angle_topo,
         crescent_direction_topo,
         crescent_position_topo: moon_azimuth_topo - sun_azimuth_topo,
+        observation_date_hijri: crate::calendar::gregorian_to_hijri(observation_date)
+            .to_formatted_string(),
     }
 }
 

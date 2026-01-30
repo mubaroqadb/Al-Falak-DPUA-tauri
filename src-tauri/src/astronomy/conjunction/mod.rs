@@ -10,18 +10,15 @@
 //! - Jean Meeus: Astronomical Algorithms, Chapter 49
 //! - Port dari: Astronomy.bas & JeanMeeus.bas (VB6)
 
-mod types;
+mod calculations;
 mod estimation;
 mod refinement;
-mod calculations;
+mod types;
 
 // Re-export public API
-pub use types::Conjunction;
 pub use calculations::{
-    find_conjunction,
-    find_conjunction_with_config,
-    find_conjunction_for_month,
-    find_conjunction_before,
-    find_conjunction_after,
+    find_conjunction, find_conjunction_after, find_conjunction_before, find_conjunction_for_month,
+    find_conjunction_with_config, find_topocentric_conjunction,
 };
 pub use refinement::RefinementConfig;
+pub use types::Conjunction;

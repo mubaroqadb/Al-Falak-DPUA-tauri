@@ -193,6 +193,22 @@ fn get_prayer_times(
 }
 
 #[tauri::command]
+fn get_prayer_times_hijri(
+    location: GeoLocation,
+    hijri_year: i32,
+    hijri_month: u8,
+    hijri_day: u8,
+) -> Result<std::collections::HashMap<String, String>, String> {
+    let hijri_date = crate::calendar::HijriDate::new(hijri_year, hijri_month, hijri_day);
+    let gregorian_date = crate::calendar::hijri_to_gregorian(&hijri_date);
+    let date_str = format!(
+        "{:04}-{:02}-{:02}T12:00:00Z",
+        gregorian_date.year, gregorian_date.month, gregorian_date.day as u8
+    );
+    get_prayer_times(location, date_str)
+}
+
+#[tauri::command]
 fn calculate_visibility_zones(
     date: String,
     criteria: String,
@@ -214,6 +230,21 @@ fn calculate_visibility_zones(
     let jd = calendar::gregorian_to_jd(&gregorian);
 
     // Call the calculation function
+    let zones = map::calculate_visibility_zones_internal(jd, &criteria, step_degrees);
+    Ok(zones)
+}
+
+#[tauri::command]
+fn calculate_visibility_zones_hijri(
+    hijri_year: i32,
+    hijri_month: u8,
+    hijri_day: u8,
+    criteria: String,
+    step_degrees: f64,
+) -> Result<Vec<map::VisibilityZone>, String> {
+    let hijri_date = crate::calendar::HijriDate::new(hijri_year, hijri_month, hijri_day);
+    let gregorian_date = crate::calendar::hijri_to_gregorian(&hijri_date);
+    let jd = calendar::gregorian_to_jd(&gregorian_date);
     let zones = map::calculate_visibility_zones_internal(jd, &criteria, step_degrees);
     Ok(zones)
 }
@@ -273,6 +304,23 @@ fn get_detailed_hilal_data(
 }
 
 #[tauri::command]
+fn get_detailed_hilal_data_hijri(
+    location: GeoLocation,
+    hijri_year: i32,
+    hijri_month: u8,
+    hijri_day: u8,
+) -> Result<map::DetailedHilalData, String> {
+    let hijri_date = crate::calendar::HijriDate::new(hijri_year, hijri_month, hijri_day);
+    let gregorian_date = crate::calendar::hijri_to_gregorian(&hijri_date);
+    get_detailed_hilal_data(
+        location,
+        gregorian_date.year,
+        gregorian_date.month,
+        gregorian_date.day as u8,
+    )
+}
+
+#[tauri::command]
 fn get_ephemeris_data(
     location: GeoLocation,
     start_date: String,
@@ -287,6 +335,19 @@ fn get_ephemeris_data(
     Ok(vec![])
 }
 
+#[tauri::command]
+fn get_ephemeris_data_hijri(
+    location: GeoLocation,
+    hijri_year: i32,
+    hijri_month: u8,
+) -> Result<Vec<AstronomicalData>, String> {
+    // Return placeholder
+    let _loc = location;
+    let _y = hijri_year;
+    let _m = hijri_month;
+    Ok(vec![])
+}
+
 // Replaced by commands::validation::validate_location_command
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -298,16 +359,22 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             greet,
             crate::commands::hilal::calculate_hilal_visibility_command,
+            crate::commands::hilal::calculate_hilal_visibility_hijri_command,
             crate::commands::astronomical::get_astronomical_data_command,
+            crate::commands::astronomical::get_astronomical_data_hijri_command,
             crate::commands::calendar_cmd::gregorian_to_hijri_command,
             crate::commands::calendar_cmd::hijri_to_gregorian_command,
             crate::commands::validation::validate_location_command,
             crate::commands::validation::run_validation_tests_command,
             calculate_visibility_zones,
+            calculate_visibility_zones_hijri,
             get_detailed_hilal_data,
+            get_detailed_hilal_data_hijri,
             get_ephemeris_data,
+            get_ephemeris_data_hijri,
             calculate_qibla_direction,
             get_prayer_times,
+            get_prayer_times_hijri,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -389,9 +389,9 @@ pub fn sun_topocentric_ra_dec(location: &GeoLocation, jd: f64) -> (f64, f64) {
 /// Refraction correction in arcminutes (add to altitude)
 fn atmospheric_refraction(h0: f64) -> f64 {
     // VB6: Default pressure 1010 mb, temperature 10°C
-    // For simplicity, use standard conditions
+    // However, VB6 RefractionApparentAltitude example uses T=27°C (Indonesia average)
     const P: f64 = 1010.0;
-    const T: f64 = 10.0;
+    const T: f64 = 27.0;
 
     // VB6 seems to cap refraction at the horizon (0 degrees)
     // rather than extrapolating it for geometric altitudes below the horizon.

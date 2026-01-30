@@ -36,6 +36,7 @@ pub struct DetailedHilalData {
     pub refraction: f64,
     pub arcv: f64,
     pub crescent_width: f64,
+    pub day_name: String,
 }
 
 /// Struktur untuk kurva jadwal shalat di peta
@@ -56,7 +57,7 @@ pub fn calculate_visibility_zones_internal(
     // 1. Cari Konjungsi terdekat (sebelum tanggal observasi)
     // Map visibilitas selalu dihitung relatif terhadap maghrib pertama setelah ijtima'
     let obs_date = crate::calendar::jd_to_gregorian(observation_jd);
-    let conjunction = crate::astronomy::find_conjunction_for_month(obs_date.year, obs_date.month);
+    let conjunction = crate::astronomy::conjunction::find_conjunction(&obs_date);
     let conj_jd = conjunction.jd_utc;
 
     // Grid untuk latitude dan longitude

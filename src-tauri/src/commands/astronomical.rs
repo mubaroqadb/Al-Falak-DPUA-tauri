@@ -13,6 +13,7 @@ pub struct AstronomicalDataResponse {
     pub moon_altitude: f64,    // Altitude di atas horizon
     pub moon_distance_km: f64, // Distance ke bumi
     pub sunset_time: f64,      // Waktu maghrib dalam jam
+    pub day_name: String,      // Hari + Pasaran (e.g. "Senin Legi")
     pub timestamp: String,
 }
 
@@ -73,6 +74,39 @@ pub fn get_astronomical_data_command(
         sunset_time: sunset_hour,
         timestamp: chrono::Local::now().to_rfc3339(),
     })
+}
+
+/// Get astronomical data menggunakan tanggal Hijriah
+#[tauri::command]
+pub fn get_astronomical_data_hijri_command(
+    location: GeoLocation,
+    hijri_year: i32,
+    hijri_month: u8,
+    hijri_day: u8,
+    hour: f64,
+    minute: f64,
+) -> Result<AstronomicalDataResponse, String> {
+    // Validate time input
+    if hour < 0.0 || hour >= 24.0 {
+        return Err("Invalid hour (0-23)".to_string());
+    }
+    if minute < 0.0 || minute >= 60.0 {
+        return Err("Invalid minute (0-59)".to_string());
+    }
+
+    // Convert Hijri to Gregorian
+    let hijri_date = crate::calendar::HijriDate::new(hijri_year, hijri_month, hijri_day);
+    let gregorian_date = crate::calendar::hijri_to_gregorian(&hijri_date);
+
+    // Call the Gregorian version with the converted date
+    get_astronomical_data_command(
+        location,
+        gregorian_date.year,
+        gregorian_date.month,
+        gregorian_date.day as u8,
+        hour,
+        minute,
+    )
 }
 
 #[cfg(test)]

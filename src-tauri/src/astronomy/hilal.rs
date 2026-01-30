@@ -136,10 +136,17 @@ pub fn elongation_at_sunset(
 /// # Returns
 /// Tinggi bulan dalam derajat (negatif jika di bawah horizon)
 pub fn altitude_at_sunset(location: &GeoLocation, date: &GregorianDate, topocentric: bool) -> f64 {
-    let jd = crate::calendar::gregorian_to_jd(date);
-
-    // Konversi ke Julian Day pada waktu maghrib
+    // Hitung waktu maghrib
     let sunset_hour = crate::astronomy::calculate_sunset(location, date);
+
+    // Modifikasi: Pastikan JD dasar hanya mewakili tanggal (dengan membuang bagian pecahan hari)
+    // untuk menghindari double-counting waktu sunset jika GregorianDate mengandung waktu.
+    let date_only = crate::GregorianDate {
+        year: date.year,
+        month: date.month,
+        day: date.day.floor(),
+    };
+    let jd = crate::calendar::gregorian_to_jd(&date_only);
 
     // Convert sunset from local time to UT before adding to JD
     let sunset_hour_ut = sunset_hour - location.timezone;
@@ -261,7 +268,7 @@ pub fn crescent_width_at_sunset(
     let _moon_pos = crate::astronomy::moon_position(sunset_jd);
     let _sun_pos = crate::astronomy::sun_position(sunset_jd);
 
-    // Hitung jarak sudut bulan-matahari (elongasi)
+    // Hitung jarak sudut bulan-matahari (elongasi) menggunakan angular separation
     let elong = elongation_at_sunset(location, date, topocentric);
     let elong_rad = elong.to_radians();
 
@@ -520,6 +527,42 @@ mod tests {
             (elongation_topo - 11.096).abs() < 1.0,
             "Elongation {:.3}° differs from expected 11.096°",
             elongation_topo
+        );
+    }
+
+    #[test]
+    fn test_sukabumi_17_feb_2026() {
+        use crate::astronomy::ephemeris_utils;
+
+        // Test case for ijtima day issues (lag time)
+        let location = GeoLocation {
+            name: Some("Cibeas".to_string()),
+            latitude: -7.0739,
+            longitude: 106.5314,
+            elevation: 10.0,
+            timezone: 7.0,
+        };
+
+        let date = GregorianDate {
+            year: 2026,
+            month: 2,
+            day: 17.0,
+        };
+
+        let sunset_hour = crate::astronomy::calculate_sunset(&location, &date);
+        let moonset_hour = ephemeris_utils::calculate_moonset(&location, &date);
+
+        println!("Sunset (Local): {:.4}h", sunset_hour);
+        println!("Moonset (Local): {:.4}h", moonset_hour);
+
+        let lag_time_hours = moonset_hour - sunset_hour;
+        println!("Lag Time (Minutes): {:.2}m", lag_time_hours * 60.0);
+
+        // Reference lag time for Feb 17 is -3m 42s (~ -3.7 min)
+        assert!(
+            (lag_time_hours * 60.0 + 3.7).abs() < 2.0,
+            "Lag time {:.1}m differs from expected ~-3.7m",
+            lag_time_hours * 60.0
         );
     }
 

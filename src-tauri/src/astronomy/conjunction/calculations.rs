@@ -24,6 +24,33 @@ pub fn find_conjunction_with_config(date: &GregorianDate, config: RefinementConf
     compute_conjunction_info(jd_conjunction)
 }
 
+/// Cari konjungsi toposentrik (Ijtima Toposentrik)
+pub fn find_topocentric_conjunction(
+    date: &GregorianDate,
+    location: &crate::GeoLocation,
+) -> Conjunction {
+    let jd_start = crate::calendar::gregorian_to_jd(date);
+
+    // Step 1: Estimasi awal (tetap gunakan geosentrik sebagai basis)
+    let jd_estimate = estimate_conjunction_time(jd_start);
+
+    // Step 2: Refinement menggunakan toposentrik
+    let jd_conjunction =
+        refine_topocentric_conjunction_time(jd_estimate, location, RefinementConfig::default());
+
+    // Step 3: Hitung hasil
+    let gregorian = crate::calendar::jd_to_gregorian(jd_conjunction);
+    let elongation = calculate_topocentric_elongation_at_jd(jd_conjunction, location);
+
+    Conjunction {
+        jd_utc: jd_conjunction,
+        year: gregorian.year,
+        month: gregorian.month,
+        day: gregorian.day,
+        elongation,
+    }
+}
+
 /// Cari konjungsi untuk bulan tertentu
 pub fn find_conjunction_for_month(year: i32, month: u8) -> Conjunction {
     let date = GregorianDate {
@@ -75,6 +102,78 @@ fn calculate_elongation_at_jd(jd: f64) -> f64 {
     let dlat = (moon_pos.latitude - sun_pos.latitude).to_radians();
 
     (dlon.cos() * dlat.cos()).acos().to_degrees()
+}
+
+/// Refine waktu konjungsi toposentrik
+fn refine_topocentric_conjunction_time(
+    jd_initial: f64,
+    location: &crate::GeoLocation,
+    config: RefinementConfig,
+) -> f64 {
+    let mut jd = jd_initial;
+    let mut iterations = 0;
+
+    loop {
+        let (angle_a, derivative) = compute_topocentric_angle_and_derivative(jd, location);
+
+        if derivative.abs() < 1e-10 || iterations >= config.max_iterations {
+            break;
+        }
+
+        let correction = -angle_a / derivative;
+        jd += correction;
+        iterations += 1;
+
+        if correction.abs() < config.tolerance {
+            break;
+        }
+    }
+
+    jd
+}
+
+fn compute_topocentric_angle_and_derivative(jd: f64, location: &crate::GeoLocation) -> (f64, f64) {
+    let angle_a = compute_topocentric_elongation_angle(jd, location);
+
+    // Finite difference (1 jam = 1/24 hari) untuk kestabilan di toposentrik
+    let delta = 1.0 / 24.0;
+    let jd_next = jd + delta;
+    let angle_b = compute_topocentric_elongation_angle(jd_next, location);
+
+    let derivative = (angle_b - angle_a) / delta;
+    (angle_a, derivative)
+}
+
+fn compute_topocentric_elongation_angle(jd: f64, location: &crate::GeoLocation) -> f64 {
+    let moon_geo = crate::astronomy::moon_position(jd);
+    let moon_topo = crate::astronomy::topocentric::moon_topocentric_position(
+        location,
+        jd,
+        moon_geo.right_ascension,
+        moon_geo.declination,
+        moon_geo.distance,
+        moon_geo.longitude,
+        moon_geo.latitude,
+    );
+
+    // Sun topo ≈ geo
+    let sun_geo = crate::astronomy::sun_position(jd);
+
+    // Calculate angular separation in ecliptic coordinates (topo)
+    let dlon = (moon_topo.longitude - sun_geo.longitude).to_radians();
+    let dlat = (moon_topo.latitude - sun_geo.latitude).to_radians();
+
+    let moon_lat_rad = moon_topo.latitude.to_radians();
+    let sun_lat_rad = sun_geo.latitude.to_radians();
+
+    let cos_angle = moon_lat_rad.sin() * sun_lat_rad.sin()
+        + moon_lat_rad.cos() * sun_lat_rad.cos() * dlon.cos();
+
+    cos_angle.clamp(-1.0, 1.0).acos()
+}
+
+fn calculate_topocentric_elongation_at_jd(jd: f64, location: &crate::GeoLocation) -> f64 {
+    compute_topocentric_elongation_angle(jd, location).to_degrees()
 }
 
 #[cfg(test)]

@@ -23,23 +23,39 @@ pub fn calculate_azimuth(hour_angle_deg: f64, declination_deg: f64, latitude_deg
     azimuth_deg
 }
 
+/// Helper function to format timezone offset as a string (e.g., "UTC+07:00")
+pub fn format_timezone_label(timezone: f64) -> String {
+    let abs_tz = timezone.abs();
+    let hours = abs_tz.floor() as i32;
+    let minutes = ((abs_tz - hours as f64) * 60.0).round() as i32;
+    let sign = if timezone >= 0.0 { "+" } else { "-" };
+    format!("UTC{}{:02}:{:02}", sign, hours, minutes)
+}
+
 /// Calculate moonset time for a given location and date
 /// Returns hours from midnight in local time
 ///
 /// CRITICAL FIX: This function now properly searches for when moon altitude
 /// crosses ZERO (horizon), not just minimum altitude.
 pub fn calculate_moonset(location: &GeoLocation, date: &GregorianDate) -> f64 {
+    // jd_start represents the start of the Gregorian day in UT
     let jd_start = crate::calendar::gregorian_to_jd(date);
 
-    // First, find approximate moonset time by checking altitude sign change
-    let mut prev_alt =
-        super::topocentric::moon_altitude_topocentric(location, jd_start + (12.0 / 24.0));
-    let mut moonset_hour = 18.0; // Default
+    // To find moonset in LOCAL day, we should search around the local day
+    // Local day starts at jd_start - (timezone / 24.0)
+    // We search from 12:00 local to 24:00 local (typically moonset is in the afternoon/evening for hilal)
 
-    // Search in 1-minute increments from noon to midnight
+    let mut prev_alt = super::topocentric::moon_altitude_topocentric(
+        location,
+        jd_start + ((12.0 - location.timezone) / 24.0),
+    );
+    let mut moonset_hour_local = 18.0; // Default guess in local time
+
+    // Search in 1-minute increments from 12:00 local to 24:00 local
     for minutes in (12 * 60)..(24 * 60) {
-        let hour = minutes as f64 / 60.0;
-        let jd = jd_start + (hour / 24.0);
+        let hour_local = minutes as f64 / 60.0;
+        let hour_ut = hour_local - location.timezone;
+        let jd = jd_start + (hour_ut / 24.0);
 
         let moon_alt = super::topocentric::moon_altitude_topocentric(location, jd);
 
@@ -47,14 +63,14 @@ pub fn calculate_moonset(location: &GeoLocation, date: &GregorianDate) -> f64 {
         if prev_alt > 0.0 && moon_alt <= 0.0 {
             // Found the crossing point, refine with linear interpolation
             let fraction = prev_alt / (prev_alt - moon_alt);
-            moonset_hour = hour - (1.0 / 60.0) * (1.0 - fraction);
+            moonset_hour_local = hour_local - (1.0 / 60.0) * (1.0 - fraction);
             break;
         }
 
         prev_alt = moon_alt;
     }
 
-    moonset_hour
+    moonset_hour_local
 }
 
 /// Calculate lag time (difference between sunset and moonset)
@@ -90,9 +106,10 @@ pub fn format_jd_to_local_time(jd: f64, timezone: f64) -> String {
     let minutes = ((day_fraction * 24.0 - hours) * 60.0).floor();
     let seconds = (((day_fraction * 24.0 - hours) * 60.0 - minutes) * 60.0).round();
 
+    let tz_label = format_timezone_label(timezone);
     format!(
-        "{:02}:{:02}:{:02} WIB",
-        hours as i32, minutes as i32, seconds as i32
+        "{:02}:{:02}:{:02} {}",
+        hours as i32, minutes as i32, seconds as i32, tz_label
     )
 }
 
@@ -152,9 +169,10 @@ pub fn format_jd_to_datetime(jd: f64, timezone: f64) -> String {
     // Calculate day of week
     let dow = ((jd + 1.5) % 7.0).floor() as usize;
 
+    let tz_label = format_timezone_label(timezone);
     format!(
-        "{} : {:02}:{:02}:{:02} LT",
-        day_names[dow], hours as i32, minutes as i32, seconds as i32
+        "{} : {:02}:{:02}:{:02} {}",
+        day_names[dow], hours as i32, minutes as i32, seconds as i32, tz_label
     )
 }
 
@@ -170,40 +188,45 @@ pub fn calculate_delta_t(year: i32, month: u8) -> f64 {
     dt
 }
 
-/// Calculate crescent width (approximate)
+/// Calculate crescent width exactly as VB6/Meeus
 pub fn calculate_crescent_width(
     elongation_deg: f64,
     moon_semidiameter_deg: f64,
     _sun_semidiameter_deg: f64,
 ) -> f64 {
-    // Simplified formula based on elongation
-    let elongation_rad = elongation_deg.to_radians();
-    let width = 2.0 * moon_semidiameter_deg * elongation_rad.sin();
+    // VB6: 2 * Semidiameter * Illumination
+    // Illumination = (1 - cos(elongation)) / 2 (approximate)
+    let illumination = calculate_illumination(elongation_deg) / 100.0;
+    let width = 2.0 * moon_semidiameter_deg * illumination;
     width.max(0.0)
 }
 
 /// Calculate crescent direction (position angle of bright limb)
-pub fn calculate_crescent_direction(
-    sun_azimuth: f64,
-    moon_azimuth: f64,
-    moon_altitude: f64,
-) -> f64 {
-    // Simplified: angle from north through east
-    let azimuth_diff = moon_azimuth - sun_azimuth;
-    let altitude_rad = moon_altitude.to_radians();
+/// Meeus Chapter 48 / VB6: JM_GeoMoonBrightLimb
+pub fn calculate_crescent_direction(sun_ra: f64, sun_dec: f64, moon_ra: f64, moon_dec: f64) -> f64 {
+    let d0 = sun_dec.to_radians();
+    let d1 = moon_dec.to_radians();
+    let a0 = sun_ra.to_radians();
+    let a1 = moon_ra.to_radians();
 
-    let direction = azimuth_diff + 90.0 * (1.0 - altitude_rad.cos());
+    let y = d0.cos() * (a0 - a1).sin();
+    let x = d0.sin() * d1.cos() - d0.cos() * d1.sin() * (a0 - a1).cos();
+
+    let chi_rad = y.atan2(x);
+    let mut chi_deg = chi_rad.to_degrees();
 
     // Normalize to 0-360
-    let mut normalized = direction % 360.0;
-    if normalized < 0.0 {
-        normalized += 360.0;
+    if chi_deg < 0.0 {
+        chi_deg += 360.0;
     }
-    normalized
+    chi_deg
 }
 
 /// Calculate illumination percentage
 pub fn calculate_illumination(elongation_deg: f64) -> f64 {
+    // Meeus 48.1 / VB6: (1 - cos(elongation)) / 2
+    // Technically it should use phase angle i, but for Hilal i ≈ 180 - elongation
+    // so (1 + cos(i))/2 ≈ (1 - cos(elongation))/2
     let elongation_rad = elongation_deg.to_radians();
     ((1.0 - elongation_rad.cos()) / 2.0) * 100.0
 }
@@ -237,5 +260,14 @@ mod tests {
 
         let illum_180 = calculate_illumination(180.0);
         assert!((illum_180 - 100.0).abs() < 0.1);
+    }
+
+    #[test]
+    fn test_timezone_label_formatting() {
+        assert_eq!(format_timezone_label(7.0), "UTC+07:00");
+        assert_eq!(format_timezone_label(9.0), "UTC+09:00");
+        assert_eq!(format_timezone_label(-5.0), "UTC-05:00");
+        assert_eq!(format_timezone_label(5.5), "UTC+05:30");
+        assert_eq!(format_timezone_label(0.0), "UTC+00:00");
     }
 }
