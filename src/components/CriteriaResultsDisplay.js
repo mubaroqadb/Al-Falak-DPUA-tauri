@@ -1,23 +1,34 @@
 // Criteria Results Display Component
 // Shows visibility results for all hilal visibility criteria
 
+import { i18n } from '../services/i18n.js';
+
 export class CriteriaResultsDisplay extends HTMLElement {
   constructor() {
     super();
     this.criteriaResults = null;
     this.locationData = null;
     this.observationDate = null;
+    this.i18n = i18n;
+  }
+
+  t(key, defaultValue = key) {
+    if (this.i18n && this.i18n.t) {
+      return this.i18n.t(key, defaultValue);
+    }
+    return defaultValue;
   }
 
   connectedCallback() {
     try {
       this.render();
+      this.setupLanguageChangeListener();
     } catch (error) {
       console.error('❌ Error rendering CriteriaResultsDisplay:', error);
       this.innerHTML = `
         <div class="criteria-results-display">
           <div class="error-state">
-            <p>⚠️ Failed to load component</p>
+            <p>⚠️ ${this.t('messages.error', 'Failed to load component')}</p>
             <p>${error.message}</p>
           </div>
         </div>
@@ -25,18 +36,33 @@ export class CriteriaResultsDisplay extends HTMLElement {
     }
   }
 
+  setupLanguageChangeListener() {
+    window.addEventListener('language-changed', () => {
+      console.log('🔄 CriteriaResultsDisplay: Language changed, re-rendering');
+      if (this.criteriaResults) {
+        this.updateResults({
+          criteria_results: this.criteriaResults,
+          location: this.locationData,
+          observation_date: this.observationDate
+        });
+      } else {
+        this.render();
+      }
+    });
+  }
+
   render() {
     this.innerHTML = `
       <div class="criteria-results-display">
         <h3 class="flex items-center gap-2">
           <svg class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-          Visibility Criteria Analysis
+          ${this.t('criteriaResults.title', 'Visibility Criteria Analysis')}
         </h3>
 
         <div id="criteria-content" class="criteria-content">
           <div class="no-results flex flex-col items-center justify-center p-8 opacity-60">
             <svg class="w-12 h-12 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
-            <p>Perform a calculation to see criteria results</p>
+            <p>${this.t('messages.noData', 'Perform a calculation to see criteria results')}</p>
           </div>
         </div>
 
@@ -51,7 +77,7 @@ export class CriteriaResultsDisplay extends HTMLElement {
           </button>
           <button id="print-criteria" class="btn btn-outline btn-sm btn-ghost gap-2">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
-            Print/PDF
+            ${this.t('buttons.print', 'Print')}/PDF
           </button>
         </div>
       </div>
@@ -106,7 +132,7 @@ export class CriteriaResultsDisplay extends HTMLElement {
       if (!this.criteriaResults || Object.keys(this.criteriaResults).length === 0) {
         content.innerHTML = `
           <div class="no-results">
-            <p>❌ No criteria results available</p>
+            <p>❌ ${this.t('criteriaResults.noResults', 'No criteria results available')}</p>
           </div>
         `;
         return;
@@ -119,7 +145,7 @@ export class CriteriaResultsDisplay extends HTMLElement {
       if (content) {
         content.innerHTML = `
           <div class="error-state">
-            <p>⚠️ Error displaying results</p>
+            <p>⚠️ ${this.t('criteriaResults.errorDisplaying', 'Error displaying results')}</p>
             <p>${error.message}</p>
           </div>
         `;
@@ -133,7 +159,7 @@ export class CriteriaResultsDisplay extends HTMLElement {
       content.innerHTML = `
         <div class="no-results flex flex-col items-center justify-center p-8 opacity-60">
           <svg class="w-12 h-12 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
-          <p>Perform a calculation to see criteria results</p>
+          <p>${this.t('messages.noData', 'Perform a calculation to see criteria results')}</p>
         </div>
       `;
     }
@@ -148,15 +174,15 @@ export class CriteriaResultsDisplay extends HTMLElement {
       <div class="space-y-6">
         <div class="stats stats-vertical lg:stats-horizontal shadow-md bg-base-200 w-full">
           <div class="stat">
-            <div class="stat-title">Total Criteria</div>
-            <div class="stat-value text-sm">${totalCount} Methods</div>
+            <div class="stat-title">${this.t('criteriaResults.totalCriteria', 'Total Criteria')}</div>
+            <div class="stat-value text-sm">${totalCount} ${this.t('criteriaResults.methods', 'Methods')}</div>
           </div>
           <div class="stat">
-            <div class="stat-title text-success font-bold">Visible</div>
+            <div class="stat-title text-success font-bold">${this.t('results.visible', 'Visible')}</div>
             <div class="stat-value text-success">${visibleCount}</div>
           </div>
           <div class="stat">
-            <div class="stat-title text-error font-bold">Not Visible</div>
+            <div class="stat-title text-error font-bold">${this.t('results.notVisible', 'Not Visible')}</div>
             <div class="stat-value text-error">${totalCount - visibleCount}</div>
           </div>
         </div>
@@ -187,14 +213,14 @@ export class CriteriaResultsDisplay extends HTMLElement {
               </div>
               <div>
                 <h4 class="font-bold text-lg leading-tight">${data.criteria_name}</h4>
-                <div class="badge ${badgeClass} badge-sm font-bold mt-1">${isVisible ? 'VISIBLE' : 'NOT VISIBLE'}</div>
+                <div class="badge ${badgeClass} badge-sm font-bold mt-1">${isVisible ? this.t('results.visible', 'VISIBLE') : this.t('results.notVisible', 'NOT VISIBLE')}</div>
               </div>
             </div>
           </div>
 
           <div class="mt-4 text-sm bg-base-200/50 p-3 rounded-lg">
-             <div class="font-semibold opacity-70 mb-1">Details:</div>
-             <p class="font-mono text-xs">${data.additional_info || 'No technical data available'}</p>
+             <div class="font-semibold opacity-70 mb-1">${this.t('criteriaResults.details', 'Details')}:</div>
+             <p class="font-mono text-xs">${data.additional_info || this.t('criteriaResults.noTechnicalData', 'No technical data available')}</p>
           </div>
 
           <div class="mt-3 pt-3 border-t border-base-300 flex justify-between items-center">
@@ -208,14 +234,14 @@ export class CriteriaResultsDisplay extends HTMLElement {
 
   getCriteriaDescription(key) {
     const descriptions = {
-      'MABIMS_Lama': 'MABIMS criteria (Traditional)',
-      'MABIMS_Baru': 'MABIMS criteria (Updated)',
-      'Wujudul_Hilal': 'Wujudul Hilal (Muhammadiyah)',
-      'Turkey': 'Turkey/Diyanet criteria',
-      'Odeh': 'Odeh Astronomical criteria',
-      'Ijtima_Qobla_Ghurub': 'Conjunction before sunset',
-      'LFNU': 'LFNU criteria',
-      'Additional': 'Additional criteria'
+      'MABIMS_Lama': this.t('criteriaDescriptions.mabimsLama', 'MABIMS criteria (Traditional)'),
+      'MABIMS_Baru': this.t('criteriaDescriptions.mabimsBaru', 'MABIMS criteria (Updated)'),
+      'Wujudul_Hilal': this.t('criteriaDescriptions.wujudulHilal', 'Wujudul Hilal (Muhammadiyah)'),
+      'Turkey': this.t('criteriaDescriptions.turkey', 'Turkey/Diyanet criteria'),
+      'Odeh': this.t('criteriaDescriptions.odeh', 'Odeh Astronomical criteria'),
+      'Ijtima_Qobla_Ghurub': this.t('criteriaDescriptions.ijtimaQoblaGhurub', 'Conjunction before sunset'),
+      'LFNU': this.t('criteriaDescriptions.lfnu', 'LFNU criteria'),
+      'Additional': this.t('criteriaDescriptions.additional', 'Additional criteria')
     };
     return descriptions[key] || key;
   }
@@ -245,13 +271,13 @@ export class CriteriaResultsDisplay extends HTMLElement {
 
   async exportCSV() {
     if (!this.criteriaResults) {
-      alert('No results to export');
+      alert(this.t('criteriaResults.noResultsToExport', 'No results to export'));
       return;
     }
 
     // Check if we're in Tauri environment
     if (!window.__TAURI__) {
-      alert('Export functionality is only available in the desktop application');
+      alert(this.t('export.desktopOnly', 'Export functionality is only available in the desktop application'));
       return;
     }
 
@@ -260,10 +286,10 @@ export class CriteriaResultsDisplay extends HTMLElement {
       const { save } = await import('@tauri-apps/plugin-dialog');
       
       const rows = [
-        ['Criteria', 'Visible', 'Type', 'Details'],
+        [this.t('criteriaResults.criteria', 'Criteria'), this.t('criteriaResults.visible', 'Visible'), this.t('criteriaResults.type', 'Type'), this.t('criteriaResults.details', 'Details')],
         ...Object.entries(this.criteriaResults).map(([name, data]) => [
           data.criteria_name,
-          data.is_visible ? 'YES' : 'NO',
+          data.is_visible ? this.t('criteriaResults.yes', 'YES') : this.t('criteriaResults.no', 'NO'),
           data.visibility_type,
           data.additional_info || ''
         ])
@@ -283,23 +309,23 @@ export class CriteriaResultsDisplay extends HTMLElement {
       if (filePath) {
         await writeTextFile(filePath, csv);
         console.log('📤 Results exported to CSV:', filePath);
-        alert('Results exported successfully!');
+        alert(this.t('export.success', 'Results exported successfully!'));
       }
     } catch (error) {
       console.error('❌ Export failed:', error);
-      alert('Export failed: ' + (error.message || error));
+      alert(this.t('export.error', 'Export failed:') + ' ' + (error.message || error));
     }
   }
 
   async exportTXT() {
     if (!this.criteriaResults) {
-      alert('No results to export');
+      alert(this.t('criteriaResults.noResultsToExport', 'No results to export'));
       return;
     }
 
     // Check if we're in Tauri environment
     if (!window.__TAURI__) {
-      alert('Export functionality is only available in the desktop application');
+      alert(this.t('export.desktopOnly', 'Export functionality is only available in the desktop application'));
       return;
     }
 
@@ -308,21 +334,21 @@ export class CriteriaResultsDisplay extends HTMLElement {
       const { save } = await import('@tauri-apps/plugin-dialog');
       
       const lines = [
-        'HISAB HILAL - Visibility Criteria Results',
-        `Location: ${this.formatLocation()}`,
-        `Coordinates: ${this.formatCoordinates()}`,
-        `Observation Date: ${this.observationDate ? this.formatDate(this.observationDate.year, this.observationDate.month, this.observationDate.day) : 'N/A'}`,
+        this.t('criteriaResults.exportTitle', 'HISAB HILAL - Visibility Criteria Results'),
+        `${this.t('labels.location', 'Location')}: ${this.formatLocation()}`,
+        `${this.t('labels.coordinates', 'Coordinates')}: ${this.formatCoordinates()}`,
+        `${this.t('labels.date', 'Observation Date')}: ${this.observationDate ? this.formatDate(this.observationDate.year, this.observationDate.month, this.observationDate.day) : 'N/A'}`,
         '',
-        'VISIBILITY CRITERIA ANALYSIS',
-        'Criteria\tVisible\tType\tDetails',
+        this.t('criteriaResults.analysisTitle', 'VISIBILITY CRITERIA ANALYSIS'),
+        `${this.t('criteriaResults.criteria', 'Criteria')}\t${this.t('criteriaResults.visible', 'Visible')}\t${this.t('criteriaResults.type', 'Type')}\t${this.t('criteriaResults.details', 'Details')}`,
         ...Object.entries(this.criteriaResults).map(([name, data]) => 
-          `${data.criteria_name}\t${data.is_visible ? 'YES' : 'NO'}\t${data.visibility_type}\t${data.additional_info || ''}`
+          `${data.criteria_name}\t${data.is_visible ? this.t('criteriaResults.yes', 'YES') : this.t('criteriaResults.no', 'NO')}\t${data.visibility_type}\t${data.additional_info || ''}`
         ),
         '',
-        'SUMMARY',
-        `Total Criteria: ${Object.keys(this.criteriaResults).length}`,
-        `Visible: ${Object.values(this.criteriaResults).filter(c => c.is_visible).length}`,
-        `Not Visible: ${Object.values(this.criteriaResults).filter(c => !c.is_visible).length}`
+        this.t('criteriaResults.summary', 'SUMMARY'),
+        `${this.t('criteriaResults.totalCriteria', 'Total Criteria')}: ${Object.keys(this.criteriaResults).length}`,
+        `${this.t('results.visible', 'Visible')}: ${Object.values(this.criteriaResults).filter(c => c.is_visible).length}`,
+        `${this.t('results.notVisible', 'Not Visible')}: ${Object.values(this.criteriaResults).filter(c => !c.is_visible).length}`
       ];
 
       const txt = lines.join('\n');
@@ -339,17 +365,17 @@ export class CriteriaResultsDisplay extends HTMLElement {
       if (filePath) {
         await writeTextFile(filePath, txt);
         console.log('📤 Results exported to TXT:', filePath);
-        alert('Results exported successfully!');
+        alert(this.t('export.success', 'Results exported successfully!'));
       }
     } catch (error) {
       console.error('❌ Export failed:', error);
-      alert('Export failed: ' + (error.message || error));
+      alert(this.t('export.error', 'Export failed:') + ' ' + (error.message || error));
     }
   }
 
   printResults() {
     if (!this.criteriaResults) {
-      alert('No results to print');
+      alert(this.t('criteriaResults.noResultsToPrint', 'No results to print'));
       return;
     }
 
@@ -362,7 +388,7 @@ export class CriteriaResultsDisplay extends HTMLElement {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Hilal Visibility Criteria Results</title>
+          <title>${this.t('criteriaResults.printTitle', 'Hilal Visibility Criteria Results')}</title>
           <style>
             body { 
               font-family: Arial, sans-serif; 
@@ -446,8 +472,8 @@ export class CriteriaResultsDisplay extends HTMLElement {
           </style>
         </head>
         <body>
-          <h1>Hilal Visibility Criteria Analysis</h1>
-          <p style="text-align: center; color: #999;">Generated on: ${new Date().toLocaleString()}</p>
+          <h1>${this.t('criteriaResults.printTitle', 'Hilal Visibility Criteria Analysis')}</h1>
+          <p style="text-align: center; color: #999;">${this.t('criteriaResults.generatedOn', 'Generated on')}: ${new Date().toLocaleString()}</p>
           ${criteriaHtml}
         </body>
       </html>

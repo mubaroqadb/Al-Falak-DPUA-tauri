@@ -33,9 +33,49 @@ export class DetailedEphemerisDisplay extends HTMLElement {
     window.addEventListener('language-changed', () => {
       console.log('🔄 DetailedEphemerisDisplay: Language changed, re-rendering');
       if (this.ephemerisData) {
-        this.renderEphemeris();
+        this.renderEphemerisTableAndUpdateDOM();
+      } else {
+        // Re-render the entire component including header and buttons
+        this.render();
       }
     });
+  }
+
+  renderEphemerisTableAndUpdateDOM() {
+    const content = this.querySelector('#ephemeris-content');
+    if (content) {
+      content.innerHTML = this.renderEphemerisTable();
+    }
+    // Also update the header and buttons text
+    this.updateStaticText();
+  }
+
+  updateStaticText() {
+    // Update header title
+    const header = this.querySelector('h3');
+    if (header) {
+      header.innerHTML = `
+        <svg class="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        ${this.t('tabLabels.ephemeris', 'Detailed Ephemeris Data')}
+      `;
+    }
+    // Update buttons
+    const exportTxtBtn = this.querySelector('#export-ephemeris-txt');
+    const exportCsvBtn = this.querySelector('#export-ephemeris-csv');
+    const printBtn = this.querySelector('#print-ephemeris');
+    
+    if (exportTxtBtn) {
+      exportTxtBtn.innerHTML = `
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+        ${this.t('export.saveTXT', 'Save TXT')}
+      `;
+    }
+    if (exportCsvBtn) {
+      exportCsvBtn.innerHTML = `
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+        ${this.t('export.saveCSV', 'Save CSV')}
+      `;
+    }
   }
 
   t(key, defaultValue = key) {
@@ -83,7 +123,7 @@ export class DetailedEphemerisDisplay extends HTMLElement {
           </button>
           <button id="print-ephemeris" class="btn btn-outline btn-sm btn-ghost gap-2">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
-            Print
+            ${this.t('buttons.print', 'Print')}
           </button>
         </div>
       </div>
@@ -133,7 +173,7 @@ export class DetailedEphemerisDisplay extends HTMLElement {
       if (!this.ephemerisData) {
         content.innerHTML = `
           <div class="no-data">
-            <p><svg class="w-5 h-5 text-error inline mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> No ephemeris data available</p>
+            <p><svg class="w-5 h-5 text-error inline mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> ${this.t('messages.noData', 'No ephemeris data available')}</p>
           </div>
         `;
         return;
@@ -146,7 +186,7 @@ export class DetailedEphemerisDisplay extends HTMLElement {
       if (content) {
         content.innerHTML = `
           <div class="error-state">
-            <p>⚠️ Error displaying ephemeris data</p>
+            <p><svg class="w-5 h-5 text-error inline mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> ${this.t('messages.error', 'Error displaying ephemeris data')}</p>
             <p>${error.message}</p>
           </div>
         `;
@@ -159,7 +199,7 @@ export class DetailedEphemerisDisplay extends HTMLElement {
     if (content) {
       content.innerHTML = `
         <div class="no-data">
-          <p><svg class="w-5 h-5 inline mr-1 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg> Perform a calculation to see detailed ephemeris data</p>
+          <p><svg class="w-5 h-5 inline mr-1 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg> ${this.t('messages.noData', 'Perform a calculation to see detailed ephemeris data')}</p>
         </div>
       `;
     }

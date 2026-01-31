@@ -1,4 +1,4 @@
-import { i18n, t } from '../services/i18n.js';
+import { i18n } from '../services/i18n.js';
 
 export class MapVisualization extends HTMLElement {
   constructor() {
@@ -7,24 +7,44 @@ export class MapVisualization extends HTMLElement {
     this.visibilityLayers = [];
     this.prayerTimeLayers = [];
     this.markers = [];
+    this.i18n = i18n;
 
     // Bind methods
     this.handleMapClick = this.handleMapClick.bind(this);
     this.handleLocationSelect = this.handleLocationSelect.bind(this);
   }
 
+  t(key, defaultValue = key) {
+    if (this.i18n && this.i18n.t) {
+      return this.i18n.t(key, defaultValue);
+    }
+    return defaultValue;
+  }
+
   connectedCallback() {
+    this.render();
+    this.setupLanguageChangeListener();
+  }
+
+  setupLanguageChangeListener() {
+    window.addEventListener('language-changed', () => {
+      console.log('🔄 MapVisualization: Language changed, re-rendering');
+      this.render();
+    });
+  }
+
+  render() {
     this.innerHTML = `
       <div class="map-visualization">
         <div id="map" class="map-container"></div>
         <div class="map-controls">
           <div class="map-control-group">
-            <button id="clear-markers" title="Clear all markers">
+            <button id="clear-markers" title="${this.t('map.clearMarkers', 'Clear all markers')}">
               <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                 <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
               </svg>
             </button>
-            <button id="fit-bounds" title="Fit to data">
+            <button id="fit-bounds" title="${this.t('map.fitBounds', 'Fit to data')}">
               <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
               </svg>
@@ -32,14 +52,14 @@ export class MapVisualization extends HTMLElement {
           </div>
         </div>
         <div class="layer-controls" id="layer-controls" style="display: none;">
-          <h4>Map Layers</h4>
+          <h4>${this.t('map.layers', 'Map Layers')}</h4>
           <div class="layer-item">
             <input type="checkbox" id="visibility-layer" class="layer-checkbox" checked>
-            <label for="visibility-layer" class="layer-label">Visibility Zones</label>
+            <label for="visibility-layer" class="layer-label">${this.t('map.visibilityZones', 'Visibility Zones')}</label>
           </div>
           <div class="layer-item">
             <input type="checkbox" id="prayer-layer" class="layer-checkbox" checked>
-            <label for="prayer-layer" class="layer-label">Prayer Times</label>
+            <label for="prayer-layer" class="layer-label">${this.t('map.prayerTimes', 'Prayer Times')}</label>
           </div>
         </div>
       </div>
