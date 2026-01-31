@@ -62,17 +62,24 @@ export class HijriDateInput extends HTMLElement {
   }
 
   getLocalizedText(key) {
+    // First check if i18n is available and has the translation
     if (this.i18n && this.i18n.t) {
-      return this.i18n.t(key);
+      const translation = this.i18n.t(key);
+      // If translation is different from key (meaning it was found), return it
+      if (translation !== key) {
+        return translation;
+      }
     }
-    // Fallback to default values
+    // Fallback to default values in Indonesian
     const fallback = {
-      'hijriDate.gregorian': 'Gregorian',
-      'hijriDate.hijri': 'Hijri',
-      'hijriDate.day': 'Day',
-      'hijriDate.month': 'Month',
-      'hijriDate.year': 'Year',
-      'labels.date': 'Calculation Date'
+      'hijriDate.gregorian': 'Masehi',
+      'hijriDate.hijri': 'Hijriyah',
+      'hijriDate.day': 'Tanggal',
+      'hijriDate.month': 'Bulan',
+      'hijriDate.year': 'Tahun',
+      'hijriDate.title': 'Tanggal Hijriyah',
+      'hijriDate.arabicYearSuffix': 'H',
+      'labels.date': 'Tanggal Perhitungan'
     };
     return fallback[key] || key;
   }

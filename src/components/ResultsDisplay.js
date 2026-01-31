@@ -1,31 +1,51 @@
 // Results Display Web Component
 // Shows calculation results and astronomical data
 
+import { i18n } from '../services/i18n.js';
+
 export class ResultsDisplay extends HTMLElement {
   constructor() {
     super();
     this.currentResult = null;
+    this.i18n = i18n;
   }
 
   connectedCallback() {
     this.render();
+    this.setupLanguageChangeListener();
+  }
+
+  setupLanguageChangeListener() {
+    window.addEventListener('language-changed', () => {
+      console.log('🔄 ResultsDisplay: Language changed, re-rendering results');
+      if (this.currentResult) {
+        this.updateResults(this.currentResult);
+      }
+    });
+  }
+
+  t(key, defaultValue = key) {
+    if (this.i18n && this.i18n.t) {
+      return this.i18n.t(key, defaultValue);
+    }
+    return defaultValue;
   }
 
   render() {
     this.innerHTML = `
       <div class="results-display">
-        <h3>Calculation Results</h3>
+        <h3>${this.t('results.title', 'Calculation Results')}</h3>
 
         <div id="results-content" class="results-content">
           <div class="no-results flex flex-col items-center justify-center p-8 opacity-60">
             <svg class="w-12 h-12 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg>
-            <p>Select a location and criteria to see calculation results</p>
+            <p>${this.t('messages.noData', 'Select a location and criteria to see calculation results')}</p>
           </div>
         </div>
 
         <div class="results-actions">
-          <button id="export-results">Export Results</button>
-          <button id="print-results">Print</button>
+          <button id="export-results">${this.t('buttons.export', 'Export Results')}</button>
+          <button id="print-results">${this.t('buttons.print', 'Print')}</button>
         </div>
       </div>
     `;
@@ -116,25 +136,25 @@ export class ResultsDisplay extends HTMLElement {
         <div class="result-section">
           <h4 class="flex items-center gap-2">
             <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            Basic Information
+            ${this.t('results.basicInfo', 'Basic Information')}
           </h4>
           <div class="result-item">
-            <span class="label">Date:</span>
+            <span class="label">${this.t('labels.date', 'Date')}:</span>
             <span class="value font-mono">${this.formatDate(result.date)}</span>
           </div>
           ${result.converted_date_info ? `
           <div class="result-item">
-            <span class="label">${result.converted_date_info.label}:</span>
-            <span class="value font-mono text-primary font-bold">${result.converted_date_info.converted}</span>
+            <span class="label">${this.t('results.dateInfo', 'Date Information')}:</span>
+            <span class="value font-mono text-primary font-bold">${this.formatConvertedDateWithDayName(result)}</span>
           </div>
           ` : ''}
           <div class="result-item">
-            <span class="label">Location:</span>
+            <span class="label">${this.t('labels.location', 'Location')}:</span>
             <span class="value font-mono">${result.location?.latitude?.toFixed(4)}°, ${result.location?.longitude?.toFixed(4)}°</span>
           </div>
           <div class="result-item">
-            <span class="label">Criteria:</span>
-            <span class="value font-mono">${result.criteria || 'Not specified'}</span>
+            <span class="label">${this.t('labels.criteria', 'Criteria')}:</span>
+            <span class="value font-mono">${result.criteria || this.t('criteria.notSpecified', 'Not specified')}</span>
           </div>
         </div>
 
@@ -149,49 +169,49 @@ export class ResultsDisplay extends HTMLElement {
                 </moon-phase-visualizer>
                 
                 <div class="glass-panel p-4 rounded-xl">
-                    <h4 class="text-sm font-bold uppercase opacity-70 mb-3">🌙 Moon Position</h4>
+                    <h4 class="text-sm font-bold uppercase opacity-70 mb-3">🌙 ${this.t('results.moonPosition', 'Moon Position')}</h4>
                     <div class="space-y-2 text-sm">
-                         <div class="flex justify-between"><span>Altitude:</span> <span class="font-mono font-bold">${result.moon_altitude ? result.moon_altitude.toFixed(4) + '°' : 'N/A'}</span></div>
-                         <div class="flex justify-between"><span>Azimuth:</span> <span class="font-mono">${result.moon_azimuth ? result.moon_azimuth.toFixed(4) + '°' : 'N/A'}</span></div>
-                         <div class="flex justify-between"><span>Elongation:</span> <span class="font-mono">${result.elongation ? result.elongation.toFixed(4) + '°' : 'N/A'}</span></div>
+                         <div class="flex justify-between"><span>${this.t('results.altitude', 'Altitude')}:</span> <span class="font-mono font-bold">${result.moon_altitude ? result.moon_altitude.toFixed(4) + '°' : 'N/A'}</span></div>
+                         <div class="flex justify-between"><span>${this.t('results.azimuth', 'Azimuth')}:</span> <span class="font-mono">${result.moon_azimuth ? result.moon_azimuth.toFixed(4) + '°' : 'N/A'}</span></div>
+                         <div class="flex justify-between"><span>${this.t('results.elongation', 'Elongation')}:</span> <span class="font-mono">${result.elongation ? result.elongation.toFixed(4) + '°' : 'N/A'}</span></div>
                     </div>
                 </div>
             </div>
 
             <!-- Detailed Data Column -->
             <div class="glass-panel p-4 rounded-xl">
-              <h4 class="text-sm font-bold uppercase opacity-70 mb-3">📋 Detailed Ephemeris</h4>
+              <h4 class="text-sm font-bold uppercase opacity-70 mb-3">📋 ${this.t('tabLabels.ephemeris', 'Detailed Ephemeris')}</h4>
               <div class="space-y-2 text-sm overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
                   <div class="result-item">
-                    <span class="label">Conjunction (Ijtimak):</span>
+                    <span class="label">${this.t('results.conjunction', 'Conjunction (Ijtimak)')}:</span>
                     <span class="value font-mono text-right">${result.conjunction_date || 'N/A'}</span>
                   </div>
                   <div class="result-item">
-                    <span class="label">Moon Age:</span>
+                    <span class="label">${this.t('results.moonAge', 'Moon Age')}:</span>
                     <span class="value font-mono text-right">${result.moon_age_hours ? result.moon_age_hours.toFixed(2) + ' h' : 'N/A'}</span>
                   </div>
                   <div class="result-item">
-                    <span class="label">ARCV (Arc of Vision):</span>
+                    <span class="label">${this.t('results.arcv', 'ARCV (Arc of Vision)')}:</span>
                     <span class="value font-mono text-right">${result.arcv ? result.arcv.toFixed(4) + '°' : 'N/A'}</span>
                   </div>
                   <div class="result-item">
-                    <span class="label">Crescent Width:</span>
+                    <span class="label">${this.t('results.crescentWidth', 'Crescent Width')}:</span>
                     <span class="value font-mono text-right">${result.crescent_width ? result.crescent_width.toFixed(4) + "'" : 'N/A'}</span>
                   </div>
                   <div class="result-item">
-                    <span class="label">Moon Distance:</span>
+                    <span class="label">${this.t('results.moonDistance', 'Moon Distance')}:</span>
                     <span class="value font-mono text-right">${result.moon_distance_km ? result.moon_distance_km.toFixed(0) + ' km' : 'N/A'}</span>
                   </div>
                   <div class="result-item">
-                    <span class="label">Moon Semi-Diameter:</span>
+                    <span class="label">${this.t('results.moonSemiDiameter', 'Moon Semi-Diameter')}:</span>
                     <span class="value font-mono text-right">${result.moon_semidiameter ? result.moon_semidiameter.toFixed(4) + '°' : 'N/A'}</span>
                   </div>
                   <div class="result-item">
-                    <span class="label">Parallax:</span>
+                    <span class="label">${this.t('results.parallax', 'Parallax')}:</span>
                     <span class="value font-mono text-right">${result.parallax ? result.parallax.toFixed(4) + '°' : 'N/A'}</span>
                   </div>
                   <div class="result-item">
-                    <span class="label">Refraction:</span>
+                    <span class="label">${this.t('results.refraction', 'Refraction')}:</span>
                     <span class="value font-mono text-right">${result.refraction ? result.refraction.toFixed(4) + '°' : 'N/A'}</span>
                   </div>
               </div>
@@ -343,6 +363,31 @@ export class ResultsDisplay extends HTMLElement {
       return value.toFixed ? value.toFixed(2) : value;
     }
     return value;
+  }
+
+  /**
+   * Format converted date with day name (Hari Jawa)
+   * Examples:
+   * - "01 Ramadhan 1447 H bertepatan dengan Kamis Pahing, 19 Februari 2026 M"
+   * - "Kamis Pahing, 18 Februari 2026 M bertepatan dengan 01 Ramadhan 1447 H"
+   */
+  formatConvertedDateWithDayName(result) {
+    if (!result.converted_date_info) return '';
+    
+    const { original, converted, label } = result.converted_date_info;
+    const dayName = result.day_name || '';
+    
+    // Determine if this is Hijri->Gregorian or Gregorian->Hijri conversion
+    // by checking the label
+    const isHijriToGregorian = label === 'Bertepatan dengan';
+    
+    if (isHijriToGregorian) {
+      // Hijri to Gregorian: "01 Ramadhan 1447 H bertepatan dengan Kamis Pahing, 19 Februari 2026 M"
+      return `${original} bertepatan dengan ${dayName ? dayName + ', ' : ''}${converted}`;
+    } else {
+      // Gregorian to Hijri: "Kamis Pahing, 18 Februari 2026 M bertepatan dengan 01 Ramadhan 1447 H"
+      return `${dayName ? dayName + ', ' : ''}${original} bertepatan dengan ${converted}`;
+    }
   }
 
   exportResults() {
