@@ -222,18 +222,18 @@ export class ResultsDisplay extends HTMLElement {
         <div class="result-section">
           <h4 class="flex items-center gap-2">
             <svg class="w-4 h-4 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="5"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-            Solar Data
+            ${this.t('results.solarData', 'Solar Data')}
           </h4>
           <div class="result-item">
-            <span class="label">Sunset Time:</span>
+            <span class="label">${this.t('results.sunsetTime', 'Sunset Time')}:</span>
             <span class="value font-mono">${result.sunset_time ? this.formatTime(result.sunset_time) : 'N/A'}</span>
           </div>
           <div class="result-item">
-            <span class="label">Sun Altitude:</span>
+            <span class="label">${this.t('results.sunAltitude', 'Sun Altitude')}:</span>
             <span class="value font-mono">${result.sun_altitude ? result.sun_altitude.toFixed(2) + '°' : 'N/A'}</span>
           </div>
           <div class="result-item">
-            <span class="label">Equation of Time:</span>
+            <span class="label">${this.t('results.equationOfTime', 'Equation of Time')}:</span>
             <span class="value font-mono">${result.equation_of_time ? result.equation_of_time.toFixed(2) + ' min' : 'N/A'}</span>
           </div>
         </div>
@@ -242,7 +242,7 @@ export class ResultsDisplay extends HTMLElement {
         <div class="result-section">
           <h4 class="flex items-center gap-2">
             <svg class="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-            Visibility Assessment
+            ${this.t('results.visibility', 'Visibility Assessment')}
           </h4>
           <div class="visibility-result ${result.is_visible ? 'visible' : 'not-visible'}">
             <div class="visibility-status">
@@ -251,10 +251,10 @@ export class ResultsDisplay extends HTMLElement {
                   '<svg class="w-6 h-6 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' : 
                   '<svg class="w-6 h-6 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'}
               </span>
-              <span class="status-text">${result.is_visible ? 'HILAL TERLIHAT' : 'HILAL TIDAK TERLIHAT'}</span>
+              <span class="status-text">${result.is_visible ? this.t('results.visible', 'HILAL TERLIHAT') : this.t('results.notVisible', 'HILAL TIDAK TERLIHAT')}</span>
             </div>
             <div class="visibility-details">
-              <p><strong>Criteria Check:</strong></p>
+              <p><strong>${this.t('results.criteriaCheck', 'Criteria Check')}:</strong></p>
               <ul>
                 ${this.renderCriteriaChecks(result)}
               </ul>
@@ -267,7 +267,7 @@ export class ResultsDisplay extends HTMLElement {
           <div class="result-section">
             <h4 class="flex items-center gap-2">
               <svg class="w-4 h-4 text-info" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-              Additional Data
+              ${this.t('results.additionalData', 'Additional Data')}
             </h4>
             <div class="additional-data">
               ${this.renderAdditionalData(result.additional_data)}
@@ -285,7 +285,7 @@ export class ResultsDisplay extends HTMLElement {
     if (result.moon_altitude !== undefined) {
       const altCheck = result.moon_altitude > 3;
       checks.push(`<li class="${altCheck ? 'pass' : 'fail'} flex items-center gap-2">
-        <span>Altitude > 3°: ${result.moon_altitude.toFixed(2)}°</span>
+        <span>${this.t('results.altitudeCheck', 'Altitude > 3°')}: ${result.moon_altitude.toFixed(2)}°</span>
         ${altCheck ? 
           '<svg class="w-4 h-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>' : 
           '<svg class="w-4 h-4 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>'}
@@ -296,7 +296,7 @@ export class ResultsDisplay extends HTMLElement {
     if (result.elongation !== undefined) {
       const elongCheck = result.elongation > 6.4;
       checks.push(`<li class="${elongCheck ? 'pass' : 'fail'} flex items-center gap-2">
-        <span>Elongation > 6.4°: ${result.elongation.toFixed(2)}°</span>
+        <span>${this.t('results.elongationCheck', 'Elongation > 6.4°')}: ${result.elongation.toFixed(2)}°</span>
         ${elongCheck ? 
           '<svg class="w-4 h-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>' : 
           '<svg class="w-4 h-4 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>'}
@@ -307,7 +307,7 @@ export class ResultsDisplay extends HTMLElement {
     if (result.moon_age !== undefined) {
       const ageCheck = result.moon_age > 0;
       checks.push(`<li class="${ageCheck ? 'pass' : 'fail'} flex items-center gap-2">
-        <span>Age > 0h: ${result.moon_age.toFixed(2)}h</span>
+        <span>${this.t('results.ageCheck', 'Age > 0h')}: ${result.moon_age.toFixed(2)}h</span>
         ${ageCheck ? 
           '<svg class="w-4 h-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>' : 
           '<svg class="w-4 h-4 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>'}
@@ -377,16 +377,19 @@ export class ResultsDisplay extends HTMLElement {
     const { original, converted, label } = result.converted_date_info;
     const dayName = result.day_name || '';
     
+    // Get translated "bertepatan dengan" text
+    const bertepatanDengan = this.t('results.correspondsTo', 'bertepatan dengan');
+    
     // Determine if this is Hijri->Gregorian or Gregorian->Hijri conversion
     // by checking the label
     const isHijriToGregorian = label === 'Bertepatan dengan';
     
     if (isHijriToGregorian) {
       // Hijri to Gregorian: "01 Ramadhan 1447 H bertepatan dengan Kamis Pahing, 19 Februari 2026 M"
-      return `${original} bertepatan dengan ${dayName ? dayName + ', ' : ''}${converted}`;
+      return `${original} ${bertepatanDengan} ${dayName ? dayName + ', ' : ''}${converted}`;
     } else {
       // Gregorian to Hijri: "Kamis Pahing, 18 Februari 2026 M bertepatan dengan 01 Ramadhan 1447 H"
-      return `${dayName ? dayName + ', ' : ''}${original} bertepatan dengan ${converted}`;
+      return `${dayName ? dayName + ', ' : ''}${original} ${bertepatanDengan} ${converted}`;
     }
   }
 
