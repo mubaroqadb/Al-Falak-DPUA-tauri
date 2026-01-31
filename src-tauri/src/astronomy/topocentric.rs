@@ -437,45 +437,28 @@ pub fn moon_altitude_topocentric(location: &GeoLocation, jd: f64) -> f64 {
     let lat_rad = location.latitude.to_radians();
     let dec_rad = moon_geo.declination.to_radians();
 
-    // DEBUG: Print intermediate values
-    eprintln!("\n=== ALTITUDE DEBUG ===");
-    eprintln!("LST (hours): {:.6}", lst_hours);
-    eprintln!("Moon RA (deg): {:.6}", moon_geo.right_ascension);
-    eprintln!("Moon Dec (deg): {:.6}", moon_geo.declination);
-    eprintln!("Hour Angle (deg): {:.6}", hour_angle_deg);
-    eprintln!("Latitude (deg): {:.6}", location.latitude);
-
     // GEOCENTRIC altitude
     let sin_alt = lat_rad.sin() * dec_rad.sin() + lat_rad.cos() * dec_rad.cos() * ha_rad.cos();
     let h = sin_alt.asin().to_degrees();
-    eprintln!("Geocentric Altitude (deg): {:.6}", h);
 
     // Step 2: Apply refraction to geocentric altitude FIRST (VB6 order)
     // This gives us the "apparent geocentric altitude"
     let refraction_arcmin = atmospheric_refraction(h);
     let h_apparent = h + refraction_arcmin / 60.0;
-    eprintln!("Refraction (arcmin): {:.6}", refraction_arcmin);
-    eprintln!("Apparent Geocentric Altitude (deg): {:.6}", h_apparent);
 
     // Step 3: Calculate parallax in altitude using APPARENT altitude
     // VB6: mPar = Asin(Sin(HP) * Cos(h_apparent))
     // This is CRITICAL - parallax depends on the apparent altitude, not raw geocentric
     let earth_radius_km = 6378.14;
     let horizontal_parallax_rad = (earth_radius_km / moon_geo.distance).asin();
-    let horizontal_parallax_deg = horizontal_parallax_rad.to_degrees();
-    eprintln!("Moon Distance (km): {:.3}", moon_geo.distance);
-    eprintln!("Horizontal Parallax (deg): {:.6}", horizontal_parallax_deg);
 
     // Use h_apparent (after refraction) for parallax calculation
     let m_par_rad = (horizontal_parallax_rad.sin() * h_apparent.to_radians().cos()).asin();
     let m_par = m_par_rad.to_degrees();
-    eprintln!("Parallax in Altitude (deg): {:.6}", m_par);
 
     // Step 4: Subtract parallax from apparent altitude
     // VB6: JM_TopoMoonAltitude = h_apparent - mPar
     let topo_alt = h_apparent - m_par;
-    eprintln!("Topocentric Altitude (deg): {:.6}", topo_alt);
-    eprintln!("  = {:.6} + {:.6}/60 - {:.6}", h, refraction_arcmin, m_par);
 
     topo_alt
 }
