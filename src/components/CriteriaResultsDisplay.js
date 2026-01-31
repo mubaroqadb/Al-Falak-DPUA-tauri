@@ -249,7 +249,8 @@ export class CriteriaResultsDisplay extends HTMLElement {
   formatDate(year, month, day) {
     if (!year || !month || !day) return 'N/A';
     const date = new Date(year, month - 1, Math.floor(day));
-    return date.toLocaleDateString('id-ID', {
+    const locale = this.i18n.getLocale();
+    return date.toLocaleDateString(locale, {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -259,7 +260,7 @@ export class CriteriaResultsDisplay extends HTMLElement {
 
   formatLocation() {
     if (!this.locationData) return 'N/A';
-    return `Lat: ${this.locationData.latitude.toFixed(4)}°, Lon: ${this.locationData.longitude.toFixed(4)}°`;
+    return `${this.t('labels.latitude', 'Lat')}: ${this.locationData.latitude.toFixed(4)}°, ${this.t('labels.longitude', 'Lon')}: ${this.locationData.longitude.toFixed(4)}°`;
   }
 
   formatCoordinates() {
@@ -346,7 +347,7 @@ export class CriteriaResultsDisplay extends HTMLElement {
         ),
         '',
         this.t('criteriaResults.summary', 'SUMMARY'),
-        `${this.t('criteriaResults.totalCriteria', 'Total Criteria')}: ${Object.keys(this.criteriaResults).length}`,
+        `${this.t('criteriaResults.totalCriteria', 'Total Criteria')}: ${Object.keys(this.criteriaResults).length} ${this.t('criteriaResults.methods', 'Methods')}`,
         `${this.t('results.visible', 'Visible')}: ${Object.values(this.criteriaResults).filter(c => c.is_visible).length}`,
         `${this.t('results.notVisible', 'Not Visible')}: ${Object.values(this.criteriaResults).filter(c => !c.is_visible).length}`
       ];

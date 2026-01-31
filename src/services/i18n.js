@@ -47,6 +47,16 @@ class I18nManager {
     return this.currentLanguage;
   }
 
+  // Get BCP 47 locale string
+  getLocale() {
+    const locales = {
+      'en': 'en-US',
+      'id': 'id-ID',
+      'ar': 'ar-SA'
+    };
+    return locales[this.currentLanguage] || 'en-US';
+  }
+
   // Get translated string using dot notation
   // Example: t('labels.date') returns "Calculation Date" (EN) or "Tanggal Perhitungan" (ID)
   t(key, defaultValue = key) {

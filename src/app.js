@@ -4,6 +4,7 @@
 import { HilalAPI, isTauri } from './services/api.js';
 import { DataStore } from './services/DataStore.js';
 import { VISIBILITY_CRITERIA } from './utils/constants.js';
+import { i18n } from './services/i18n.js';
 
 export class HilalApp {
   constructor() {
@@ -414,7 +415,7 @@ export class HilalApp {
             convertedDateInfo = {
             original: `${hijriDate.hijriDay} ${this.getHijriMonthName(hijriDate.hijriMonth)} ${hijriDate.hijriYear} H`,
             converted: `${gregResult.day} ${this.getGregorianMonthName(gregResult.month)} ${gregResult.year} M`,
-            label: 'Bertepatan dengan'
+            type: 'hijri-to-gregorian'
             };
             console.log('Generated convertedDateInfo (Hijri Mode):', convertedDateInfo);
         } else {
@@ -443,7 +444,7 @@ export class HilalApp {
             convertedDateInfo = {
             original: `${day} ${this.getGregorianMonthName(month)} ${year} M`,
             converted: `${hijriResult.day} ${this.getHijriMonthName(hijriResult.month)} ${hijriResult.year} H`,
-            label: 'Tanggal Hijriah'
+            type: 'gregorian-to-hijri'
             };
              console.log('Generated convertedDateInfo (Gregorian Mode):', convertedDateInfo);
         }
@@ -548,20 +549,20 @@ export class HilalApp {
   }
 
   getHijriMonthName(month) {
-    const months = [
+    const locale = i18n.getLocale();
+    // Use Intl.DateTimeFormat with Islamic calendar if possible, or fallback to fixed names
+    const monthNames = [
       'Muharram', 'Safar', 'Rabi\'ul Awal', 'Rabi\'ul Akhir',
       'Jumadil Awal', 'Jumadil Akhir', 'Rajab', 'Sha\'ban',
       'Ramadan', 'Syawwal', 'Dzulqa\'dah', 'Dzulhijjah'
     ];
-    return months[month - 1] || '';
+    return monthNames[month - 1] || '';
   }
 
   getGregorianMonthName(month) {
-    const months = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-    ];
-    return months[month - 1] || '';
+    const date = new Date(2000, month - 1, 1);
+    const locale = i18n.getLocale();
+    return date.toLocaleDateString(locale, { month: 'long' });
   }
 
   showLoading(message = 'Calculating...') {
@@ -689,12 +690,12 @@ export class HilalApp {
     
     // Visibility status comes from criteria check
     if (visEl && stats) {
-      visEl.textContent = stats.is_visible ? 'Visible' : 'Not Visible';
+      visEl.textContent = stats.is_visible ? i18n.t('criteriaResults.visible', 'Visible') : i18n.t('criteriaResults.notVisible', 'Not Visible');
       visEl.className = `stat-value text-3xl ${stats.is_visible ? 'text-success' : 'text-error'}`;
     }
     
     if (visDescEl && stats) {
-      visDescEl.textContent = stats.is_visible ? 'HILAL TERLIHAT' : 'HILAL TIDAK TERLIHAT';
+      visDescEl.textContent = stats.is_visible ? i18n.t('results.visible', 'HILAL TERLIHAT') : i18n.t('results.notVisible', 'HILAL TIDAK TERLIHAT');
       visDescEl.className = `stat-desc font-bold ${stats.is_visible ? 'text-success' : 'text-error'}`;
     }
   }

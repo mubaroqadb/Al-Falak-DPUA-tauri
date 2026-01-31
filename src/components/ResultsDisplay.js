@@ -17,7 +17,8 @@ export class ResultsDisplay extends HTMLElement {
 
   setupLanguageChangeListener() {
     window.addEventListener('language-changed', () => {
-      console.log('🔄 ResultsDisplay: Language changed, re-rendering results');
+      console.log('🔄 ResultsDisplay: Language changed, re-rendering');
+      this.render(); // Always re-render static parts
       if (this.currentResult) {
         this.updateResults(this.currentResult);
       }
@@ -200,7 +201,7 @@ export class ResultsDisplay extends HTMLElement {
                   </div>
                   <div class="result-item">
                     <span class="label">${this.t('results.moonDistance', 'Moon Distance')}:</span>
-                    <span class="value font-mono text-right">${result.moon_distance_km ? result.moon_distance_km.toFixed(0) + ' km' : 'N/A'}</span>
+                    <span class="value font-mono text-right">${result.moon_distance_km ? result.moon_distance_km.toFixed(0) + ' ' + this.t('labels.km', 'km') : 'N/A'}</span>
                   </div>
                   <div class="result-item">
                     <span class="label">${this.t('results.moonSemiDiameter', 'Moon Semi-Diameter')}:</span>
@@ -334,7 +335,8 @@ export class ResultsDisplay extends HTMLElement {
   formatDate(date) {
     if (!date) return 'N/A';
     try {
-      return new Date(date).toLocaleDateString('id-ID', {
+      const locale = this.i18n.getLocale();
+      return new Date(date).toLocaleDateString(locale, {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
@@ -348,7 +350,8 @@ export class ResultsDisplay extends HTMLElement {
   formatTime(time) {
     if (!time) return 'N/A';
     try {
-      return new Date(time).toLocaleTimeString('id-ID');
+      const locale = this.i18n.getLocale();
+      return new Date(time).toLocaleTimeString(locale);
     } catch {
       return time;
     }
@@ -374,21 +377,17 @@ export class ResultsDisplay extends HTMLElement {
   formatConvertedDateWithDayName(result) {
     if (!result.converted_date_info) return '';
     
-    const { original, converted, label } = result.converted_date_info;
+    const { original, converted, type } = result.converted_date_info;
     const dayName = result.day_name || '';
     
-    // Get translated "bertepatan dengan" text
+    // Get translated \"bertepatan dengan\" text
     const bertepatanDengan = this.t('results.correspondsTo', 'bertepatan dengan');
     
-    // Determine if this is Hijri->Gregorian or Gregorian->Hijri conversion
-    // by checking the label
-    const isHijriToGregorian = label === 'Bertepatan dengan';
-    
-    if (isHijriToGregorian) {
-      // Hijri to Gregorian: "01 Ramadhan 1447 H bertepatan dengan Kamis Pahing, 19 Februari 2026 M"
+    if (type === 'hijri-to-gregorian') {
+      // Hijri to Gregorian: \"01 Ramadhan 1447 H bertepatan dengan Kamis Pahing, 19 Februari 2026 M\"
       return `${original} ${bertepatanDengan} ${dayName ? dayName + ', ' : ''}${converted}`;
     } else {
-      // Gregorian to Hijri: "Kamis Pahing, 18 Februari 2026 M bertepatan dengan 01 Ramadhan 1447 H"
+      // Gregorian to Hijri: \"Kamis Pahing, 18 Februari 2026 M bertepatan dengan 01 Ramadhan 1447 H\"
       return `${dayName ? dayName + ', ' : ''}${original} ${bertepatanDengan} ${converted}`;
     }
   }

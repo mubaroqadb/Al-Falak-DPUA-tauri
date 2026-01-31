@@ -1,5 +1,4 @@
-// Location Selector Component
-// Features: Searchable dropdown, VB6 city database integration, custom location registration
+import { i18n } from '../services/i18n.js';
 
 export class LocationSelector extends HTMLElement {
   constructor() {
@@ -10,12 +9,29 @@ export class LocationSelector extends HTMLElement {
     this.selectedCity = null;
     this.filteredCities = [];
     this.isDropdownOpen = false;
+    this.i18n = i18n;
+  }
+
+  t(key, defaultValue = key) {
+    if (this.i18n && this.i18n.t) {
+      return this.i18n.t(key, defaultValue);
+    }
+    return defaultValue;
   }
 
   async connectedCallback() {
     await this.loadData();
     this.render();
     this.setupEventListeners();
+    this.setupLanguageChangeListener();
+  }
+
+  setupLanguageChangeListener() {
+    window.addEventListener('language-changed', () => {
+      console.log('🔄 LocationSelector: Language changed, re-rendering');
+      this.render();
+      this.setupEventListeners();
+    });
   }
 
   async loadData() {
@@ -68,7 +84,7 @@ export class LocationSelector extends HTMLElement {
             <div class="relative flex-1">
               <input type="text" id="city-search" 
                 class="input input-bordered w-full join-item pr-10" 
-                placeholder="Search city (e.g. Jakarta, London...)" 
+                placeholder="${this.t('placeholders.searchLocation', 'Search city (e.g. Jakarta, London...)')}" 
                 value="${this.selectedCity.name}" />
               <div class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/30 pointer-events-none">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -76,11 +92,11 @@ export class LocationSelector extends HTMLElement {
                 </svg>
               </div>
             </div>
-            <button id="btn-register-location" class="btn btn-secondary join-item border-l-0" title="Add Custom Location">
+            <button id="btn-register-location" class="btn btn-secondary join-item border-l-0" title="${this.t('labels.addCustom', 'Add Custom Location')}">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
-              Add Custom
+              <span class="hidden sm:inline">${this.t('labels.addCustom', 'Add Custom')}</span>
             </button>
           </div>
 
@@ -93,19 +109,19 @@ export class LocationSelector extends HTMLElement {
         <!-- Selected Location Details (Compact Ref) -->
         <div class="bg-base-200/50 rounded-xl p-3 border border-base-300 grid grid-cols-2 lg:grid-cols-4 gap-2 text-[11px]">
           <div class="flex flex-col">
-            <span class="opacity-50 font-mono uppercase tracking-wider font-bold">Country</span>
-            <span class="font-bold truncate">${this.selectedCity.country || 'Custom'}</span>
+            <span class="opacity-50 font-mono uppercase tracking-wider font-bold">${this.t('labels.country', 'Country')}</span>
+            <span class="font-bold truncate">${this.selectedCity.country || this.t('labels.custom', 'Custom')}</span>
           </div>
           <div class="flex flex-col">
-            <span class="opacity-50 font-mono uppercase tracking-wider font-bold">Latitude</span>
+            <span class="opacity-50 font-mono uppercase tracking-wider font-bold">${this.t('labels.latitude', 'Latitude')}</span>
             <span class="font-bold font-mono text-primary">${this.selectedCity.lat.toFixed(4)}°</span>
           </div>
           <div class="flex flex-col">
-            <span class="opacity-50 font-mono uppercase tracking-wider font-bold">Longitude</span>
+            <span class="opacity-50 font-mono uppercase tracking-wider font-bold">${this.t('labels.longitude', 'Longitude')}</span>
             <span class="font-bold font-mono text-secondary">${this.selectedCity.lon.toFixed(4)}°</span>
           </div>
           <div class="flex flex-col">
-            <span class="opacity-50 font-mono uppercase tracking-wider font-bold">Timezone</span>
+            <span class="opacity-50 font-mono uppercase tracking-wider font-bold">${this.t('labels.timezone', 'Timezone')}</span>
             <span class="font-bold">UTC${this.selectedCity.tz >= 0 ? '+' : ''}${this.selectedCity.tz}</span>
           </div>
         </div>
@@ -119,45 +135,45 @@ export class LocationSelector extends HTMLElement {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            Register New City
+            ${this.t('labels.registerNewCity', 'Register New City')}
           </h3>
           <form id="form-register-city" class="space-y-3">
             <div class="form-control">
-              <label class="label p-1"><span class="label-text text-xs">City Name</span></label>
+              <label class="label p-1"><span class="label-text text-xs">${this.t('labels.cityName', 'City Name')}</span></label>
               <input type="text" name="name" required class="input input-sm input-bordered" placeholder="e.g. Sukabumi" />
             </div>
             <div class="form-control">
-              <label class="label p-1"><span class="label-text text-xs">Country</span></label>
+              <label class="label p-1"><span class="label-text text-xs">${this.t('labels.country', 'Country')}</span></label>
               <input type="text" name="country" class="input input-sm input-bordered" placeholder="Indonesia" />
             </div>
             <div class="grid grid-cols-2 gap-2">
               <div class="form-control">
-                <label class="label p-1"><span class="label-text text-xs">Latitude</span></label>
+                <label class="label p-1"><span class="label-text text-xs">${this.t('labels.latitude', 'Latitude')}</span></label>
                 <input type="number" step="0.0001" name="lat" required class="input input-sm input-bordered" placeholder="-6.9" />
               </div>
               <div class="form-control">
-                <label class="label p-1"><span class="label-text text-xs">Longitude</span></label>
+                <label class="label p-1"><span class="label-text text-xs">${this.t('labels.longitude', 'Longitude')}</span></label>
                 <input type="number" step="0.0001" name="lon" required class="input input-sm input-bordered" placeholder="106.9" />
               </div>
             </div>
              <div class="grid grid-cols-2 gap-2">
               <div class="form-control">
-                <label class="label p-1"><span class="label-text text-xs">Timezone</span></label>
+                <label class="label p-1"><span class="label-text text-xs">${this.t('labels.timezone', 'Timezone')}</span></label>
                 <input type="number" step="0.5" name="tz" required class="input input-sm input-bordered" value="7" />
               </div>
               <div class="form-control">
-                <label class="label p-1"><span class="label-text text-xs">Elevation (m)</span></label>
+                <label class="label p-1"><span class="label-text text-xs">${this.t('labels.elevation', 'Elevation (m)')}</span></label>
                 <input type="number" name="elev" class="input input-sm input-bordered" value="0" />
               </div>
             </div>
             <div class="modal-action mt-6 gap-2">
-              <button type="button" class="btn btn-ghost btn-sm" id="btn-close-modal">Cancel</button>
-              <button type="submit" class="btn btn-primary btn-sm">Save Location</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="btn-close-modal">${this.t('buttons.cancel', 'Cancel')}</button>
+              <button type="submit" class="btn btn-primary btn-sm">${this.t('buttons.saveLocation', 'Save Location')}</button>
             </div>
           </form>
         </div>
         <form method="dialog" class="modal-backdrop">
-          <button>close</button>
+          <button>${this.t('buttons.close', 'close')}</button>
         </form>
       </dialog>
     `;
@@ -194,7 +210,7 @@ export class LocationSelector extends HTMLElement {
             </div>
             <div class="flex-1">
               <div class="font-bold text-sm">${city.name}</div>
-              <div class="text-[10px] opacity-60">${city.country || 'Custom Location'}</div>
+              <div class="text-[10px] opacity-60">${city.country || this.t('labels.customLocation', 'Custom Location')}</div>
             </div>
             <div class="text-[9px] font-mono opacity-50">${city.lat.toFixed(1)}, ${city.lon.toFixed(1)}</div>
           </li>
@@ -234,19 +250,19 @@ export class LocationSelector extends HTMLElement {
 
       // Validate latitude (-90 to 90)
       if (isNaN(lat) || lat < -90 || lat > 90) {
-        alert('Latitude harus antara -90 dan 90 derajat');
+        alert(this.t('validation.invalidLatitude', 'Latitude harus antara -90 dan 90 derajat'));
         return;
       }
 
       // Validate longitude (-180 to 180)
       if (isNaN(lon) || lon < -180 || lon > 180) {
-        alert('Longitude harus antara -180 dan 180 derajat');
+        alert(this.t('validation.invalidLongitude', 'Longitude harus antara -180 dan 180 derajat'));
         return;
       }
 
       // Validate timezone (-12 to 14)
       if (isNaN(tz) || tz < -12 || tz > 14) {
-        alert('Timezone harus antara -12 dan +14');
+        alert(this.t('validation.invalidTimezone', 'Timezone harus antara -12 dan +14'));
         return;
       }
 

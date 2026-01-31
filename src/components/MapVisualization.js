@@ -163,10 +163,10 @@ export class MapVisualization extends HTMLElement {
     // Add popup with coordinates (safe - no inline onclick)
     const popupContent = document.createElement('div');
     popupContent.innerHTML = `
-      <b>Location Selected</b><br>
-      Latitude: ${lat.toFixed(6)}<br>
-      Longitude: ${lng.toFixed(6)}<br>
-      <button class="leaflet-popup-close-button btn btn-xs btn-primary mt-2">Select This Location</button>
+      <b>${this.t('map.locationSelected', 'Location Selected')}</b><br>
+      ${this.t('labels.latitude', 'Latitude')}: ${lat.toFixed(6)}<br>
+      ${this.t('labels.longitude', 'Longitude')}: ${lng.toFixed(6)}<br>
+      <button class="leaflet-popup-close-button btn btn-xs btn-primary mt-2">${this.t('labels.selectThisLocation', 'Select This Location')}</button>
     `;
 
     // Add event listener to button (safe approach)
@@ -213,11 +213,11 @@ export class MapVisualization extends HTMLElement {
     // Standard AHC palette (Translucent for scientific overlay feel)
     // Accurate Times (Odeh Criterion) Palette
     const colors = {
-      4: { color: 'rgba(0, 128, 0, 0.5)', label: t('visibilityLevels.level4') },    // Green
-      3: { color: 'rgba(255, 0, 255, 0.5)', label: t('visibilityLevels.level3') }, // Magenta
-      2: { color: 'rgba(0, 0, 255, 0.5)', label: t('visibilityLevels.level2') },    // Blue
-      1: { color: 'rgba(0, 0, 0, 0.0)', label: t('visibilityLevels.level1') },     // Label exists but no color
-      0: { color: 'rgba(255, 0, 0, 0.3)', label: t('visibilityLevels.level0') }     // Red
+      4: { color: 'rgba(0, 128, 0, 0.5)', label: this.t('visibilityLevels.level4') },    // Green
+      3: { color: 'rgba(255, 0, 255, 0.5)', label: this.t('visibilityLevels.level3') }, // Magenta
+      2: { color: 'rgba(0, 0, 255, 0.5)', label: this.t('visibilityLevels.level2') },    // Blue
+      1: { color: 'rgba(0, 0, 0, 0.0)', label: this.t('visibilityLevels.level1') },     // Label exists but no color
+      0: { color: 'rgba(255, 0, 0, 0.3)', label: this.t('visibilityLevels.level0') }     // Red
     };
 
     // Use Canvas renderer to eliminate seams/gaps between segments
@@ -341,11 +341,11 @@ export class MapVisualization extends HTMLElement {
 
     this.currentLocationMarker.bindPopup(`
       <div class="p-3 min-w-[140px] glass-panel rounded-lg border-0 shadow-xl">
-        <div class="text-[9px] uppercase font-mono opacity-60 mb-1 tracking-wider">Observation Site</div>
-        <div class="text-xs font-bold border-b border-base-content/10 pb-2 mb-2">Global Reference Point</div>
+        <div class="text-[9px] uppercase font-mono opacity-60 mb-1 tracking-wider">${this.t('map.observationSite', 'Observation Site')}</div>
+        <div class="text-xs font-bold border-b border-base-content/10 pb-2 mb-2">${this.t('map.globalReferencePoint', 'Global Reference Point')}</div>
         <div class="text-[10px] space-y-1.5 font-mono">
-          <div class="flex justify-between items-center"><span class="opacity-70">LAT:</span> <span class="font-bold text-primary">${latitude.toFixed(4)}°</span></div>
-          <div class="flex justify-between items-center"><span class="opacity-70">LON:</span> <span class="font-bold text-primary">${longitude.toFixed(4)}°</span></div>
+          <div class="flex justify-between items-center"><span class="opacity-70">${this.t('labels.latitudeShort', 'LAT')}:</span> <span class="font-bold text-primary">${latitude.toFixed(4)}°</span></div>
+          <div class="flex justify-between items-center"><span class="opacity-70">${this.t('labels.longitudeShort', 'LON')}:</span> <span class="font-bold text-primary">${longitude.toFixed(4)}°</span></div>
         </div>
       </div>
     `, { className: 'modern-popup' });
@@ -409,10 +409,10 @@ export class MapVisualization extends HTMLElement {
     const popupContent = document.createElement('div');
     popupContent.className = 'text-xs';
     popupContent.innerHTML = `
-      <b>Location Selected</b><br>
+      <b>${this.t('map.locationSelected', 'Location Selected')}</b><br>
       Lat: <span class="font-mono">${lat.toFixed(6)}</span><br>
       Lon: <span class="font-mono">${lng.toFixed(6)}</span><br>
-      <button class="btn btn-xs btn-primary mt-2 select-location-btn">Use This Location</button>
+      <button class="btn btn-xs btn-primary mt-2 select-location-btn">${this.t('labels.useThisLocation', 'Use This Location')}</button>
     `;
 
     // Add event listener to button (safe approach)

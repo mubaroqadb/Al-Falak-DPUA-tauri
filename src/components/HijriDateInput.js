@@ -45,19 +45,20 @@ export class HijriDateInput extends HTMLElement {
   }
 
   getHijriMonths() {
+    const t = (key, def) => this.i18n?.t(key, def) || def;
     return [
-      { value: 1, label: 'Muharram', arabic: 'محرّم' },
-      { value: 2, label: 'Safar', arabic: 'صفر' },
-      { value: 3, label: 'Rabi\'ul Awal', arabic: 'ربيع الأول' },
-      { value: 4, label: 'Rabi\'ul Akhir', arabic: 'ربيع الثاني' },
-      { value: 5, label: 'Jumadil Awal', arabic: 'جمادى الأولى' },
-      { value: 6, label: 'Jumadil Akhir', arabic: 'جمادى الثانية' },
-      { value: 7, label: 'Rajab', arabic: 'رجب' },
-      { value: 8, label: 'Sha\'ban', arabic: 'شعبان' },
-      { value: 9, label: 'Ramadan', arabic: 'رمضان' },
-      { value: 10, label: 'Syawwal', arabic: 'شوال' },
-      { value: 11, label: 'Dzulqa\'dah', arabic: 'ذو القعدة' },
-      { value: 12, label: 'Dzulhijjah', arabic: 'ذو الحجة' }
+      { value: 1, label: t('hijriMonths.muharram', 'Muharram'), arabic: 'محرّم' },
+      { value: 2, label: t('hijriMonths.safar', 'Safar'), arabic: 'صفر' },
+      { value: 3, label: t('hijriMonths.rabiulAwal', 'Rabi\'ul Awal'), arabic: 'ربيع الأول' },
+      { value: 4, label: t('hijriMonths.rabiulAkhir', 'Rabi\'ul Akhir'), arabic: 'ربيع الثاني' },
+      { value: 5, label: t('hijriMonths.jumadilAwal', 'Jumadil Awal'), arabic: 'جمادى الأولى' },
+      { value: 6, label: t('hijriMonths.jumadilAkhir', 'Jumadil Akhir'), arabic: 'جمادى الثانية' },
+      { value: 7, label: t('hijriMonths.rajab', 'Rajab'), arabic: 'رجب' },
+      { value: 8, label: t('hijriMonths.shaban', 'Sha\'ban'), arabic: 'شعبan' },
+      { value: 9, label: t('hijriMonths.ramadan', 'Ramadan'), arabic: 'رمضان' },
+      { value: 10, label: t('hijriMonths.syawwal', 'Syawwal'), arabic: 'شوال' },
+      { value: 11, label: t('hijriMonths.dzulqadah', 'Dzulqa\'dah'), arabic: 'ذو القعدة' },
+      { value: 12, label: t('hijriMonths.dzulhijjah', 'Dzulhijjah'), arabic: 'ذو الحجة' }
     ];
   }
 
@@ -429,10 +430,9 @@ export class HijriDateInput extends HTMLElement {
     }
 
     // Listen for language changes
-    document.addEventListener('language-changed', () => {
+    window.addEventListener('language-changed', () => {
+      console.log('🔄 HijriDateInput: Language changed, re-rendering');
       this.render();
-      // Re-attach listeners after render
-      this.setupEventListeners();
     });
   }
 
@@ -479,7 +479,7 @@ export class HijriDateInput extends HTMLElement {
     const currentMonth = months.find(m => m.value === this.hijriMonth);
     const display = this.querySelector('#hijri-date-display');
     if (display) {
-      display.textContent = `${this.hijriDay} ${currentMonth?.label || ''} ${this.hijriYear} H`;
+      display.textContent = `${this.hijriDay} ${currentMonth?.label || ''} ${this.hijriYear} ${this.i18n?.t('hijriDate.arabicYearSuffix', 'H')}`;
     }
   }
 
@@ -516,11 +516,9 @@ export class HijriDateInput extends HTMLElement {
   }
 
   getGregorianMonthName(month) {
-    const months = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-    ];
-    return months[month - 1] || '';
+    const date = new Date(2000, month - 1, 1);
+    const locale = this.i18n?.getLocale() || 'en-US';
+    return date.toLocaleDateString(locale, { month: 'long' });
   }
 
   // Convert Hijri to Gregorian using API

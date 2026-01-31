@@ -129,6 +129,16 @@ export const VISIBILITY_CRITERIA = {
       elongation: 0, // degrees
       age: 0 // hours
     }
+  },
+
+  KHGT: {
+    name: 'KHGT',
+    description: 'Kalender Hijriah Global Tunggal (Muhammadiyah) - Tinggi ≥ 5°, Elongasi ≥ 8°',
+    requirements: {
+      altitude: 5,
+      elongation: 8,
+      age: 0
+    }
   }
 };
 

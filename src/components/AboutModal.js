@@ -7,6 +7,16 @@ class AboutModal extends HTMLElement {
   connectedCallback() {
     this.render();
     this.setupEventListeners();
+    this.setupLanguageChangeListener();
+  }
+
+  setupLanguageChangeListener() {
+    window.addEventListener('language-changed', () => {
+      console.log('🔄 AboutModal: Language changed, re-rendering');
+      this.render();
+      // Re-attach listeners after re-render
+      this.setupEventListeners();
+    });
   }
 
   open() {
