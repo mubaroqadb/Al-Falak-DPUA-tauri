@@ -236,11 +236,12 @@ export class CriteriaResultsDisplay extends HTMLElement {
     const descriptions = {
       'MABIMS_Lama': this.t('criteriaDescriptions.mabimsLama', 'MABIMS criteria (Traditional)'),
       'MABIMS_Baru': this.t('criteriaDescriptions.mabimsBaru', 'MABIMS criteria (Updated)'),
-      'Wujudul_Hilal': this.t('criteriaDescriptions.wujudulHilal', 'Wujudul Hilal (Muhammadiyah)'),
+      'WujudulHilal': this.t('criteriaDescriptions.wujudulHilal', 'Wujudul Hilal (Above horizon at sunset)'),
       'Turkey': this.t('criteriaDescriptions.turkey', 'Turkey/Diyanet criteria'),
       'Odeh': this.t('criteriaDescriptions.odeh', 'Odeh Astronomical criteria'),
-      'Ijtima_Qobla_Ghurub': this.t('criteriaDescriptions.ijtimaQoblaGhurub', 'Conjunction before sunset'),
+      'IjtimaQoblaGhurub': this.t('criteriaDescriptions.ijtimaQoblaGhurub', 'Conjunction before sunset'),
       'LFNU': this.t('criteriaDescriptions.lfnu', 'LFNU criteria'),
+      'KHGT': this.t('criteriaDescriptions.khgt', 'Global Single Hijri Calendar (KHGT) criteria'),
       'Additional': this.t('criteriaDescriptions.additional', 'Additional criteria')
     };
     return descriptions[key] || key;

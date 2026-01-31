@@ -49,12 +49,15 @@
     "cityName": "اسم المدينة",
     "customLocation": "موقع مخصص",
     "km": "كم",
+    "hoursShort": "س",
+    "minutesShort": "د",
     "secondsShort": "ث",
     "north": "ش",
     "south": "ج",
     "east": "ق",
     "west": "غ",
-    "elevationShort": "ارتفاع"
+    "elevationShort": "ارتفاع",
+    "localTimeShort": "ت.ل"
   },
   "criteria": {
     "mabims": "MABIMS 2010+",
@@ -64,7 +67,13 @@
     "odeh": "معيار عودة",
     "turkey": "المعيار التركي",
     "additional": "إضافي",
-    "khgt": "معيار KHGT"
+    "khgt": "معيار KHGT",
+    "mabims_desc": "ارتفاع ≥ 3°، استطالة ≥ 6.4°",
+    "odeh_desc": "معيار فلكي",
+    "lfnu_desc": "إمكانية الرؤية نهضة العلماء",
+    "turkey_desc": "ارتفاع ≥ 5°، استطالة ≥ 8°",
+    "khgt_desc": "ارتفاع ≥ 5°، استطالة ≥ 8°",
+    "wujudul_hilal_desc": "الهلال فوق الأفق"
   },
   "ephemeris": {
     "title": "بيانات الجداول الفلكية التفصيلية",
@@ -308,12 +317,13 @@
   "criteriaDescriptions": {
     "mabimsLama": "معيار MABIMS (القديم)",
     "mabimsBaru": "معيار MABIMS (الجديد)",
-    "wujudulHilal": "وجود الهلال (المحمدية)",
+    "wujudulHilal": "وجود الهلال (الهلال فوق الأفق)",
     "turkey": "المعيار التركي/ديانت",
     "odeh": "معيار عودة الفلكي",
     "ijtimaQoblaGhurub": "الاجتماع قبل الغروب",
     "lfnu": "معيار LFNU",
-    "additional": "معايير إضافية"
+    "additional": "معايير إضافية",
+    "khgt": "معيار KHGT (تقويم الهجرة العالمي الموحد)"
   },
   "visibilityLevels": {
     "level4": "أ: مرئي بالعين المجردة",

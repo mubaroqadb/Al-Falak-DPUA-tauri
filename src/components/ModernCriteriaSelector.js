@@ -1,24 +1,40 @@
-// Modern Criteria Selector Component - DaisyUI Version
-// Visual card-based criteria selection with DaisyUI styling
+import { i18n } from '../services/i18n.js';
 
 export class ModernCriteriaSelector extends HTMLElement {
   constructor() {
     super();
     this.selectedCriteria = 'MABIMS';
+    this.i18n = i18n;
+  }
+
+  t(key, defaultValue = key) {
+    if (this.i18n && this.i18n.t) {
+      return this.i18n.t(key, defaultValue);
+    }
+    return defaultValue;
   }
 
   connectedCallback() {
     this.render();
     this.setupEventListeners();
+    this.setupLanguageChangeListener();
+  }
+
+  setupLanguageChangeListener() {
+    window.addEventListener('language-changed', () => {
+      this.render();
+      this.setupEventListeners();
+    });
   }
 
   render() {
     const criteria = [
-      { id: 'MABIMS', name: 'MABIMS', icon: '🌙', desc: 'Alt ≥ 3°, Elong ≥ 6.4°' },
-      { id: 'ODEH', name: 'Odeh', icon: '🔭', desc: 'Astronomical criteria' },
-      { id: 'LFNU', name: 'LFNU', icon: '🕌', desc: 'Imkanur Rukyat NU' },
-      { id: 'TURKEY', name: 'Turkey', icon: '🌟', desc: 'Alt ≥ 5°, Elong ≥ 8°' },
-      { id: 'Wujudul_Hilal', name: 'Wujudul Hilal', icon: '☪️', desc: 'Muhammadiyah' }
+      { id: 'MABIMS', name: 'MABIMS', icon: '🌙', desc: this.t('criteria.mabims_desc', 'Alt ≥ 3°, Elong ≥ 6.4°') },
+      { id: 'Odeh', name: 'Odeh', icon: '🔭', desc: this.t('criteria.odeh_desc', 'Astronomical criteria') },
+      { id: 'LFNU', name: 'LFNU', icon: '🕌', desc: this.t('criteria.lfnu_desc', 'Imkanur Rukyat NU') },
+      { id: 'KHGT', name: 'KHGT', icon: '🌍', desc: this.t('criteria.khgt_desc', 'Alt ≥ 5°, Elong ≥ 8°') },
+      { id: 'Turkey', name: 'Turkey', icon: '🌟', desc: this.t('criteria.turkey_desc', 'Alt ≥ 5°, Elong ≥ 8°') },
+      { id: 'WujudulHilal', name: 'Wujudul Hilal', icon: '☪️', desc: this.t('criteria.wujudul_hilal_desc', 'Above horizon') }
     ];
 
     this.innerHTML = `

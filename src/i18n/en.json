@@ -49,12 +49,15 @@
     "cityName": "City Name",
     "customLocation": "Custom Location",
     "km": "km",
+    "hoursShort": "h",
+    "minutesShort": "m",
     "secondsShort": "s",
     "north": "N",
     "south": "S",
     "east": "E",
     "west": "W",
-    "elevationShort": "Elev"
+    "elevationShort": "Elev",
+    "localTimeShort": "LT"
   },
   "criteria": {
     "mabims": "MABIMS 2010+",
@@ -64,7 +67,13 @@
     "odeh": "Odeh",
     "turkey": "Turkish",
     "additional": "Additional",
-    "khgt": "KHGT"
+    "khgt": "KHGT",
+    "mabims_desc": "Alt ≥ 3°, Elong ≥ 6.4°",
+    "odeh_desc": "Astronomical criteria",
+    "lfnu_desc": "Imkanur Rukyat NU",
+    "turkey_desc": "Alt ≥ 5°, Elong ≥ 8°",
+    "khgt_desc": "Alt ≥ 5°, Elong ≥ 8°",
+    "wujudul_hilal_desc": "Moon above horizon"
   },
   "ephemeris": {
     "title": "Detailed Ephemeris Data",
@@ -236,7 +245,7 @@
   "criteriaDescriptions": {
     "mabimsLama": "MABIMS criteria (Traditional)",
     "mabimsBaru": "MABIMS criteria (Updated)",
-    "wujudulHilal": "Wujudul Hilal (Muhammadiyah)",
+    "wujudulHilal": "Wujudul Hilal (Moon above horizon)",
     "turkey": "Turkey/Diyanet criteria",
     "odeh": "Odeh Astronomical criteria",
     "ijtimaQoblaGhurub": "Conjunction before sunset",

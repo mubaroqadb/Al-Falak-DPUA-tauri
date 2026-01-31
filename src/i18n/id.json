@@ -31,12 +31,16 @@
     "difference": "Selisih",
     "localTime": "Waktu Lokal",
     "seconds": "detik",
-    "eclipticCoordinates": "Koordinat Ekliptika",
-    "equatorialCoordinates": "Koordinat Equator",
-    "horizontalCoordinates": "Koordinat Horizon",
-    "corrections": "Koreksi",
+    "km": "km",
+    "hoursShort": "j",
+    "minutesShort": "m",
+    "secondsShort": "d",
+    "north": "U",
+    "south": "S",
+    "east": "T",
     "west": "B",
-    "elevationShort": "Elev"
+    "elevationShort": "Elev",
+    "localTimeShort": "WIB"
   },
   "criteria": {
     "mabims": "MABIMS 2010+",
@@ -46,7 +50,13 @@
     "odeh": "Odeh",
     "turkey": "Turki",
     "additional": "Tambahan",
-    "khgt": "KHGT"
+    "khgt": "KHGT",
+    "mabims_desc": "Tinggi ≥ 3°, Elongasi ≥ 6.4°",
+    "odeh_desc": "Kriteria Astronomis",
+    "lfnu_desc": "Imkanur Rukyat NU",
+    "turkey_desc": "Tinggi ≥ 5°, Elongasi ≥ 8°",
+    "khgt_desc": "Tinggi ≥ 5°, Elongasi ≥ 8°",
+    "wujudul_hilal_desc": "Bulan di atas ufuk"
   },
   "ephemeris": {
     "title": "Data Efeméris Lengkap",
@@ -218,7 +228,7 @@
   "criteriaDescriptions": {
     "mabimsLama": "Kriteria MABIMS (Tradisional)",
     "mabimsBaru": "Kriteria MABIMS (Diperbarui)",
-    "wujudulHilal": "Wujudul Hilal (Muhammadiyah)",
+    "wujudulHilal": "Wujudul Hilal (Bulan di atas ufuk)",
     "turkey": "Kriteria Turki/Diyanet",
     "odeh": "Kriteria Astronomis Odeh",
     "ijtimaQoblaGhurub": "Ijtima sebelum matahari terbenam",

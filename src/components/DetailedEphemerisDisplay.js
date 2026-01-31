@@ -505,8 +505,12 @@ export class DetailedEphemerisDisplay extends HTMLElement {
     const m = Math.floor(minDecimal);
     const s = ((minDecimal - m) * 60).toFixed(2);
     
+    const hLabel = this.t('labels.hoursShort', 'h');
+    const mLabel = this.t('labels.minutesShort', 'm');
+    const sLabel = this.t('labels.secondsShort', 's');
+    
     const sign = isNegative ? '-' : '';
-    return `${sign}${h}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
+    return `${sign}${h}${hLabel} ${m.toString().padStart(2, '0')}${mLabel} ${s.toString().padStart(2, '0')}${sLabel}`;
   }
 
   formatHours(hours) {
@@ -517,8 +521,12 @@ export class DetailedEphemerisDisplay extends HTMLElement {
     const m = Math.floor(minDecimal);
     const s = Math.round((minDecimal - m) * 60);
     
+    const hLabel = this.t('labels.hoursShort', 'h');
+    const mLabel = this.t('labels.minutesShort', 'm');
+    const sLabel = this.t('labels.secondsShort', 's');
+    
     const sign = isNegative ? '-' : '';
-    return `${sign}${h}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
+    return `${sign}${h}${hLabel} ${m.toString().padStart(2, '0')}${mLabel} ${s.toString().padStart(2, '0')}${sLabel}`;
   }
 
   formatDate() {
@@ -571,20 +579,20 @@ export class DetailedEphemerisDisplay extends HTMLElement {
       const locationName = (this.locationData && this.locationData.name) ? this.locationData.name.toUpperCase() : this.t('labels.location', 'MARKAZ PERHITUNGAN');
       const lines = [
         locationName,
-        `"${this.t('results.title', 'DATA HILAL')} :  ${this.formatDate()}   - ${locationName}"`,
-        `\t\t\t    ${this.t('labels.location', 'Lokasi Perhitungan')}\t(Markaz)\t"${this.formatLocation()}"`,
-        `\t\t\t    ${this.t('results.sunsetTime', 'Waktu Perhitungan')}\t${this.t('results.sunsetTime', 'Saat Matahari Terbenam')}\t"${eph.sunset_time} ${this.t('labels.localTime', 'WIB')}"`,
-        `\t\t\t    ${this.t('results.julianDay', 'Julian Datum (JD)')}\t${this.t('results.sunsetTime', 'Saat Waktu Perhitungan')}\t${eph.julian_date || 'N/A'}`,
-        `\t\t\t    ${this.t('results.deltaT', 'Delta T')}\tD T (${this.t('results.sunsetTime', 'Saat Waktu Perhitungan')})\t${eph.delta_t.toFixed(2)} ${this.t('labels.seconds', 'detik')}`,
-        `\t\t\t    ${this.t('results.sunsetTime', 'Matahari Terbenam')}\tSunset\t${eph.sunset_time} ${this.t('labels.localTime', 'WIB')}`,
-        `\t\t\t    ${this.t('results.moonsetTime', 'Bulan Terbenam')}\tMoonset\t${eph.moonset_time} ${this.t('labels.localTime', 'WIB')}`,
-        `\t\t\t    ${this.t('results.lagTime', 'Lama Hilal')}\tLag Time\t${eph.lag_time}`,
-        `\t\t\t    ${this.t('results.sunDistance', 'Jarak Matahari')}\tSun's Distance from the Earth\t${(eph.sun_distance_km || 0).toFixed(3)} km`,
-        `\t\t\t    ${this.t('results.moonDistance', 'Jarak Bulan')}\tMoon's Distance from the Earth\t${(eph.moon_distance_km || 0).toFixed(3)} km`,
+        `"${this.t('results.title', 'HILAL DATA')} :  ${this.formatDate()}   - ${locationName}"`,
+        `\t\t\t    ${this.t('labels.location', 'Calculation Location')}\t(Markaz)\t"${this.formatLocation()}"`,
+        `\t\t\t    ${this.t('results.sunsetTime', 'Sunset Time')}\t${this.t('results.sunsetTime', 'At Sunset')}\t"${eph.sunset_time} ${this.t('labels.localTimeShort', 'LT')}"`,
+        `\t\t\t    ${this.t('results.julianDay', 'Julian Date (JD)')}\t${this.t('results.sunsetTime', 'At Time of Calculation')}\t${eph.julian_date || 'N/A'}`,
+        `\t\t\t    ${this.t('results.deltaT', 'Delta T')}\tD T (${this.t('results.sunsetTime', 'At Time of Calculation')})\t${eph.delta_t.toFixed(2)} ${this.t('labels.secondsShort', 's')}`,
+        `\t\t\t    ${this.t('results.sunsetTime', 'Sunset')}\tSunset\t${eph.sunset_time} ${this.t('labels.localTimeShort', 'LT')}`,
+        `\t\t\t    ${this.t('results.moonsetTime', 'Moonset')}\tMoonset\t${eph.moonset_time} ${this.t('labels.localTimeShort', 'LT')}`,
+        `\t\t\t    ${this.t('results.lagTime', 'Lag Time')}\tLag Time\t${eph.lag_time}`,
+        `\t\t\t    ${this.t('results.sunDistance', 'Sun Distance')}\tSun's Distance from the Earth\t${(eph.sun_distance_km || 0).toFixed(3)} ${this.t('labels.km', 'km')}`,
+        `\t\t\t    ${this.t('results.moonDistance', 'Moon Distance')}\tMoon's Distance from the Earth\t${(eph.moon_distance_km || 0).toFixed(3)} ${this.t('labels.km', 'km')}`,
         '',
         `\t\t${this.t('labels.ephemeris', 'Ephemeris')}\t\t\t${this.t('ephemeris.geocentric', 'Geocentric')}\t${this.t('ephemeris.topocentric', 'Topocentric')}\t${this.t('ephemeris.difference', 'Difference')}`,
         `${this.t('ephemeris.eclipticCoordinates', 'Ecliptic Coordinates')}\tAirless\t1\t    ${this.t('ephemeris.conjunctionTime', 'Conjunction Time')}\tConjunction\t${eph.conjunction_date}\t${eph.conjunction_date}\t-01:34:36`,
-        `${this.t('ephemeris.eclipticCoordinates', 'Ecliptic Coordinates')}\tAirless\t\t\t${eph.sunset_time} LT\t${eph.moonset_time} LT`,
+        `${this.t('ephemeris.eclipticCoordinates', 'Ecliptic Coordinates')}\tAirless\t\t\t${eph.sunset_time} ${this.t('labels.localTimeShort', 'LT')}\t${eph.moonset_time} ${this.t('labels.localTimeShort', 'LT')}`,
         `${this.t('ephemeris.eclipticCoordinates', 'Ecliptic Coordinates')}\tAirless\t2\t    ${this.t('ephemeris.sunSemidiameter', 'Sun Semidiameter')}\tSun's Semidiameter\t${this.formatDMS(eph.sun_semidiameter_deg)}\t${this.formatDMS(eph.sun_semidiameter_deg)}\t-0° 00' 00"`,
         `${this.t('ephemeris.eclipticCoordinates', 'Ecliptic Coordinates')}\tAirless\t3\t    ${this.t('ephemeris.moonSemidiameter', 'Moon Semidiameter')}\tMoon's Semidiameter\t${this.formatDMS(eph.moon_semidiameter_deg)}\t${this.formatDMS(eph.moon_semidiameter_deg)}\t-0° 00' 00"`,
         `${this.t('ephemeris.eclipticCoordinates', 'Ecliptic Coordinates')}\tAirless\t4\t    ${this.t('ephemeris.sunLongitude', 'Sun Longitude')}\tSun's Longitude\t${this.formatDMS(eph.sun_longitude_geo)}\t${this.formatDMS(eph.sun_longitude_topo)}\t${this.formatDMS(eph.sun_longitude_topo - eph.sun_longitude_geo)}`,
@@ -676,52 +684,52 @@ export class DetailedEphemerisDisplay extends HTMLElement {
 
       const eph = this.ephemerisData;
       const rows = [
-        [`${this.t('app.title', 'HISAB HILAL')} - ${this.t('detailedEphemeris.title', 'Detailed Ephemeris Data')}`],
+        [`${this.t('app.title', 'HISAB HILAL')} - ${this.t('ephemeris.title', 'Detailed Ephemeris Data')}`],
         [this.t('labels.location', 'Location'), this.formatLocation()],
         [this.t('labels.coordinates', 'Coordinates'), this.formatCoordinates()],
         [this.t('labels.observationDate', 'Observation Date'), this.formatDate()],
         [''],
-        [this.t('detailedEphemeris.timeInfo', 'TIME INFORMATION').toUpperCase()],
+        [this.t('ephemeris.timeInfo', 'TIME INFORMATION').toUpperCase()],
         [this.t('labels.parameter', 'Parameter'), this.t('labels.value', 'Value')],
         [this.t('results.conjunctionTime', 'Conjunction (Ijtima\')'), eph.conjunction_date],
         [this.t('results.sunsetTime', 'Sunset Time'), eph.sunset_time],
         [this.t('results.moonsetTime', 'Moonset Time'), eph.moonset_time],
         [this.t('results.lagTime', 'Lag Time'), eph.lag_time],
-        [this.t('results.deltaT', 'Delta T'), `${eph.delta_t.toFixed(2)}s`],
+        [this.t('results.deltaT', 'Delta T'), `${eph.delta_t.toFixed(2)}${this.t('labels.secondsShort', 's')}`],
         [''],
-        [this.t('detailedEphemeris.distances', 'DISTANCES & SEMIDIAMETERS').toUpperCase()],
+        [this.t('ephemeris.distances', 'DISTANCES & SEMIDIAMETERS').toUpperCase()],
         [this.t('labels.parameter', 'Parameter'), this.t('labels.geocentric', 'Geocentric'), this.t('labels.topocentric', 'Topocentric')],
-        [this.t('results.moonDistance', 'Earth-Moon Distance'), `${(eph.moon_distance_km || 0).toFixed(2)} km`],
-        [this.t('results.sunDistance', 'Earth-Sun Distance'), `${(eph.sun_distance_km || 0).toFixed(2)} km`],
+        [this.t('results.moonDistance', 'Earth-Moon Distance'), `${(eph.moon_distance_km || 0).toFixed(2)} ${this.t('labels.km', 'km')}`],
+        [this.t('results.sunDistance', 'Earth-Sun Distance'), `${(eph.sun_distance_km || 0).toFixed(2)} ${this.t('labels.km', 'km')}`],
         [this.t('results.moonSemidiameter', 'Moon Semidiameter'), `${this.formatDMS(eph.moon_semidiameter_deg)}`],
         [this.t('results.sunSemidiameter', 'Sun Semidiameter'), `${this.formatDMS(eph.sun_semidiameter_deg)}`],
         [''],
-        [this.t('detailedEphemeris.moonEcliptic', 'MOON ECLIPTIC COORDINATES').toUpperCase()],
+        [this.t('ephemeris.moonEcliptic', 'MOON ECLIPTIC COORDINATES').toUpperCase()],
         [this.t('labels.parameter', 'Parameter'), this.t('labels.geocentric', 'Geocentric'), this.t('labels.topocentric', 'Topocentric')],
         [this.t('results.moonLongitude', 'Longitude'), this.formatDMS(eph.moon_longitude_geo || 0), this.formatDMS(eph.moon_longitude_topo || 0)],
         [this.t('results.moonLatitude', 'Latitude'), this.formatDMS(eph.moon_latitude_geo || 0), this.formatDMS(eph.moon_latitude_topo || 0)],
         [''],
-        [this.t('detailedEphemeris.sunEcliptic', 'SUN ECLIPTIC COORDINATES').toUpperCase()],
+        [this.t('ephemeris.sunEcliptic', 'SUN ECLIPTIC COORDINATES').toUpperCase()],
         [this.t('labels.parameter', 'Parameter'), this.t('labels.geocentric', 'Geocentric'), this.t('labels.topocentric', 'Topocentric')],
         [this.t('results.sunLongitude', 'Longitude'), this.formatDMS(eph.sun_longitude_geo || 0), this.formatDMS(eph.sun_longitude_topo || 0)],
         [this.t('results.sunLatitude', 'Latitude'), this.formatDMS(eph.sun_latitude_geo || 0), this.formatDMS(eph.sun_latitude_topo || 0)],
         [''],
-        [this.t('detailedEphemeris.moonEquatorial', 'MOON EQUATORIAL COORDINATES').toUpperCase()],
+        [this.t('ephemeris.moonEquatorial', 'MOON EQUATORIAL COORDINATES').toUpperCase()],
         [this.t('labels.parameter', 'Parameter'), this.t('labels.geocentric', 'Geocentric'), this.t('labels.topocentric', 'Topocentric')],
         [this.t('results.moonRightAscension', 'Right Ascension'), this.formatHMS(eph.moon_ra_geo || 0), this.formatHMS(eph.moon_ra_topo || 0)],
         [this.t('results.moonDeclination', 'Declination'), this.formatDMS(eph.moon_dec_geo || 0), this.formatDMS(eph.moon_dec_topo || 0)],
         [''],
-        [this.t('detailedEphemeris.sunEquatorial', 'SUN EQUATORIAL COORDINATES').toUpperCase()],
+        [this.t('ephemeris.sunEquatorial', 'SUN EQUATORIAL COORDINATES').toUpperCase()],
         [this.t('labels.parameter', 'Parameter'), this.t('labels.geocentric', 'Geocentric'), this.t('labels.topocentric', 'Topocentric')],
         [this.t('results.sunRightAscension', 'Right Ascension'), this.formatHMS(eph.sun_ra_geo || 0), this.formatHMS(eph.sun_ra_topo || 0)],
         [this.t('results.sunDeclination', 'Declination'), this.formatDMS(eph.sun_dec_geo || 0), this.formatDMS(eph.sun_dec_topo || 0)],
         [''],
-        [this.t('detailedEphemeris.moonHorizontal', 'MOON HORIZONTAL COORDINATES').toUpperCase()],
+        [this.t('ephemeris.moonHorizontal', 'MOON HORIZONTAL COORDINATES').toUpperCase()],
         [this.t('labels.parameter', 'Parameter'), this.t('labels.geocentric', 'Geocentric'), this.t('labels.topocentric', 'Topocentric')],
         [this.t('results.moonAltitude', 'Altitude'), this.formatDMS(eph.moon_altitude_airless_geo || 0), this.formatDMS(eph.moon_altitude_airless_topo || 0)],
         [this.t('results.moonAzimuth', 'Azimuth'), this.formatDMS(eph.moon_azimuth_airless_geo || 0), this.formatDMS(eph.moon_azimuth_airless_topo || 0)],
         [''],
-        [this.t('detailedEphemeris.sunHorizontal', 'SUN HORIZONTAL COORDINATES').toUpperCase()],
+        [this.t('ephemeris.sunHorizontal', 'SUN HORIZONTAL COORDINATES').toUpperCase()],
         [this.t('labels.parameter', 'Parameter'), this.t('labels.geocentric', 'Geocentric'), this.t('labels.topocentric', 'Topocentric')],
         [this.t('results.sunAltitude', 'Altitude'), this.formatDMS(eph.sun_altitude_airless_geo || 0), this.formatDMS(eph.sun_altitude_airless_topo || 0)],
         [this.t('results.sunAzimuth', 'Azimuth'), this.formatDMS(eph.sun_azimuth_airless_geo || 0), this.formatDMS(eph.sun_azimuth_airless_topo || 0)],
@@ -733,7 +741,7 @@ export class DetailedEphemerisDisplay extends HTMLElement {
         [this.t('results.moonRefraction', 'Moon Refraction Correction'), `${(eph.moon_refraction || 0).toFixed(4)}°`],
         [this.t('results.sunRefraction', 'Sun Refraction Correction'), `${(eph.sun_refraction || 0).toFixed(4)}°`],
         [''],
-        [this.t('detailedEphemeris.hilalVisibility', 'HILAL VISIBILITY DATA').toUpperCase()],
+        [this.t('ephemeris.hilalVisibilityData', 'HILAL VISIBILITY DATA').toUpperCase()],
         [this.t('labels.parameter', 'Parameter'), this.t('labels.geocentric', 'Geocentric'), this.t('labels.topocentric', 'Topocentric'), this.t('labels.difference', 'Difference')],
         [this.t('results.moonAge', 'Moon Age'), this.formatHours(eph.moon_age_hours_geo || 0), this.formatHours(eph.moon_age_hours_topo || 0), this.formatHours((eph.moon_age_hours_topo || 0) - (eph.moon_age_hours_geo || 0))],
         [this.t('results.elongation', 'Elongation'), this.formatDMS(eph.elongation_geo || 0), this.formatDMS(eph.elongation_topo || 0), this.formatDMS((eph.elongation_topo || 0) - (eph.elongation_geo || 0))],

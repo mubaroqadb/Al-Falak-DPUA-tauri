@@ -355,6 +355,14 @@ class CriteriaPanel extends HTMLElement {
         parameters: [
           'Moon must set after sunset'
         ]
+      },
+      'KHGT': {
+        title: 'KHGT Criteria',
+        description: 'Kalender Hijriah Global Tunggal criteria (Muhammadiyah).',
+        parameters: [
+          'Moon altitude at sunset ≥ 5°',
+          'Elongation ≥ 8°'
+        ]
       }
     };
 

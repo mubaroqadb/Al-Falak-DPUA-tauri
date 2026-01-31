@@ -5,6 +5,7 @@
 
 pub mod additional;
 pub mod ijtima_qobla_ghurub;
+pub mod khgt;
 pub mod lfnu;
 pub mod mabims;
 pub mod odeh;
@@ -14,6 +15,7 @@ pub mod wujudul_hilal;
 // Re-export tipe data dan fungsi
 pub use additional::{evaluate_kig, evaluate_kriteria_29, KigResult, Kriteria29Result};
 pub use ijtima_qobla_ghurub::{evaluate_ijtima_qobla_ghurub, IjtimaQoblaGhuribResult};
+pub use khgt::{evaluate_khgt, KhgtResult};
 pub use lfnu::{evaluate_lfnu, LfnuResult};
 pub use mabims::{evaluate_criteria as evaluate_mabims, evaluate_new_mabims, MabimsResult};
 pub use odeh::{evaluate_odeh, OdehResult};
@@ -179,6 +181,25 @@ pub fn evaluate_all_criteria(
             additional_info: format!(
                 "Altitude: {:.2}°, Elongation: {:.2}°",
                 lfnu_result.moon_altitude, lfnu_result.elongation
+            ),
+        },
+    );
+
+    // Evaluasi KHGT
+    let khgt_result = evaluate_khgt(location, date, true);
+    results.insert(
+        "KHGT".to_string(),
+        VisibilityResult {
+            criteria_name: "KHGT (Kalender Hijriah Global Tunggal)".to_string(),
+            is_visible: khgt_result.is_visible,
+            visibility_type: if khgt_result.is_visible {
+                "Visible".to_string()
+            } else {
+                "Not Visible".to_string()
+            },
+            additional_info: format!(
+                "Altitude: {:.2}°, Elongation: {:.2}°",
+                khgt_result.moon_altitude, khgt_result.elongation
             ),
         },
     );
