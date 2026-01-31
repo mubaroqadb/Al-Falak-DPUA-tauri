@@ -198,8 +198,8 @@ pub fn evaluate_all_criteria(
                 "Not Visible".to_string()
             },
             additional_info: format!(
-                "Altitude: {:.2}°, Elongation: {:.2}°",
-                khgt_result.moon_altitude, khgt_result.elongation
+                "Altitude: {:.2}°, Elongation: {:.2}°, Ijtima OK: {}",
+                khgt_result.moon_altitude, khgt_result.elongation, khgt_result.ijtima_ok
             ),
         },
     );

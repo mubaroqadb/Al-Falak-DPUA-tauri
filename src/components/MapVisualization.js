@@ -34,6 +34,17 @@ export class MapVisualization extends HTMLElement {
   }
 
   render() {
+    // Clean up existing map properly before wiping innerHTML
+    if (this.map) {
+      try {
+        this.map.off('click', this.handleMapClick);
+        this.map.remove();
+      } catch (e) {
+        console.warn('⚠️ Error removing old map:', e);
+      }
+      this.map = null;
+    }
+
     this.innerHTML = `
       <div class="map-visualization">
         <div id="map" class="map-container"></div>
@@ -100,6 +111,13 @@ export class MapVisualization extends HTMLElement {
     }
 
     try {
+      // Check if map container is already initialized
+      if (this.map || mapElement._leaflet_id) {
+        console.warn('⚠️ Map already initialized, skipping initMap');
+        if (this.map) this.map.invalidateSize();
+        return;
+      }
+
       // Set default view to Jakarta/Indonesia
       this.map = L.map(mapElement, {
         center: [-6.2, 106.816666],
