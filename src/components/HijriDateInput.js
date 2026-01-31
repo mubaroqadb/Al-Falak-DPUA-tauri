@@ -7,7 +7,7 @@ import { HilalAPI, isTauri } from '../services/api.js';
 export class HijriDateInput extends HTMLElement {
   constructor() {
     super();
-    this.hijriYear = 1446;
+    this.hijriYear = 1447;
     this.hijriMonth = 7; // Ramadan default
     this.hijriDay = 1;
     this.dateMode = 'gregorian'; // 'gregorian' or 'hijri'
@@ -35,7 +35,7 @@ export class HijriDateInput extends HTMLElement {
   setDefaultHijriDate() {
     const now = new Date();
     // Approximate conversion - in production, use backend API
-    const approximateHijriYear = 1446;
+    const approximateHijriYear = 1447;
     const approximateHijriMonth = 7;
     const approximateHijriDay = Math.min(now.getDate(), 30);
     
@@ -95,7 +95,7 @@ export class HijriDateInput extends HTMLElement {
 
         <div id="gregorian-input" class="date-input-section ${this.dateMode === 'gregorian' ? 'active' : ''}">
           <label for="calc-date">${t('labels.date')}</label>
-          <input type="date" id="calc-date" class="date-input" />
+          <input type="date" id="calc-date" class="date-input" value="${this.gregorianDateValue || new Date().toISOString().split('T')[0]}" />
         </div>
 
         <div id="hijri-input" class="date-input-section ${this.dateMode === 'hijri' ? 'active' : ''}">
@@ -200,6 +200,7 @@ export class HijriDateInput extends HTMLElement {
 
         .hijri-selectors {
           display: flex;
+          flex-wrap: wrap;
           gap: 8px;
         }
 
@@ -210,20 +211,23 @@ export class HijriDateInput extends HTMLElement {
         }
 
         .selector-group:first-child {
-          flex: 0 0 70px;
+          flex: 0 0 auto;
+          min-width: 60px;
         }
 
         .selector-group:nth-child(2) {
-          flex: 1;
+          flex: 1 1 140px; /* Allow growing and shrinking, min-width 140px */
+          min-width: 0;
         }
 
         .selector-group:nth-child(3) {
-          flex: 0 0 90px;
+          flex: 0 0 80px;
         }
 
         .selector-group label {
           font-size: 0.75rem;
           color: #868e96;
+          white-space: nowrap;
         }
 
         .hijri-select {
@@ -344,6 +348,8 @@ export class HijriDateInput extends HTMLElement {
         }
       </style>
     `;
+
+    this.setupEventListeners();
   }
 
   generateDayOptions() {
@@ -355,11 +361,6 @@ export class HijriDateInput extends HTMLElement {
   }
 
   setupEventListeners() {
-    // Only set up event listeners once to avoid duplicates
-    if (this.eventListenersSetup) {
-      return;
-    }
-
     // Mode toggle buttons
     const modeButtons = this.querySelectorAll('.mode-btn');
     modeButtons.forEach(btn => {
@@ -376,6 +377,7 @@ export class HijriDateInput extends HTMLElement {
         gregorianInput.value = new Date().toISOString().split('T')[0];
       }
       gregorianInput.addEventListener('change', (e) => {
+        this.gregorianDateValue = e.target.value;
         const date = new Date(e.target.value);
         this.dispatchGregorianDateChange(date);
         // No automatic conversion - will be done when Calculate is clicked
@@ -413,14 +415,18 @@ export class HijriDateInput extends HTMLElement {
     const hijriYear = this.querySelector('#hijri-year');
     if (hijriYear) {
       hijriYear.addEventListener('change', (e) => {
-        this.hijriYear = parseInt(e.target.value) || 1446;
+        this.hijriYear = parseInt(e.target.value) || 1447;
         this.updateHijriDisplay();
         this.dispatchHijriDateChange();
-        // No automatic conversion - will be done when Calculate is clicked
       });
     }
 
-    this.eventListenersSetup = true;
+    // Listen for language changes
+    document.addEventListener('language-changed', () => {
+      this.render();
+      // Re-attach listeners after render
+      this.setupEventListeners();
+    });
   }
 
   setDateMode(mode) {

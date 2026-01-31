@@ -145,5 +145,14 @@
     "level2": "C: Memerlukan Alat Optik",
     "level1": "D: Tidak Memungkinkan",
     "level0": "E: Mustahil"
+  },
+  "hijriDate": {
+    "gregorian": "Masehi",
+    "hijri": "Hijriah",
+    "title": "Tanggal Hijriah",
+    "day": "Hari",
+    "month": "Bulan",
+    "year": "Tahun",
+    "arabicYearSuffix": "H"
   }
 }

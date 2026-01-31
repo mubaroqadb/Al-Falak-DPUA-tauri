@@ -145,5 +145,14 @@
     "level2": "C: Need Optical Aid",
     "level1": "D: Not Possible",
     "level0": "E: Impossible"
+  },
+  "hijriDate": {
+    "gregorian": "Gregorian",
+    "hijri": "Hijri",
+    "title": "Hijri Date",
+    "day": "Day",
+    "month": "Month",
+    "year": "Year",
+    "arabicYearSuffix": "AH"
   }
 }
