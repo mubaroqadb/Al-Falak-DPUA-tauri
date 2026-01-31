@@ -271,23 +271,23 @@ export class DetailedEphemerisDisplay extends HTMLElement {
         <div class="card-body p-0">
           <div class="bg-base-300/50 px-4 py-2 font-bold flex items-center gap-2 rounded-t-xl border-b border-base-300 shadow-sm">
             <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            <span>Ecliptic Coordinates</span>
+            <span>${this.t('ephemeris.eclipticCoordinates', 'Ecliptic Coordinates')}</span>
           </div>
           <div class="overflow-x-auto">
             <table class="table table-zebra table-sm w-full">
               <thead>
                 <tr>
-                  <th>Parameter</th>
-                  <th class="text-right">Geocentric</th>
-                  <th class="text-right">Topocentric</th>
-                  <th class="text-right">Difference</th>
+                  <th>${this.t('ephemeris.parameter', 'Parameter')}</th>
+                  <th class="text-right">${this.t('ephemeris.geocentric', 'Geocentric')}</th>
+                  <th class="text-right">${this.t('ephemeris.topocentric', 'Topocentric')}</th>
+                  <th class="text-right">${this.t('ephemeris.difference', 'Difference')}</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td>Sun Longitude</td><td class="text-right font-mono">${this.formatDMS(eph.sun_longitude_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_longitude_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_longitude_topo - eph.sun_longitude_geo)}</td></tr>
-                <tr><td>Sun Latitude</td><td class="text-right font-mono">${this.formatDMS(eph.sun_latitude_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_latitude_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_latitude_topo - eph.sun_latitude_geo)}</td></tr>
-                <tr><td>Moon Longitude</td><td class="text-right font-mono">${this.formatDMS(eph.moon_longitude_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_longitude_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_longitude_topo - eph.moon_longitude_geo)}</td></tr>
-                <tr><td>Moon Latitude</td><td class="text-right font-mono">${this.formatDMS(eph.moon_latitude_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_latitude_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_latitude_topo - eph.moon_latitude_geo)}</td></tr>
+                <tr><td>${this.t('ephemeris.sunLongitude', 'Sun Longitude')}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_longitude_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_longitude_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_longitude_topo - eph.sun_longitude_geo)}</td></tr>
+                <tr><td>${this.t('ephemeris.sunLatitude', 'Sun Latitude')}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_latitude_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_latitude_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_latitude_topo - eph.sun_latitude_geo)}</td></tr>
+                <tr><td>${this.t('ephemeris.moonLongitude', 'Moon Longitude')}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_longitude_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_longitude_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_longitude_topo - eph.moon_longitude_geo)}</td></tr>
+                <tr><td>${this.t('ephemeris.moonLatitude', 'Moon Latitude')}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_latitude_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_latitude_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_latitude_topo - eph.moon_latitude_geo)}</td></tr>
               </tbody>
             </table>
           </div>
@@ -303,23 +303,23 @@ export class DetailedEphemerisDisplay extends HTMLElement {
         <div class="card-body p-0">
           <div class="bg-base-300/50 px-4 py-2 font-bold flex items-center gap-2 rounded-t-xl border-b border-base-300 shadow-sm">
             <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <span>Equatorial Coordinates</span>
+            <span>${this.t('ephemeris.equatorialCoordinates', 'Equatorial Coordinates')}</span>
           </div>
           <div class="overflow-x-auto">
             <table class="table table-zebra table-sm w-full">
               <thead>
                 <tr>
-                  <th>Parameter</th>
-                  <th class="text-right">Geocentric</th>
-                  <th class="text-right">Topocentric</th>
-                  <th class="text-right">Difference</th>
+                  <th>${this.t('ephemeris.parameter', 'Parameter')}</th>
+                  <th class="text-right">${this.t('ephemeris.geocentric', 'Geocentric')}</th>
+                  <th class="text-right">${this.t('ephemeris.topocentric', 'Topocentric')}</th>
+                  <th class="text-right">${this.t('ephemeris.difference', 'Difference')}</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td>Sun RA</td><td class="text-right font-mono">${this.formatRA(eph.sun_ra_geo)}</td><td class="text-right font-mono">${this.formatRA(eph.sun_ra_topo)}</td><td class="text-right font-mono">${this.formatRA(eph.sun_ra_topo - eph.sun_ra_geo)}</td></tr>
-                <tr><td>Sun Dec</td><td class="text-right font-mono">${this.formatDMS(eph.sun_dec_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_dec_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_dec_topo - eph.sun_dec_geo)}</td></tr>
-                <tr><td>Moon RA</td><td class="text-right font-mono">${this.formatRA(eph.moon_ra_geo)}</td><td class="text-right font-mono">${this.formatRA(eph.moon_ra_topo)}</td><td class="text-right font-mono">${this.formatRA(eph.moon_ra_topo - eph.moon_ra_geo)}</td></tr>
-                <tr><td>Moon Dec</td><td class="text-right font-mono">${this.formatDMS(eph.moon_dec_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_dec_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_dec_topo - eph.moon_dec_geo)}</td></tr>
+                <tr><td>${this.t('ephemeris.sunRA', 'Sun RA')}</td><td class="text-right font-mono">${this.formatRA(eph.sun_ra_geo)}</td><td class="text-right font-mono">${this.formatRA(eph.sun_ra_topo)}</td><td class="text-right font-mono">${this.formatRA(eph.sun_ra_topo - eph.sun_ra_geo)}</td></tr>
+                <tr><td>${this.t('ephemeris.sunDec', 'Sun Dec')}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_dec_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_dec_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_dec_topo - eph.sun_dec_geo)}</td></tr>
+                <tr><td>${this.t('ephemeris.moonRA', 'Moon RA')}</td><td class="text-right font-mono">${this.formatRA(eph.moon_ra_geo)}</td><td class="text-right font-mono">${this.formatRA(eph.moon_ra_topo)}</td><td class="text-right font-mono">${this.formatRA(eph.moon_ra_topo - eph.moon_ra_geo)}</td></tr>
+                <tr><td>${this.t('ephemeris.moonDec', 'Moon Dec')}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_dec_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_dec_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_dec_topo - eph.moon_dec_geo)}</td></tr>
               </tbody>
             </table>
           </div>
@@ -335,26 +335,26 @@ export class DetailedEphemerisDisplay extends HTMLElement {
         <div class="card-body p-0">
           <div class="bg-base-300/50 px-4 py-2 font-bold flex items-center gap-2 rounded-t-xl border-b border-base-300 shadow-sm">
             <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
-            <span>Horizontal Coordinates</span>
+            <span>${this.t('ephemeris.horizontalCoordinates', 'Horizontal Coordinates')}</span>
           </div>
           <div class="overflow-x-auto">
             <table class="table table-zebra table-sm w-full">
               <thead>
                 <tr>
-                  <th>Parameter</th>
-                  <th class="text-right">Geocentric</th>
-                  <th class="text-right">Topocentric</th>
-                  <th class="text-right">Difference</th>
+                  <th>${this.t('ephemeris.parameter', 'Parameter')}</th>
+                  <th class="text-right">${this.t('ephemeris.geocentric', 'Geocentric')}</th>
+                  <th class="text-right">${this.t('ephemeris.topocentric', 'Topocentric')}</th>
+                  <th class="text-right">${this.t('ephemeris.difference', 'Difference')}</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td>Sun Alt (Airless)</td><td class="text-right font-mono">${this.formatDMS(eph.sun_altitude_airless_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_altitude_airless_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_altitude_airless_topo - eph.sun_altitude_airless_geo)}</td></tr>
-                <tr><td>Sun Azimuth</td><td class="text-right font-mono">${this.formatDMS(eph.sun_azimuth_airless_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_azimuth_airless_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_azimuth_airless_topo - eph.sun_azimuth_airless_geo)}</td></tr>
-                <tr><td>Moon Alt (Airless)</td><td class="text-right font-mono">${this.formatDMS(eph.moon_altitude_airless_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_altitude_airless_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_altitude_airless_topo - eph.moon_altitude_airless_geo)}</td></tr>
-                <tr><td>Moon Azimuth</td><td class="text-right font-mono">${this.formatDMS(eph.moon_azimuth_airless_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_azimuth_airless_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_azimuth_airless_topo - eph.moon_azimuth_airless_geo)}</td></tr>
-                <tr class="bg-base-300/30 font-bold"><td colspan="4">With Refraction (Airy)</td></tr>
-                <tr><td>Sun Alt (Airy)</td><td class="text-right font-mono">${this.formatDMS(eph.sun_altitude_airy_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_altitude_airy_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_altitude_airy_topo - eph.sun_altitude_airy_geo)}</td></tr>
-                <tr><td>Moon Alt (Airy)</td><td class="text-right font-mono font-bold text-primary">${this.formatDMS(eph.moon_altitude_airy_geo)}</td><td class="text-right font-mono font-bold text-accent">${this.formatDMS(eph.moon_altitude_airy_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_altitude_airy_topo - eph.moon_altitude_airy_geo)}</td></tr>
+                <tr><td>${this.t('ephemeris.sunAltAirless', 'Sun Alt (Airless)')}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_altitude_airless_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_altitude_airless_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_altitude_airless_topo - eph.sun_altitude_airless_geo)}</td></tr>
+                <tr><td>${this.t('ephemeris.sunAzimuth', 'Sun Azimuth')}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_azimuth_airless_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_azimuth_airless_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_azimuth_airless_topo - eph.sun_azimuth_airless_geo)}</td></tr>
+                <tr><td>${this.t('ephemeris.moonAltAirless', 'Moon Alt (Airless)')}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_altitude_airless_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_altitude_airless_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_altitude_airless_topo - eph.moon_altitude_airless_geo)}</td></tr>
+                <tr><td>${this.t('ephemeris.moonAzimuth', 'Moon Azimuth')}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_azimuth_airless_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_azimuth_airless_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_azimuth_airless_topo - eph.moon_azimuth_airless_geo)}</td></tr>
+                <tr class="bg-base-300/30 font-bold"><td colspan="4">${this.t('ephemeris.withRefraction', 'With Refraction (Airy)')}</td></tr>
+                <tr><td>${this.t('ephemeris.sunAltAiry', 'Sun Alt (Airy)')}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_altitude_airy_geo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_altitude_airy_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_altitude_airy_topo - eph.sun_altitude_airy_geo)}</td></tr>
+                <tr><td>${this.t('ephemeris.moonAltAiry', 'Moon Alt (Airy)')}</td><td class="text-right font-mono font-bold text-primary">${this.formatDMS(eph.moon_altitude_airy_geo)}</td><td class="text-right font-mono font-bold text-accent">${this.formatDMS(eph.moon_altitude_airy_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_altitude_airy_topo - eph.moon_altitude_airy_geo)}</td></tr>
               </tbody>
             </table>
           </div>
@@ -370,24 +370,24 @@ export class DetailedEphemerisDisplay extends HTMLElement {
         <div class="card-body p-0">
           <div class="bg-base-300/50 px-4 py-2 font-bold flex items-center gap-2 rounded-t-xl border-b border-base-300 shadow-sm">
             <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-            <span>Corrections & Parallax</span>
+            <span>${this.t('ephemeris.corrections', 'Corrections & Parallax')}</span>
           </div>
           <div class="overflow-x-auto">
             <table class="table table-zebra table-sm w-full">
               <thead>
                 <tr>
-                  <th>Parameter</th>
-                  <th class="text-right">Value</th>
+                  <th>${this.t('ephemeris.parameter', 'Parameter')}</th>
+                  <th class="text-right">${this.t('ephemeris.value', 'Value')}</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td>Nutation Lon</td><td class="text-right font-mono">${eph.nutation_longitude.toFixed(2)}"</td></tr>
-                <tr><td>Nutation Obl</td><td class="text-right font-mono">${eph.nutation_obliquity.toFixed(2)}"</td></tr>
-                <tr><td>Sun Aberration</td><td class="text-right font-mono">${eph.sun_aberration.toFixed(2)}"</td></tr>
-                <tr><td>Sun Refraction</td><td class="text-right font-mono">${(eph.sun_refraction / 60.0).toFixed(2)}'</td></tr>
-                <tr><td>Moon Refraction</td><td class="text-right font-mono">${(eph.moon_refraction / 60.0).toFixed(2)}'</td></tr>
-                <tr><td>Sun HP</td><td class="text-right font-mono">${eph.sun_horizontal_parallax.toFixed(2)}"</td></tr>
-                <tr><td>Moon HP</td><td class="text-right font-mono">${(eph.moon_horizontal_parallax / 60.0).toFixed(2)}'</td></tr>
+                <tr><td>${this.t('ephemeris.nutationLon', 'Nutation Lon')}</td><td class="text-right font-mono">${eph.nutation_longitude.toFixed(2)}"</td></tr>
+                <tr><td>${this.t('ephemeris.nutationObl', 'Nutation Obl')}</td><td class="text-right font-mono">${eph.nutation_obliquity.toFixed(2)}"</td></tr>
+                <tr><td>${this.t('ephemeris.sunAberration', 'Sun Aberration')}</td><td class="text-right font-mono">${eph.sun_aberration.toFixed(2)}"</td></tr>
+                <tr><td>${this.t('ephemeris.sunRefraction', 'Sun Refraction')}</td><td class="text-right font-mono">${(eph.sun_refraction / 60.0).toFixed(2)}'</td></tr>
+                <tr><td>${this.t('ephemeris.moonRefraction', 'Moon Refraction')}</td><td class="text-right font-mono">${(eph.moon_refraction / 60.0).toFixed(2)}'</td></tr>
+                <tr><td>${this.t('ephemeris.sunHP', 'Sun HP')}</td><td class="text-right font-mono">${eph.sun_horizontal_parallax.toFixed(2)}"</td></tr>
+                <tr><td>${this.t('ephemeris.moonHP', 'Moon HP')}</td><td class="text-right font-mono">${(eph.moon_horizontal_parallax / 60.0).toFixed(2)}'</td></tr>
               </tbody>
             </table>
           </div>
@@ -404,28 +404,28 @@ export class DetailedEphemerisDisplay extends HTMLElement {
           <div class="px-6 py-4 border-b border-white/20">
             <h3 class="text-xl font-bold flex items-center gap-2">
               <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
-              Hilal Visibility Data (Detailed)
+              ${this.t('ephemeris.hilalVisibilityData', 'Hilal Visibility Data (Detailed)')}
             </h3>
           </div>
           <div class="overflow-x-auto">
             <table class="table w-full text-primary-content border-none">
               <thead class="text-primary-content/70 border-b border-white/10">
                 <tr>
-                  <th class="bg-transparent">Parameter</th>
-                  <th class="text-right bg-transparent">Geocentric</th>
-                  <th class="text-right bg-transparent">Topocentric</th>
-                  <th class="text-right bg-transparent">Difference</th>
+                  <th class="bg-transparent">${this.t('ephemeris.parameter', 'Parameter')}</th>
+                  <th class="text-right bg-transparent">${this.t('ephemeris.geocentric', 'Geocentric')}</th>
+                  <th class="text-right bg-transparent">${this.t('ephemeris.topocentric', 'Topocentric')}</th>
+                  <th class="text-right bg-transparent">${this.t('ephemeris.difference', 'Difference')}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-white/5">
-                <tr><td>Moon Age</td><td class="text-right font-mono font-bold">${this.formatHours(eph.moon_age_hours_geo)}</td><td class="text-right font-mono font-bold">${this.formatHours(eph.moon_age_hours_topo)}</td><td class="text-right font-mono">${this.formatHours(eph.moon_age_hours_topo - eph.moon_age_hours_geo)}</td></tr>
-                <tr><td>Elongation</td><td class="text-right font-mono font-bold">${this.formatDMS(eph.elongation_geo)}</td><td class="text-right font-mono font-bold">${this.formatDMS(eph.elongation_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.elongation_topo - eph.elongation_geo)}</td></tr>
-                <tr><td>Illumination</td><td class="text-right font-mono font-bold">${eph.illumination_geo.toFixed(2)}%</td><td class="text-right font-mono font-bold">${eph.illumination_topo.toFixed(2)}%</td><td class="text-right font-mono">${(eph.illumination_topo - eph.illumination_geo).toFixed(2)}%</td></tr>
-                <tr><td>Crescent Width</td><td class="text-right font-mono font-bold">${this.formatDMS(eph.crescent_width_geo * 60)}'</td><td class="text-right font-mono font-bold">${this.formatDMS(eph.crescent_width_topo * 60)}'</td><td class="text-right font-mono">${this.formatDMS((eph.crescent_width_topo - eph.crescent_width_geo) * 60)}'</td></tr>
+                <tr><td>${this.t('results.moonAge', 'Moon Age')}</td><td class="text-right font-mono font-bold">${this.formatHours(eph.moon_age_hours_geo)}</td><td class="text-right font-mono font-bold">${this.formatHours(eph.moon_age_hours_topo)}</td><td class="text-right font-mono">${this.formatHours(eph.moon_age_hours_topo - eph.moon_age_hours_geo)}</td></tr>
+                <tr><td>${this.t('results.elongation', 'Elongation')}</td><td class="text-right font-mono font-bold">${this.formatDMS(eph.elongation_geo)}</td><td class="text-right font-mono font-bold">${this.formatDMS(eph.elongation_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.elongation_topo - eph.elongation_geo)}</td></tr>
+                <tr><td>${this.t('results.illumination', 'Illumination')}</td><td class="text-right font-mono font-bold">${eph.illumination_geo.toFixed(2)}%</td><td class="text-right font-mono font-bold">${eph.illumination_topo.toFixed(2)}%</td><td class="text-right font-mono">${(eph.illumination_topo - eph.illumination_geo).toFixed(2)}%</td></tr>
+                <tr><td>${this.t('results.crescentWidth', 'Crescent Width')}</td><td class="text-right font-mono font-bold">${this.formatDMS(eph.crescent_width_geo * 60)}'</td><td class="text-right font-mono font-bold">${this.formatDMS(eph.crescent_width_topo * 60)}'</td><td class="text-right font-mono">${this.formatDMS((eph.crescent_width_topo - eph.crescent_width_geo) * 60)}'</td></tr>
                 <tr><td colspan="4" class="opacity-50 h-2 px-0"></td></tr>
-                <tr><td>Relative Alt</td><td class="text-right font-mono font-bold">${this.formatDMS(eph.relative_altitude_geo)}</td><td class="text-right font-mono font-bold text-accent">${this.formatDMS(eph.relative_altitude_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.relative_altitude_topo - eph.relative_altitude_geo)}</td></tr>
-                <tr><td>Relative Azim</td><td class="text-right font-mono font-bold">${this.formatDMS(eph.relative_azimuth_geo)}</td><td class="text-right font-mono font-bold text-accent">${this.formatDMS(eph.relative_azimuth_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.relative_azimuth_topo - eph.relative_azimuth_geo)}</td></tr>
-                <tr><td>Phase Angle</td><td class="text-right font-mono font-bold">${this.formatDMS(eph.phase_angle_geo)}</td><td class="text-right font-mono font-bold">${this.formatDMS(eph.phase_angle_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.phase_angle_topo - eph.phase_angle_geo)}</td></tr>
+                <tr><td>${this.t('ephemeris.relativeAlt', 'Relative Alt')}</td><td class="text-right font-mono font-bold">${this.formatDMS(eph.relative_altitude_geo)}</td><td class="text-right font-mono font-bold text-accent">${this.formatDMS(eph.relative_altitude_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.relative_altitude_topo - eph.relative_altitude_geo)}</td></tr>
+                <tr><td>${this.t('ephemeris.relativeAzim', 'Relative Azim')}</td><td class="text-right font-mono font-bold">${this.formatDMS(eph.relative_azimuth_geo)}</td><td class="text-right font-mono font-bold text-accent">${this.formatDMS(eph.relative_azimuth_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.relative_azimuth_topo - eph.relative_azimuth_geo)}</td></tr>
+                <tr><td>${this.t('ephemeris.phaseAngle', 'Phase Angle')}</td><td class="text-right font-mono font-bold">${this.formatDMS(eph.phase_angle_geo)}</td><td class="text-right font-mono font-bold">${this.formatDMS(eph.phase_angle_topo)}</td><td class="text-right font-mono">${this.formatDMS(eph.phase_angle_topo - eph.phase_angle_geo)}</td></tr>
               </tbody>
             </table>
           </div>
