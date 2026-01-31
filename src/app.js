@@ -157,16 +157,9 @@ export class HilalApp {
 
 
     // Update date when input changes
-    const dateInput = document.getElementById('calc-date');
-    if (dateInput) {
-      // Set default to today
-      dateInput.value = new Date().toISOString().split('T')[0];
-      
-      dateInput.addEventListener('change', () => {
-        this.currentDate = new Date(dateInput.value);
-        console.log('Date changed to:', this.currentDate);
-      });
-    }
+    // Note: This is handled by the HijriDateInput component itself
+    // The component dispatches 'date-changed' events which we listen to below
+    // We don't need to add a separate listener here as it would conflict
 
     // Listen for criteria changes
     if (this.criteriaPanel) {

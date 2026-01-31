@@ -13,11 +13,14 @@ export class HijriDateInput extends HTMLElement {
     this.dateMode = 'gregorian'; // 'gregorian' or 'hijri'
     this.i18n = i18n;
     this.api = new HilalAPI();
-    
+
     // Store converted dates for display
     this.convertedHijriDate = null;
     this.convertedGregorianDate = null;
     this.isConverting = false;
+
+    // Track if event listeners have been set up to avoid duplicates
+    this.eventListenersSetup = false;
   }
 
   async connectedCallback() {
@@ -25,12 +28,15 @@ export class HijriDateInput extends HTMLElement {
     this.setDefaultHijriDate();
     this.render();
     this.setupEventListeners();
-    
-    // Initial conversion on load
+
+    // Initial conversion on load - only if Tauri is available
     if (isTauri()) {
+      // Small delay to ensure DOM is fully ready
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       if (this.dateMode === 'gregorian') {
         const gregorianInput = this.querySelector('#calc-date');
-        if (gregorianInput) {
+        if (gregorianInput && gregorianInput.value) {
           await this.convertGregorianToHijri(new Date(gregorianInput.value));
         }
       } else {
@@ -362,6 +368,11 @@ export class HijriDateInput extends HTMLElement {
   }
 
   setupEventListeners() {
+    // Only set up event listeners once to avoid duplicates
+    if (this.eventListenersSetup) {
+      return;
+    }
+
     // Mode toggle buttons
     const modeButtons = this.querySelectorAll('.mode-btn');
     modeButtons.forEach(btn => {
@@ -373,8 +384,16 @@ export class HijriDateInput extends HTMLElement {
     // Gregorian date input
     const gregorianInput = this.querySelector('#calc-date');
     if (gregorianInput) {
-      gregorianInput.value = new Date().toISOString().split('T')[0];
+      // Only set default value if input is empty (first initialization)
+      if (!gregorianInput.value) {
+        gregorianInput.value = new Date().toISOString().split('T')[0];
+      }
       gregorianInput.addEventListener('change', async (e) => {
+        // Prevent changes during conversion
+        if (this.isConverting) {
+          console.warn('Cannot change date during conversion');
+          return;
+        }
         const date = new Date(e.target.value);
         this.dispatchGregorianDateChange(date);
         // Convert to Hijri automatically
@@ -386,6 +405,11 @@ export class HijriDateInput extends HTMLElement {
     const hijriDay = this.querySelector('#hijri-day');
     if (hijriDay) {
       hijriDay.addEventListener('change', async (e) => {
+        // Prevent changes during conversion
+        if (this.isConverting) {
+          console.warn('Cannot change date during conversion');
+          return;
+        }
         this.hijriDay = parseInt(e.target.value);
         this.updateHijriDisplay();
         this.dispatchHijriDateChange();
@@ -398,6 +422,11 @@ export class HijriDateInput extends HTMLElement {
     const hijriMonth = this.querySelector('#hijri-month');
     if (hijriMonth) {
       hijriMonth.addEventListener('change', async (e) => {
+        // Prevent changes during conversion
+        if (this.isConverting) {
+          console.warn('Cannot change date during conversion');
+          return;
+        }
         this.hijriMonth = parseInt(e.target.value);
         // Adjust day if it exceeds the month's max days
         if (this.hijriDay > 29) {
@@ -415,6 +444,11 @@ export class HijriDateInput extends HTMLElement {
     const hijriYear = this.querySelector('#hijri-year');
     if (hijriYear) {
       hijriYear.addEventListener('change', async (e) => {
+        // Prevent changes during conversion
+        if (this.isConverting) {
+          console.warn('Cannot change date during conversion');
+          return;
+        }
         this.hijriYear = parseInt(e.target.value) || 1446;
         this.updateHijriDisplay();
         this.dispatchHijriDateChange();
@@ -422,11 +456,19 @@ export class HijriDateInput extends HTMLElement {
         await this.convertHijriToGregorian();
       });
     }
+
+    this.eventListenersSetup = true;
   }
 
   setDateMode(mode) {
+    // Prevent mode switching during conversion
+    if (this.isConverting) {
+      console.warn('Cannot switch date mode during conversion');
+      return;
+    }
+
     this.dateMode = mode;
-    
+
     // Update toggle buttons
     const modeButtons = this.querySelectorAll('.mode-btn');
     modeButtons.forEach(btn => {
@@ -447,7 +489,7 @@ export class HijriDateInput extends HTMLElement {
     // Dispatch initial date change and convert
     if (mode === 'gregorian') {
       const gregorianInput = this.querySelector('#calc-date');
-      if (gregorianInput) {
+      if (gregorianInput && gregorianInput.value) {
         const date = new Date(gregorianInput.value);
         this.dispatchGregorianDateChange(date);
         this.convertGregorianToHijri(date);
@@ -574,7 +616,7 @@ export class HijriDateInput extends HTMLElement {
     } finally {
       this.isConverting = false;
       this.render();
-      this.setupEventListeners();
+      // Don't call setupEventListeners() here - it's already set up once
     }
   }
 
@@ -602,7 +644,7 @@ export class HijriDateInput extends HTMLElement {
     } finally {
       this.isConverting = false;
       this.render();
-      this.setupEventListeners();
+      // Don't call setupEventListeners() here - it's already set up once
     }
   }
 
