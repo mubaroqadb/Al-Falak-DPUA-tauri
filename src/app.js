@@ -81,11 +81,16 @@ export class HilalApp {
         console.log('FAB Calculate clicked');
         this.calculateButton.setCalculating(true);
         this.showLoading('Calculating visibility maps and data...'); // Show immediately
-        
+
         try {
           // Critical: Yield to event loop to allow UI paint
           // Use requestAnimationFrame for more reliable yielding
           await new Promise(resolve => requestAnimationFrame(resolve));
+
+          // Prepare date for calculation (convert if needed)
+          if (this.hijriDateInput) {
+            await this.hijriDateInput.prepareForCalculation();
+          }
 
           await this.updateVisibilityZones();
           await this.updateCalculations();
@@ -105,16 +110,21 @@ export class HilalApp {
       heroBtn.addEventListener('click', async () => {
         console.log('Hero Calculate clicked');
         const spinner = document.getElementById('hero-loading');
-        
+
         // UI State: Loading
         heroBtn.classList.add('btn-disabled');
         if (spinner) spinner.classList.remove('hidden');
         this.showLoading('Calculating visibility maps and data...'); // Show immediately
-        
+
         try {
           // Critical: Yield to event loop to allow UI paint
           // Use requestAnimationFrame for more reliable yielding
           await new Promise(resolve => requestAnimationFrame(resolve));
+
+          // Prepare date for calculation (convert if needed)
+          if (this.hijriDateInput) {
+            await this.hijriDateInput.prepareForCalculation();
+          }
 
           await this.updateVisibilityZones();
           await this.updateCalculations();
@@ -287,26 +297,20 @@ export class HilalApp {
     try {
       console.log('Updating visibility zones...');
 
-      let visibilityData;
-      if (this.dateMode === 'hijri') {
-        // Use Hijri date input
-        const params = {
-          hijri_year: this.currentHijriDate.hijriYear,
-          hijri_month: this.currentHijriDate.hijriMonth,
-          hijri_day: this.currentHijriDate.hijriDay,
-          criteria: this.selectedCriteria,
-          step_degrees: 2.0
-        };
-        visibilityData = await this.api.getVisibilityZonesHijri(params);
-      } else {
-        // Use Gregorian date input
-        const params = {
-          date: this.currentDate,
-          criteria: this.selectedCriteria,
-          step_degrees: 2.0
-        };
-        visibilityData = await this.api.getVisibilityZones(params);
-      }
+      // Always use Gregorian date for visibility zones
+      // If in Hijri mode, get the converted Gregorian date
+      const calculationDate = this.hijriDateInput ?
+        this.hijriDateInput.getGregorianDateForCalculation() :
+        this.currentDate;
+
+      const params = {
+        date: calculationDate,
+        criteria: this.selectedCriteria,
+        step_degrees: 2.0
+      };
+      console.log('Sending Gregorian params for visibility zones:', JSON.stringify(params, null, 2));
+
+      const visibilityData = await this.api.getVisibilityZones(params);
 
       if (this.mapVisualization) {
         // Await the chunked rendering process
@@ -327,25 +331,23 @@ export class HilalApp {
 
     try {
       console.log('Mosque: Updating prayer times...');
-      
-      let prayerTimes;
-      if (this.dateMode === 'hijri') {
-        const params = {
-          location: this.currentLocation,
-          hijri_year: this.currentHijriDate.hijriYear,
-          hijri_month: this.currentHijriDate.hijriMonth,
-          hijri_day: this.currentHijriDate.hijriDay
-        };
-        prayerTimes = await this.api.getPrayerTimesHijri(params);
-      } else {
-        const params = {
-          location: this.currentLocation,
-          date: this.currentDate
-        };
-        prayerTimes = await this.api.getPrayerTimes(params);
-      }
-      
+
+      // Always use Gregorian date for prayer times
+      // If in Hijri mode, get the converted Gregorian date
+      const calculationDate = this.hijriDateInput ?
+        this.hijriDateInput.getGregorianDateForCalculation() :
+        this.currentDate;
+
+      const params = {
+        location: this.currentLocation,
+        date: calculationDate
+      };
+      console.log('Sending Gregorian params for prayer times:', JSON.stringify(params, null, 2));
+
+      const prayerTimes = await this.api.getPrayerTimes(params);
+
       if (this.prayerTimesDisplay) {
+        // Pass the appropriate date info to display
         if (this.dateMode === 'hijri') {
           // Pass hijri date info to display
           this.prayerTimesDisplay.updateData(prayerTimes, this.currentLocation, this.currentHijriDate);
@@ -353,7 +355,7 @@ export class HilalApp {
           this.prayerTimesDisplay.updateData(prayerTimes, this.currentLocation, this.currentDate);
         }
       }
-      
+
       console.log('Prayer times updated:', prayerTimes);
     } catch (error) {
       console.error('Error updating prayer times:', error);
@@ -369,7 +371,7 @@ export class HilalApp {
     }
 
     // showLoading handled by caller to coordinate with map updates
-    
+
     try {
       console.log('Updating calculations for location:', this.currentLocation);
       console.log('Location details - lat:', this.currentLocation.latitude, 'lon:', this.currentLocation.longitude);
@@ -377,35 +379,26 @@ export class HilalApp {
 
       let result;
 
-      if (this.dateMode === 'hijri') {
-        // Use Hijri date input
-        const params = {
-          location: this.currentLocation,
-          hijri_year: this.currentHijriDate.hijriYear,
-          hijri_month: this.currentHijriDate.hijriMonth,
-          hijri_day: this.currentHijriDate.hijriDay
-        };
-        console.log('Sending Hijri params to backend:', JSON.stringify(params, null, 2));
+      // Always use Gregorian date for calculation
+      // If in Hijri mode, get the converted Gregorian date
+      const calculationDate = this.hijriDateInput ?
+        this.hijriDateInput.getGregorianDateForCalculation() :
+        this.currentDate;
 
-        // Calculate for all criteria using Hijri date
-        result = await this.api.calculateHilalAllCriteriaHijri(params);
-      } else {
-        // Use Gregorian date input (original behavior)
-        const year = this.currentDate.getFullYear();
-        const month = this.currentDate.getMonth() + 1;
-        const day = this.currentDate.getDate();
+      const year = calculationDate.getFullYear();
+      const month = calculationDate.getMonth() + 1;
+      const day = calculationDate.getDate();
 
-        const params = {
-          location: this.currentLocation,
-          year,
-          month,
-          day
-        };
-        console.log('Sending Gregorian params to backend:', JSON.stringify(params, null, 2));
+      const params = {
+        location: this.currentLocation,
+        year,
+        month,
+        day
+      };
+      console.log('Sending Gregorian params to backend:', JSON.stringify(params, null, 2));
 
-        // Calculate for all criteria
-        result = await this.api.calculateHilalAllCriteria(params);
-      }
+      // Calculate for all criteria using Gregorian date
+      result = await this.api.calculateHilalAllCriteria(params);
 
       // Validate result structure
       if (!result || typeof result !== 'object') {
@@ -577,9 +570,23 @@ export class HilalApp {
     const visEl = document.getElementById('stat-visibility');
     const visDescEl = document.getElementById('stat-visibility-desc');
 
-    if (altEl) altEl.textContent = `${eph.moon_altitude_airy_topo.toFixed(2)}°`;
-    if (elongEl) elongEl.textContent = `${eph.elongation_topo.toFixed(2)}°`;
-    if (ageEl) ageEl.textContent = `${eph.moon_age_hours_topo.toFixed(2)}h`;
+    if (altEl && eph.moon_altitude_airy_topo !== null && eph.moon_altitude_airy_topo !== undefined) {
+      altEl.textContent = `${eph.moon_altitude_airy_topo.toFixed(2)}°`;
+    } else {
+      if (altEl) altEl.textContent = '--°';
+    }
+
+    if (elongEl && eph.elongation_topo !== null && eph.elongation_topo !== undefined) {
+      elongEl.textContent = `${eph.elongation_topo.toFixed(2)}°`;
+    } else {
+      if (elongEl) elongEl.textContent = '--°';
+    }
+
+    if (ageEl && eph.moon_age_hours_topo !== null && eph.moon_age_hours_topo !== undefined) {
+      ageEl.textContent = `${eph.moon_age_hours_topo.toFixed(2)}h`;
+    } else {
+      if (ageEl) ageEl.textContent = '--h';
+    }
     
     // Visibility status comes from criteria check
     if (visEl && stats) {
