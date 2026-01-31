@@ -498,57 +498,14 @@ export class HijriDateInput extends HTMLElement {
 
   // Render converted date display for Hijri input mode
   renderConvertedDateDisplay() {
-    if (this.dateMode !== 'hijri' || !this.convertedGregorianDate) {
-      return '';
-    }
-    const { year, month, day } = this.convertedGregorianDate;
-    const gregorianDateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return `
-      <div class="converted-date-display">
-        <span class="conversion-label">Bertepatan dengan:</span>
-        <span class="converted-date">${gregorianDateStr} M</span>
-      </div>
-    `;
+    // Info moved to ResultsDisplay
+    return '';
   }
 
   // Render dual date display showing both dates
   renderDualDateDisplay() {
-    if (!this.convertedHijriDate && !this.convertedGregorianDate) {
-      return '';
-    }
-
-    let hijriStr = '';
-    let gregorianStr = '';
-
-    if (this.convertedHijriDate) {
-      const months = this.getHijriMonths();
-      const monthName = months.find(m => m.value === this.convertedHijriDate.month)?.label || '';
-      hijriStr = `${this.convertedHijriDate.day} ${monthName} ${this.convertedHijriDate.year} H`;
-    } else if (this.dateMode === 'hijri') {
-      const months = this.getHijriMonths();
-      const monthName = months.find(m => m.value === this.hijriMonth)?.label || '';
-      hijriStr = `${this.hijriDay} ${monthName} ${this.hijriYear} H`;
-    }
-
-    if (this.convertedGregorianDate) {
-      const { year, month, day } = this.convertedGregorianDate;
-      gregorianStr = `${day} ${this.getGregorianMonthName(month)} ${year} M`;
-    }
-
-    return `
-      <div class="dual-date-display ${this.isConverting ? 'converting' : ''}">
-        <div class="date-box hijri-box">
-          <span class="date-label">Tanggal Hijriah</span>
-          <span class="date-value">${hijriStr || '-'}</span>
-        </div>
-        <div class="conversion-arrow">⇄</div>
-        <div class="date-box gregorian-box">
-          <span class="date-label">Tanggal Masehi</span>
-          <span class="date-value">${gregorianStr || '-'}</span>
-        </div>
-        ${this.isConverting ? '<div class="conversion-loading">Menghitung...</div>' : ''}
-      </div>
-    `;
+    // Info moved to ResultsDisplay
+    return '';
   }
 
   getGregorianMonthName(month) {
@@ -577,9 +534,11 @@ export class HijriDateInput extends HTMLElement {
       });
       this.convertedGregorianDate = result;
       console.log('Converted Hijri to Gregorian:', this.hijriYear, this.hijriMonth, this.hijriDay, '->', result);
+      return result; // Return result for external use
     } catch (error) {
       console.error('Failed to convert Hijri to Gregorian:', error);
       this.convertedGregorianDate = null;
+      return null;
     } finally {
       this.isConverting = false;
       this.render();
@@ -605,9 +564,11 @@ export class HijriDateInput extends HTMLElement {
       });
       this.convertedHijriDate = result;
       console.log('Converted Gregorian to Hijri:', date, '->', result);
+      return result; // Return result for external use
     } catch (error) {
       console.error('Failed to convert Gregorian to Hijri:', error);
       this.convertedHijriDate = null;
+      return null;
     } finally {
       this.isConverting = false;
       this.render();
@@ -631,21 +592,9 @@ export class HijriDateInput extends HTMLElement {
 
   // Prepare date for calculation - convert if needed
   async prepareForCalculation() {
-    if (!isTauri()) {
-      console.warn('Cannot convert date - Tauri context not available');
-      return;
-    }
-
-    if (this.dateMode === 'hijri') {
-      // Convert Hijri to Gregorian before calculation
-      await this.convertHijriToGregorian();
-    } else {
-      // Convert Gregorian to Hijri for display purposes
-      const gregorianInput = this.querySelector('#calc-date');
-      if (gregorianInput && gregorianInput.value) {
-        await this.convertGregorianToHijri(new Date(gregorianInput.value));
-      }
-    }
+    // Logic moved to app.js where we have better control over flow
+    // This just returns true to signal readiness
+    return true; 
   }
 
   // Get the Gregorian date for calculation (converted if in Hijri mode)
@@ -654,12 +603,14 @@ export class HijriDateInput extends HTMLElement {
       const input = this.querySelector('#calc-date');
       return input ? new Date(input.value) : new Date();
     } else {
-      // Return the converted Gregorian date
+      // Use fallback approximate if not converted yet, app.js will handle accurate conversion
+      // But if we have a converted date, use it
       if (this.convertedGregorianDate) {
         const { year, month, day } = this.convertedGregorianDate;
         return new Date(year, month - 1, day);
       }
-      // Fallback: return current date if conversion not available
+      // If we don't have converted date, we can't reliably give gregorian date
+      // return null or current date as fallback
       return new Date();
     }
   }

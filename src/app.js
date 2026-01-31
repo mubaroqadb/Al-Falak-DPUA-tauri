@@ -376,14 +376,78 @@ export class HilalApp {
       console.log('Updating calculations for location:', this.currentLocation);
       console.log('Location details - lat:', this.currentLocation.latitude, 'lon:', this.currentLocation.longitude);
       console.log('Date mode:', this.dateMode);
+      console.log('Hijri Date Input Reference:', !!this.hijriDateInput);
 
       let result;
+      let convertedDateInfo = null;
 
-      // Always use Gregorian date for calculation
-      // If in Hijri mode, get the converted Gregorian date
-      const calculationDate = this.hijriDateInput ?
-        this.hijriDateInput.getGregorianDateForCalculation() :
-        this.currentDate;
+      // DEBUG: Verify hijriDateInput reference
+      console.log('DEBUG: hijriDateInput present:', !!this.hijriDateInput);
+      if (!this.hijriDateInput && this.dateMode === 'hijri') {
+         console.error('CRITICAL: Hijri mode active but hijriDateInput component not found!');
+         // Try to find it again
+         this.hijriDateInput = document.querySelector('hijri-date-input');
+      }
+
+      // Handle Date Conversion based on mode
+      let calculationDate;
+      const hijriInput = this.hijriDateInput;
+
+      if (this.dateMode === 'hijri' && hijriInput) {
+        // Mode Hijri: We need to convert Hijri -> Gregorian for calculation
+        
+        const hijriDate = hijriInput.getDate(); // returns object {hijriYear...}
+        console.log('Calculating for Hijri Date object:', JSON.stringify(hijriDate));
+        
+        // 1. Convert Hijri -> Gregorian
+        const gregResult = await this.api.hijriToGregorian({
+           year: hijriDate.hijriYear,
+           month: hijriDate.hijriMonth,
+           day: hijriDate.hijriDay
+        });
+        console.log('API hijriToGregorian Result:', gregResult);
+        
+        if (gregResult) {
+            calculationDate = new Date(gregResult.year, gregResult.month - 1, gregResult.day);
+            
+            // Prepare info for display
+            convertedDateInfo = {
+            original: `${hijriDate.hijriDay} ${this.getHijriMonthName(hijriDate.hijriMonth)} ${hijriDate.hijriYear} H`,
+            converted: `${gregResult.day} ${this.getGregorianMonthName(gregResult.month)} ${gregResult.year} M`,
+            label: 'Bertepatan dengan'
+            };
+            console.log('Generated convertedDateInfo (Hijri Mode):', convertedDateInfo);
+        } else {
+             console.error('Failed to get Gregorian result from API');
+             // DEBUG: Alert on failure
+             alert('Debug: API hijriToGregorian returned null');
+             calculationDate = new Date(); // Fallback
+        }
+
+      } else {
+        // Mode Gregorian
+        // Get date from input or state
+        calculationDate = this.currentDate;
+        console.log('Calculating fro Gregorian Date:', calculationDate);
+        
+        // 1. Convert Gregorian -> Hijri for display
+        const year = calculationDate.getFullYear();
+        const month = calculationDate.getMonth() + 1;
+        const day = calculationDate.getDate();
+        
+        const hijriResult = await this.api.gregorianToHijri({ year, month, day });
+        console.log('API gregorianToHijri Result:', hijriResult);
+        
+        if (hijriResult) {
+            // Prepare info for display
+            convertedDateInfo = {
+            original: `${day} ${this.getGregorianMonthName(month)} ${year} M`,
+            converted: `${hijriResult.day} ${this.getHijriMonthName(hijriResult.month)} ${hijriResult.year} H`,
+            label: 'Tanggal Hijriah'
+            };
+             console.log('Generated convertedDateInfo (Gregorian Mode):', convertedDateInfo);
+        }
+      }
 
       const year = calculationDate.getFullYear();
       const month = calculationDate.getMonth() + 1;
@@ -395,6 +459,7 @@ export class HilalApp {
         month,
         day
       };
+      
       console.log('Sending Gregorian params to backend:', JSON.stringify(params, null, 2));
 
       // Calculate for all criteria using Gregorian date
@@ -415,6 +480,11 @@ export class HilalApp {
 
       if (!result.location) {
         throw new Error('Invalid result: location data is missing');
+      }
+
+      // Inject converted date info into result
+      if (convertedDateInfo) {
+        result.converted_date_info = convertedDateInfo;
       }
 
       this.currentCalculation = result;
@@ -442,6 +512,15 @@ export class HilalApp {
 
       // Store in data store
       this.dataStore.setCalculationResult(result);
+      
+      // DEBUG: Inspect Altitude
+      if (result.ephemeris && result.ephemeris.moon_altitude_airy_topo) {
+          const alt = result.ephemeris.moon_altitude_airy_topo;
+          if (alt > 90 || alt < -90) {
+             console.error(`DEBUG: Suspicious Altitude detected: ${alt}`);
+             alert(`DEBUG: Suspicious Altitude: ${alt}`);
+          }
+      }
 
       // Also calculate prayer times
       await this.updatePrayerTimes();
@@ -454,15 +533,35 @@ export class HilalApp {
         detail: result
       }));
 
+      // Force update ResultsDisplay to show converted date
+      if (this.resultsDisplay) {
+        this.resultsDisplay.updateResults(result);
+      }
+
       console.log('Calculations updated successfully');
-      // Success toast removed as per user request (redundant with loading animation)
-      // this.showSuccess('Calculation completed successfully');
 
     } catch (error) {
       console.error('Error updating calculations:', error);
       this.showError('Failed to update calculations: ' + error.message);
     } 
     // finally block removed, handled by caller
+  }
+
+  getHijriMonthName(month) {
+    const months = [
+      'Muharram', 'Safar', 'Rabi\'ul Awal', 'Rabi\'ul Akhir',
+      'Jumadil Awal', 'Jumadil Akhir', 'Rajab', 'Sha\'ban',
+      'Ramadan', 'Syawwal', 'Dzulqa\'dah', 'Dzulhijjah'
+    ];
+    return months[month - 1] || '';
+  }
+
+  getGregorianMonthName(month) {
+    const months = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    return months[month - 1] || '';
   }
 
   showLoading(message = 'Calculating...') {

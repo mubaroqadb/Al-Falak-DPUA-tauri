@@ -369,13 +369,6 @@ fn calculate_detailed_ephemeris(
     let elongation_geo = astronomy::hilal::elongation_at_sunset(location, &observation_date, false);
     let elongation_topo = astronomy::hilal::elongation_at_sunset(location, &observation_date, true);
 
-    // Calculate altitude (geocentric and topocentric)
-    let moon_alt_geo = astronomy::hilal::altitude_at_sunset(location, &observation_date, false);
-    let sun_alt_geo = -0.8333; // Standard sunset definition
-
-    let moon_alt_topo = astronomy::hilal::altitude_at_sunset(location, &observation_date, true);
-    let sun_alt_topo = -0.8333; // Standard sunset definition (approximate)
-
     // Calculate LST using existing formula
     let t = (sunset_jd - 2451545.0) / 36525.0;
     let lst_deg = 280.46061837
@@ -385,73 +378,107 @@ fn calculate_detailed_ephemeris(
         - (t * t * t) / 38710000.0;
     let lst_deg = lst_deg.rem_euclid(360.0);
 
-    let moon_ha_geo = lst_deg - moon_geo.right_ascension;
-    let sun_ha_geo = lst_deg - sun_geo.right_ascension;
-    let moon_ha_topo = lst_deg - moon_topo.ra;
-    let sun_ha_topo = lst_deg - sun_ra_topo;
+    // Calculate altitude (geocentric and topocentric) - AIRLESS bases
+    // We calculate these directly from equatorial coordinates to ensure we have airless values
+    let lat_rad = location.latitude.to_radians();
 
-    // Calculate azimuths
-    let moon_azimuth_geo =
-        ephemeris_utils::calculate_azimuth(moon_ha_geo, moon_geo.declination, location.latitude);
-    let sun_azimuth_geo =
-        ephemeris_utils::calculate_azimuth(sun_ha_geo, sun_geo.declination, location.latitude);
-    let moon_azimuth_topo =
-        ephemeris_utils::calculate_azimuth(moon_ha_topo, moon_topo.dec, location.latitude);
-    let sun_azimuth_topo =
-        ephemeris_utils::calculate_azimuth(sun_ha_topo, sun_geo.declination, location.latitude);
+    // Moon Geocentric Airless
+    let moon_ha_geo_rad = (lst_deg - moon_geo.right_ascension).to_radians();
+    let moon_dec_geo_rad = moon_geo.declination.to_radians();
+    let moon_alt_geo_airless = (lat_rad.sin() * moon_dec_geo_rad.sin()
+        + lat_rad.cos() * moon_dec_geo_rad.cos() * moon_ha_geo_rad.cos())
+    .asin()
+    .to_degrees();
+
+    // Sun Geocentric Airless
+    let sun_ha_geo_rad = (lst_deg - sun_geo.right_ascension).to_radians();
+    let sun_dec_geo_rad = sun_geo.declination.to_radians();
+    let sun_alt_geo_airless = (lat_rad.sin() * sun_dec_geo_rad.sin()
+        + lat_rad.cos() * sun_dec_geo_rad.cos() * sun_ha_geo_rad.cos())
+    .asin()
+    .to_degrees();
+
+    // Moon Topocentric Airless
+    let moon_ha_topo_rad = (lst_deg - moon_topo.ra).to_radians();
+    let moon_dec_topo_rad = moon_topo.dec.to_radians();
+    let moon_alt_topo_airless = (lat_rad.sin() * moon_dec_topo_rad.sin()
+        + lat_rad.cos() * moon_dec_topo_rad.cos() * moon_ha_topo_rad.cos())
+    .asin()
+    .to_degrees();
+
+    // Sun Topocentric Airless
+    let sun_ha_topo_rad = (lst_deg - sun_topo.right_ascension).to_radians();
+    let sun_dec_topo_rad = sun_topo.declination.to_radians();
+    let sun_alt_topo_airless = (lat_rad.sin() * sun_dec_topo_rad.sin()
+        + lat_rad.cos() * sun_dec_topo_rad.cos() * sun_ha_topo_rad.cos())
+    .asin()
+    .to_degrees();
+
+    // --- START LITERAL VB6 PORT (PosisiBulan.bas / Corrections.bas) ---
+    // This replicates the logic in 'Public Sub MoonPosition' and 'KoreksiRefraksi'
+
+    // 1. Refraction: Moon.Ref = RefractionApparentAltitude(Moon.h0, 1010#, 10#)
+    let calculate_refraction_vb6 = |h_airless: f64| -> f64 {
+        if h_airless <= -0.27 {
+            return 0.0;
+        } // VB6 check: If h0 > -0.27
+        let r = 1.0 / (h_airless + 7.31 / (h_airless + 4.4)).to_radians().tan() + 0.0013515;
+        let dr1 = -0.06 * ((14.7 * r / 60.0) + 13.0).to_radians().sin();
+        let dr2 = 1.0; // P=1010, T=10 makes (P/1010)*(283/(273+T)) = 1.0
+        (r + dr1 / 60.0) * dr2 // returns arcminutes
+    };
+
+    let moon_refraction_arcmin = calculate_refraction_vb6(moon_alt_geo_airless);
+    let sun_refraction_arcmin = calculate_refraction_vb6(sun_alt_geo_airless);
+
+    // 2. Parallax: Moon.Par = rad2deg(Asin(6378.14 / Moon.Dis))
+    let moon_hp_deg = (6378.14 / moon_geo.distance).asin().to_degrees();
+    let sun_hp_deg = 8.794 / 3600.0 / sun_geo.distance; // HP = 8.794" / Distance(AU)
+
+    // 3. Topocentric Altitude (Apparent): Moon.h1 = Moon.h0 + Ref - Par
+    // In VB6, h0 is Geocentric Airless, Ref is Moon.Ref/60, Par is Horizontal Parallax
+    let moon_alt_airy_topo = moon_alt_geo_airless + (moon_refraction_arcmin / 60.0) - moon_hp_deg;
+    let sun_alt_airy_topo = sun_alt_geo_airless + (sun_refraction_arcmin / 60.0) - sun_hp_deg;
+
+    // 4. Semidiameter: Moon.SD0 = (358473400# / Moon.Dis) / 60#
+    let moon_sd_deg = (358473400.0 / moon_geo.distance) / 3600.0; // Div 60 then 60 for degrees
+    let sun_sd_deg = (959.63 / sun_geo.distance) / 3600.0; // Div 3600 for degrees
+
+    // --- END LITERAL VB6 PORT ---
+
+    // Calculate azimuths (Rigorous)
+    let moon_azimuth_geo = ephemeris_utils::calculate_azimuth(
+        lst_deg - moon_geo.right_ascension,
+        moon_geo.declination,
+        location.latitude,
+    );
+    let sun_azimuth_geo = ephemeris_utils::calculate_azimuth(
+        lst_deg - sun_geo.right_ascension,
+        sun_geo.declination,
+        location.latitude,
+    );
 
     // Calculate sunset time in hours (Local)
-    // We reconstruct local time from the JD + timezone
     let sunset_local_jd = sunset_jd + (location.timezone / 24.0);
     let sunset_day_fraction = (sunset_local_jd + 0.5).fract();
     let sunset_hour_str = sunset_day_fraction * 24.0;
 
-    // Calculate moonset
+    // Calculate moonset and lag
     let moonset_hour = ephemeris_utils::calculate_moonset(location, &observation_date);
-
-    // Calculate lag time
     let lag_time = ephemeris_utils::calculate_lag_time(sunset_hour_str, moonset_hour);
 
-    // Calculate moon age
+    // Calculate moon age (Geocentric)
     let moon_age_geo = (sunset_jd - conjunction_jd) * 24.0;
-    let moon_age_topo = moon_age_geo; // Same for both
 
-    // Calculate parallax
-    let moon_hp = (6378.14 / moon_geo.distance) * (180.0 / std::f64::consts::PI);
-
-    // Sun distance is in AU, so we calculate HP differently or convert dist
-    // HP_sun (arcsec) ~= 8.794 / Distance_AU
-    let sun_hp_arcsec = 8.794 / sun_geo.distance;
-    let sun_hp = sun_hp_arcsec / 3600.0; // in degrees
-
-    // Calculate semidiameters (in degrees)
-    // Moon SD: k = 0.2724 or similar? Standard is 0.27245 * HP (if HP is sin pi)
-    // Or simplified: sin(s) = 0.2725 * sin(pi)
-    let moon_sd = 0.2724 * moon_hp;
-
-    // Sun SD: 959.63 arcsec at 1 AU / distance_au
-    let sun_sd_arcsec = 959.63 / sun_geo.distance;
-    let sun_sd = sun_sd_arcsec / 3600.0;
-
-    // Calculate illumination
+    // Calculate illumination and phase
     let illumination = ephemeris_utils::calculate_illumination(elongation_topo);
-
-    // Calculate phase angle
     let phase_angle_geo = ephemeris_utils::calculate_phase_angle(elongation_geo);
     let phase_angle_topo = ephemeris_utils::calculate_phase_angle(elongation_topo);
 
-    // Calculate crescent parameters
-    let crescent_width_geo =
-        ephemeris_utils::calculate_crescent_width(elongation_geo, moon_sd, sun_sd);
+    // Calculate crescent parameters (Topocentric)
     let crescent_width_topo =
-        ephemeris_utils::calculate_crescent_width(elongation_topo, moon_sd, sun_sd);
+        ephemeris_utils::calculate_crescent_width(elongation_topo, moon_sd_deg, sun_sd_deg);
 
-    let crescent_direction_geo = ephemeris_utils::calculate_crescent_direction(
-        sun_geo.right_ascension,
-        sun_geo.declination,
-        moon_geo.right_ascension,
-        moon_geo.declination,
-    );
     let crescent_direction_topo = ephemeris_utils::calculate_crescent_direction(
         sun_ra_topo,
         sun_dec_topo,
@@ -459,15 +486,7 @@ fn calculate_detailed_ephemeris(
         moon_topo.dec,
     );
 
-    // Calculate refraction (simplified)
-    let sun_refraction_arcmin = if sun_alt_topo < 0.0 { 35.0 } else { 0.0 };
-    let moon_refraction_arcmin = if moon_alt_topo > -5.0 {
-        34.0 / (moon_alt_topo + 7.31).tan().max(0.001)
-    } else {
-        0.0
-    };
-
-    // Calculate Delta T based on observation year/month
+    // Calculate Delta T
     let delta_t =
         ephemeris_utils::calculate_delta_t(observation_date.year, observation_date.month as u8);
 
@@ -519,8 +538,8 @@ fn calculate_detailed_ephemeris(
         // Note: VB6 Text Output has these swapped (showing Moon=16'11" and Sun=15'32" for Feb 2026).
         // However, VB6 Logic (PosisiMatahari.bas) correctly calculates Syn ~16'11".
         // Use physical values here.
-        sun_semidiameter_deg: sun_sd,
-        moon_semidiameter_deg: moon_sd,
+        sun_semidiameter_deg: sun_sd_deg,
+        moon_semidiameter_deg: moon_sd_deg,
 
         // Ecliptic coordinates (Geocentric)
         sun_longitude_geo: sun_geo.longitude,
@@ -569,70 +588,70 @@ fn calculate_detailed_ephemeris(
         moon_dec_apparent_topo: moon_topo.dec,
 
         // Horizontal coordinates (Airless)
-        sun_altitude_airless_geo: sun_alt_geo,
+        sun_altitude_airless_geo: sun_alt_geo_airless,
         sun_azimuth_airless_geo: sun_azimuth_geo,
-        moon_altitude_airless_geo: moon_alt_geo,
+        moon_altitude_airless_geo: moon_alt_geo_airless,
         moon_azimuth_airless_geo: moon_azimuth_geo,
 
-        sun_altitude_airless_topo: sun_alt_topo,
-        sun_azimuth_airless_topo: sun_azimuth_topo,
-        moon_altitude_airless_topo: moon_alt_topo,
-        moon_azimuth_airless_topo: moon_azimuth_topo,
+        sun_altitude_airless_topo: sun_alt_geo_airless - sun_hp_deg, // Simplified Topo Airless
+        sun_azimuth_airless_topo: sun_azimuth_geo,
+        moon_altitude_airless_topo: moon_alt_geo_airless - moon_hp_deg, // Simplified Topo Airless
+        moon_azimuth_airless_topo: moon_azimuth_geo,
 
         // Apparent horizontal coordinates (Airless)
-        sun_altitude_apparent_airless_geo: sun_alt_geo,
+        sun_altitude_apparent_airless_geo: sun_alt_geo_airless,
         sun_azimuth_apparent_airless_geo: sun_azimuth_geo,
-        moon_altitude_apparent_airless_geo: moon_alt_geo,
+        moon_altitude_apparent_airless_geo: moon_alt_geo_airless,
         moon_azimuth_apparent_airless_geo: moon_azimuth_geo,
 
-        sun_altitude_apparent_airless_topo: sun_alt_topo,
-        sun_azimuth_apparent_airless_topo: sun_azimuth_topo,
-        moon_altitude_apparent_airless_topo: moon_alt_topo,
-        moon_azimuth_apparent_airless_topo: moon_azimuth_topo,
+        sun_altitude_apparent_airless_topo: sun_alt_geo_airless - sun_hp_deg,
+        sun_azimuth_apparent_airless_topo: sun_azimuth_geo,
+        moon_altitude_apparent_airless_topo: moon_alt_geo_airless - moon_hp_deg,
+        moon_azimuth_apparent_airless_topo: moon_azimuth_geo,
 
         // With refraction (Airy)
-        sun_altitude_airy_geo: sun_alt_geo + (sun_refraction_arcmin / 60.0),
-        moon_altitude_airy_geo: moon_alt_geo + (moon_refraction_arcmin / 60.0),
+        sun_altitude_airy_geo: sun_alt_geo_airless + (sun_refraction_arcmin / 60.0),
+        moon_altitude_airy_geo: moon_alt_geo_airless + (moon_refraction_arcmin / 60.0),
 
-        sun_altitude_airy_topo: sun_alt_topo + (sun_refraction_arcmin / 60.0),
-        moon_altitude_airy_topo: moon_alt_topo + (moon_refraction_arcmin / 60.0),
+        sun_altitude_airy_topo: sun_alt_airy_topo,
+        moon_altitude_airy_topo: moon_alt_airy_topo,
 
         // Corrections
         nutation_longitude: nutation.longitude,
         nutation_obliquity: nutation.obliquity,
         sun_aberration: -20.76,
-        sun_refraction: sun_refraction_arcmin * 60.0, // Convert to arcsec
-        moon_refraction: moon_refraction_arcmin * 60.0,
-        sun_horizontal_parallax: sun_hp * 3600.0, // Convert to arcsec
-        moon_horizontal_parallax: moon_hp * 3600.0,
+        sun_refraction: sun_refraction_arcmin / 60.0,
+        moon_refraction: moon_refraction_arcmin / 60.0,
+        sun_horizontal_parallax: sun_hp_deg,
+        moon_horizontal_parallax: moon_hp_deg,
 
         // Hilal visibility data (Geocentric)
         moon_age_hours_geo: moon_age_geo,
         elongation_geo,
         illumination_geo: illumination,
-        crescent_width_geo,
-        upper_limb_altitude_geo: moon_alt_geo + moon_sd,
-        center_altitude_geo: moon_alt_geo,
-        lower_limb_altitude_geo: moon_alt_geo - moon_sd,
-        relative_altitude_geo: moon_alt_geo - sun_alt_geo,
+        crescent_width_geo: (crescent_width_topo * 1.0), // Geocentric crescent width doesn't exist in same way
+        upper_limb_altitude_geo: moon_alt_geo_airless + moon_sd_deg,
+        center_altitude_geo: moon_alt_geo_airless,
+        lower_limb_altitude_geo: moon_alt_geo_airless - moon_sd_deg,
+        relative_altitude_geo: moon_alt_geo_airless - sun_alt_geo_airless,
         relative_azimuth_geo: moon_azimuth_geo - sun_azimuth_geo,
         phase_angle_geo,
-        crescent_direction_geo,
+        crescent_direction_geo: crescent_direction_topo,
         crescent_position_geo: moon_azimuth_geo - sun_azimuth_geo,
 
         // Hilal visibility data (Topocentric)
-        moon_age_hours_topo: moon_age_topo,
+        moon_age_hours_topo: moon_age_geo,
         elongation_topo,
         illumination_topo: illumination,
         crescent_width_topo,
-        upper_limb_altitude_topo: moon_alt_topo + moon_sd,
-        center_altitude_topo: moon_alt_topo,
-        lower_limb_altitude_topo: moon_alt_topo - moon_sd,
-        relative_altitude_topo: moon_alt_topo - sun_alt_topo,
-        relative_azimuth_topo: moon_azimuth_topo - sun_azimuth_topo,
+        upper_limb_altitude_topo: moon_alt_airy_topo + moon_sd_deg,
+        center_altitude_topo: moon_alt_airy_topo,
+        lower_limb_altitude_topo: moon_alt_airy_topo - moon_sd_deg,
+        relative_altitude_topo: moon_alt_airy_topo - sun_alt_airy_topo,
+        relative_azimuth_topo: moon_azimuth_geo - sun_azimuth_geo, // Using Geo Azimuth per VB6 MoonPosition (Moon.aA1 = Moon.aA0)
         phase_angle_topo,
         crescent_direction_topo,
-        crescent_position_topo: moon_azimuth_topo - sun_azimuth_topo,
+        crescent_position_topo: moon_azimuth_geo - sun_azimuth_geo,
         observation_date_hijri: crate::calendar::gregorian_to_hijri(observation_date)
             .to_formatted_string(),
         day_name: crate::calendar::javanese::get_full_day_name(crate::calendar::gregorian_to_jd(

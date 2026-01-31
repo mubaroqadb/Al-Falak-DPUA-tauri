@@ -48,6 +48,15 @@ export class ResultsDisplay extends HTMLElement {
 
   updateResults(result) {
     this.currentResult = result;
+    
+    // DEBUG: Trace converted_date_info flow
+    console.log('DEBUG [ResultsDisplay]: Received result for rendering:', result);
+    if (result && result.converted_date_info) {
+       console.log('DEBUG [ResultsDisplay]: converted_date_info found:', result.converted_date_info);
+    } else if (result) {
+       console.warn('DEBUG [ResultsDisplay]: converted_date_info is MISSING in result object');
+    }
+
     const content = this.querySelector('#results-content');
 
     if (!result) {
@@ -113,6 +122,12 @@ export class ResultsDisplay extends HTMLElement {
             <span class="label">Date:</span>
             <span class="value font-mono">${this.formatDate(result.date)}</span>
           </div>
+          ${result.converted_date_info ? `
+          <div class="result-item">
+            <span class="label">${result.converted_date_info.label}:</span>
+            <span class="value font-mono text-primary font-bold">${result.converted_date_info.converted}</span>
+          </div>
+          ` : ''}
           <div class="result-item">
             <span class="label">Location:</span>
             <span class="value font-mono">${result.location?.latitude?.toFixed(4)}°, ${result.location?.longitude?.toFixed(4)}°</span>
