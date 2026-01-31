@@ -514,6 +514,13 @@ fn calculate_detailed_ephemeris(
             * 60.0) as i32,
         tz_label
     );
+    // Debug: Print conjunction JD to verify it's valid
+    println!("DEBUG: conjunction_jd = {}", conjunction_jd);
+    println!(
+        "DEBUG: conjunction_topo.jd_utc = {}",
+        conjunction_topo.jd_utc
+    );
+
     let conjunction_time_str =
         ephemeris_utils::format_jd_to_datetime(conjunction_jd, location.timezone);
 

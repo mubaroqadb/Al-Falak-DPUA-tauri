@@ -5,21 +5,21 @@ const LUNAR_MONTH_DAYS: f64 = 29.53;
 /// Estimasi waktu konjungsi terdekat dari tanggal input
 ///
 /// Menggunakan lunar phase untuk mendapatkan estimasi kasar
+/// FIX: Cari konjungsi SEBELUM tanggal input (untuk hisab hilal di akhir bulan)
 pub fn estimate_conjunction_time(jd: f64) -> f64 {
     let phase = crate::astronomy::phase(jd);
-    calculate_next_conjunction_jd(jd, phase)
+    calculate_previous_conjunction_jd(jd, phase)
 }
 
-/// Hitung JD konjungsi berikutnya berdasarkan phase
+/// Hitung JD konjungsi SEBELUMNYA berdasarkan phase
 /// Phase: 0 = new moon, 0.5 = full moon, 1 = new moon again
-fn calculate_next_conjunction_jd(jd: f64, phase: f64) -> f64 {
+/// Untuk hisab hilal, kita perlu konjungsi SEBELUM tanggal observasi
+fn calculate_previous_conjunction_jd(jd: f64, phase: f64) -> f64 {
     // Days since last new moon (going backwards)
     let days_since_new = phase * LUNAR_MONTH_DAYS;
 
-    // Days to next new moon
-    let days_to_next = LUNAR_MONTH_DAYS - days_since_new;
-
-    jd + days_to_next
+    // Go back to the previous new moon
+    jd - days_since_new
 }
 
 #[cfg(test)]

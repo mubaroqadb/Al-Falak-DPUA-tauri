@@ -115,6 +115,11 @@ pub fn format_jd_to_local_time(jd: f64, timezone: f64) -> String {
 
 /// Format JD to date and time string
 pub fn format_jd_to_datetime(jd: f64, timezone: f64) -> String {
+    // Handle invalid JD values
+    if !jd.is_finite() || jd <= 0.0 {
+        return "Invalid Date".to_string();
+    }
+
     let local_jd = jd + (timezone / 24.0);
 
     // Convert JD back to Gregorian date
@@ -168,11 +173,21 @@ pub fn format_jd_to_datetime(jd: f64, timezone: f64) -> String {
 
     // Calculate day of week
     let dow = ((jd + 1.5) % 7.0).floor() as usize;
+    let dow = dow % 7; // Ensure index is valid
 
     let tz_label = format_timezone_label(timezone);
+
+    // Format with date information
     format!(
-        "{} : {:02}:{:02}:{:02} {}",
-        day_names[dow], hours as i32, minutes as i32, seconds as i32, tz_label
+        "{} {:02} {} {:04} : {:02}:{:02}:{:02} {}",
+        day_names[dow],
+        day,
+        month_names[month as usize],
+        year,
+        hours as i32,
+        minutes as i32,
+        seconds as i32,
+        tz_label
     )
 }
 
