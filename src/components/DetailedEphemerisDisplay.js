@@ -1,12 +1,48 @@
 // Detailed Ephemeris Display Component - VB6-like Output
 // Shows complete astronomical data matching VB6 calculation output
 
+import { i18n } from '../services/i18n.js';
+
 export class DetailedEphemerisDisplay extends HTMLElement {
   constructor() {
     super();
     this.ephemerisData = null;
     this.locationData = null;
     this.observationDate = null;
+    this.i18n = i18n;
+  }
+
+  connectedCallback() {
+    try {
+      this.render();
+      this.setupLanguageChangeListener();
+    } catch (error) {
+      console.error('❌ Error rendering DetailedEphemerisDisplay:', error);
+      this.innerHTML = `
+        <div class="ephemeris-display">
+          <div class="error-state">
+            <p><svg class="w-5 h-5 text-warning inline mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Failed to load component</p>
+            <p>${error.message}</p>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  setupLanguageChangeListener() {
+    window.addEventListener('language-changed', () => {
+      console.log('🔄 DetailedEphemerisDisplay: Language changed, re-rendering');
+      if (this.ephemerisData) {
+        this.renderEphemeris();
+      }
+    });
+  }
+
+  t(key, defaultValue = key) {
+    if (this.i18n && this.i18n.t) {
+      return this.i18n.t(key, defaultValue);
+    }
+    return defaultValue;
   }
 
   formatRA(degrees) {
@@ -22,44 +58,28 @@ export class DetailedEphemerisDisplay extends HTMLElement {
     return `${sign}${h}h ${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
   }
 
-  connectedCallback() {
-    try {
-      this.render();
-    } catch (error) {
-      console.error('❌ Error rendering DetailedEphemerisDisplay:', error);
-      this.innerHTML = `
-        <div class="ephemeris-display">
-          <div class="error-state">
-            <p><svg class="w-5 h-5 text-warning inline mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Failed to load component</p>
-            <p>${error.message}</p>
-          </div>
-        </div>
-      `;
-    }
-  }
-
   render() {
     this.innerHTML = `
       <div class="ephemeris-display">
         <h3 class="flex items-center gap-2">
           <svg class="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          Detailed Ephemeris Data
+          ${this.t('tabLabels.ephemeris', 'Detailed Ephemeris Data')}
         </h3>
         
         <div id="ephemeris-content" class="ephemeris-content">
           <div class="no-data">
-            <p><svg class="w-5 h-5 inline mr-1 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg> Perform a calculation to see detailed ephemeris data</p>
+            <p><svg class="w-5 h-5 inline mr-1 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg> ${this.t('messages.noData', 'Perform a calculation to see detailed ephemeris data')}</p>
           </div>
         </div>
 
         <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-base-300">
           <button id="export-ephemeris-txt" class="btn btn-outline btn-sm btn-info gap-2">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-            Save TXT
+            ${this.t('export.saveTXT', 'Save TXT')}
           </button>
           <button id="export-ephemeris-csv" class="btn btn-outline btn-sm btn-success gap-2">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-            Save CSV
+            ${this.t('export.saveCSV', 'Save CSV')}
           </button>
           <button id="print-ephemeris" class="btn btn-outline btn-sm btn-ghost gap-2">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
@@ -152,16 +172,16 @@ export class DetailedEphemerisDisplay extends HTMLElement {
           <div class="card-body p-4">
             <h4 class="text-xl font-bold flex items-center gap-2">
               <svg class="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-              HISAB HILAL - ${this.formatDate()}
+              ${this.t('app.title', 'HISAB HILAL')} - ${this.formatDate()}
             </h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 opacity-80 text-sm">
               <p class="flex items-center gap-1">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                <strong>Location:</strong> ${this.formatLocation()}
+                <strong>${this.t('labels.location', 'Location')}:</strong> ${this.formatLocation()}
               </p>
               <p class="flex items-center gap-1">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                <strong>Coordinates:</strong> ${this.formatCoordinates()}
+                <strong>${this.t('labels.coordinates', 'Coordinates')}:</strong> ${this.formatCoordinates()}
               </p>
             </div>
           </div>
@@ -190,22 +210,22 @@ export class DetailedEphemerisDisplay extends HTMLElement {
         <div class="card-body p-0">
           <div class="bg-base-300/50 px-4 py-2 font-bold flex items-center gap-2 rounded-t-xl border-b border-base-300 shadow-sm">
             <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <span>Time Information</span>
+            <span>${this.t('ephemeris.timeInfo', 'Time Information')}</span>
           </div>
           <div class="overflow-x-auto">
             <table class="table table-zebra table-sm w-full">
               <thead>
                 <tr>
-                  <th>Parameter</th>
-                  <th class="text-right">Value</th>
+                  <th>${this.t('ephemeris.parameter', 'Parameter')}</th>
+                  <th class="text-right">${this.t('ephemeris.value', 'Value')}</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td>Conjunction (Ijtima')</td><td class="text-right font-mono">${eph?.conjunction_date ?? 'N/A'}</td></tr>
-                <tr><td>Sunset Time</td><td class="text-right font-mono text-primary font-bold">${eph?.sunset_time ?? 'N/A'}</td></tr>
-                <tr><td>Moonset Time</td><td class="text-right font-mono">${eph?.moonset_time ?? 'N/A'}</td></tr>
-                <tr><td>Lag Time</td><td class="text-right font-mono font-bold text-secondary">${eph?.lag_time ?? 'N/A'}</td></tr>
-                <tr><td>Delta T</td><td class="text-right font-mono">${eph?.delta_t?.toFixed(2) ?? 'N/A'}s</td></tr>
+                <tr><td>${this.t('results.conjunction', 'Conjunction (Ijtima\'')}</td><td class="text-right font-mono">${eph?.conjunction_date ?? 'N/A'}</td></tr>
+                <tr><td>${this.t('results.sunsetTime', 'Sunset Time')}</td><td class="text-right font-mono text-primary font-bold">${eph?.sunset_time ?? 'N/A'}</td></tr>
+                <tr><td>${this.t('results.moonsetTime', 'Moonset Time')}</td><td class="text-right font-mono">${eph?.moonset_time ?? 'N/A'}</td></tr>
+                <tr><td>${this.t('results.lagTime', 'Lag Time')}</td><td class="text-right font-mono font-bold text-secondary">${eph?.lag_time ?? 'N/A'}</td></tr>
+                <tr><td>${this.t('results.deltaT', 'Delta T')}</td><td class="text-right font-mono">${eph?.delta_t?.toFixed(2) ?? 'N/A'}s</td></tr>
               </tbody>
             </table>
           </div>
@@ -221,21 +241,21 @@ export class DetailedEphemerisDisplay extends HTMLElement {
         <div class="card-body p-0">
           <div class="bg-base-300/50 px-4 py-2 font-bold flex items-center gap-2 rounded-t-xl border-b border-base-300 shadow-sm">
             <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            <span>Distances & Semidiameters</span>
+            <span>${this.t('ephemeris.distances', 'Distances & Semidiameters')}</span>
           </div>
           <div class="overflow-x-auto">
             <table class="table table-zebra table-sm w-full">
               <thead>
                 <tr>
-                  <th>Parameter</th>
-                  <th class="text-right">Value</th>
+                  <th>${this.t('ephemeris.parameter', 'Parameter')}</th>
+                  <th class="text-right">${this.t('ephemeris.value', 'Value')}</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td>Sun Distance</td><td class="text-right font-mono">${eph.sun_distance_km.toLocaleString()} km</td></tr>
-                <tr><td>Moon Distance</td><td class="text-right font-mono">${eph.moon_distance_km.toLocaleString()} km</td></tr>
-                <tr><td>Sun Semidiameter</td><td class="text-right font-mono">${this.formatDMS(eph.sun_semidiameter_deg)}</td></tr>
-                <tr><td>Moon Semidiameter</td><td class="text-right font-mono">${this.formatDMS(eph.moon_semidiameter_deg)}</td></tr>
+                <tr><td>${this.t('results.sunDistance', 'Sun Distance')}</td><td class="text-right font-mono">${eph.sun_distance_km.toLocaleString()} km</td></tr>
+                <tr><td>${this.t('results.moonDistance', 'Moon Distance')}</td><td class="text-right font-mono">${eph.moon_distance_km.toLocaleString()} km</td></tr>
+                <tr><td>${this.t('results.sunSemiDiameter', 'Sun Semidiameter')}</td><td class="text-right font-mono">${this.formatDMS(eph.sun_semidiameter_deg)}</td></tr>
+                <tr><td>${this.t('results.moonSemiDiameter', 'Moon Semidiameter')}</td><td class="text-right font-mono">${this.formatDMS(eph.moon_semidiameter_deg)}</td></tr>
               </tbody>
             </table>
           </div>
