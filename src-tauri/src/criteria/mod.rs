@@ -15,7 +15,7 @@ pub mod wujudul_hilal;
 pub use additional::{evaluate_kig, evaluate_kriteria_29, KigResult, Kriteria29Result};
 pub use ijtima_qobla_ghurub::{evaluate_ijtima_qobla_ghurub, IjtimaQoblaGhuribResult};
 pub use lfnu::{evaluate_lfnu, LfnuResult};
-pub use mabims::{evaluate_criteria as evaluate_mabims, MabimsResult};
+pub use mabims::{evaluate_criteria as evaluate_mabims, evaluate_new_mabims, MabimsResult};
 pub use odeh::{evaluate_odeh, OdehResult};
 pub use turkey::{evaluate_turkey, TurkeyResult};
 pub use wujudul_hilal::{evaluate_wujudul_hilal, WujudulHilalResult};
